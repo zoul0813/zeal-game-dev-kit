@@ -6,7 +6,10 @@
 #include <input/button_map.h>
 
 uint16_t keys = 0;
-static uint8_t key_buffer[32];
+
+// DIRTY: trick to align key_buffer
+static uint8_t array[32 + 31];
+static uint8_t* key_buffer;
 
 /**
  * Flush the keyboard buffer
@@ -29,6 +32,10 @@ zos_err_t keyboard_init(void) {
   /* Initialize the keyboard by setting it to raw and non-blocking */
   void* arg = (void*) (KB_READ_NON_BLOCK | KB_MODE_RAW);
   zos_err_t err = ioctl(DEV_STDIN, KB_CMD_SET_MODE, arg);
+
+  // DIRTY: trick to align key_buffer
+  key_buffer = (uint8_t*)((uintptr_t)(array + 31) & (~(uintptr_t)31));
+
   return err;
 }
 
