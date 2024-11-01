@@ -8,27 +8,27 @@
 uint16_t keys = 0;
 static uint8_t key_buffer[32];
 
+/**
+ * Flush the keyboard buffer
+ */
 zos_err_t keyboard_flush(void) {
   /* Flush the keyboard fifo */
   keys = 0;
   uint16_t size = sizeof(key_buffer);
   while (size) {
     zos_err_t err = read(DEV_STDIN, key_buffer, &size);
-    if(err != ERR_SUCCESS) {
-      return err;
-    }
+    if(err != ERR_SUCCESS) return err;
   }
   return ERR_SUCCESS;
 }
 
+/**
+ * Initializes the keyboard
+ */
 zos_err_t keyboard_init(void) {
   /* Initialize the keyboard by setting it to raw and non-blocking */
   void* arg = (void*) (KB_READ_NON_BLOCK | KB_MODE_RAW);
   zos_err_t err = ioctl(DEV_STDIN, KB_CMD_SET_MODE, arg);
-  if(err != ERR_SUCCESS) return err;
-
-  err = keyboard_flush();
-  if(err != ERR_SUCCESS) printf("keyboard_init:keyboard_flush %d", err);
   return err;
 }
 

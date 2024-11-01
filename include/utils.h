@@ -13,7 +13,7 @@
 __sfr __at(0x86) debug_register; // t-state counter
 #define TSTATE_LOG(counter) debug_register = counter;
 #else
-#define TSTATE_LOGT(counter)
+#define TSTATE_LOG(counter)
 #endif
 
 void print_string(gfx_context* ctx, const char* str, uint8_t x, uint8_t y);
