@@ -64,7 +64,9 @@ uint16_t keyboard_read(void) {
             if(released) {
               keys &= ~BUTTON_UP;
             } else {
-              keys |= BUTTON_UP;
+              // keys |= BUTTON_UP;
+              keys = (keys & ~BUTTON_DOWN) | BUTTON_UP;
+
             }
             break;
 
@@ -73,7 +75,8 @@ uint16_t keyboard_read(void) {
             if(released) {
               keys &= ~BUTTON_DOWN;
             } else {
-              keys |= BUTTON_DOWN;
+              // keys |= BUTTON_DOWN;
+              keys = (keys & ~BUTTON_UP) | BUTTON_DOWN;
             }
             break;
 
@@ -82,7 +85,8 @@ uint16_t keyboard_read(void) {
             if(released) {
               keys &= ~BUTTON_LEFT;
             } else {
-              keys |= BUTTON_LEFT;
+              // keys |= BUTTON_LEFT;
+              keys = (keys & ~BUTTON_RIGHT) | BUTTON_LEFT;
             }
             break;
 
@@ -91,7 +95,9 @@ uint16_t keyboard_read(void) {
             if(released) {
               keys &= ~BUTTON_RIGHT;
             } else {
-              keys |= BUTTON_RIGHT;
+              // keys |= BUTTON_RIGHT;
+              keys = (keys & ~BUTTON_LEFT) | BUTTON_RIGHT;
+
             }
             break;
           case KB_KEY_ENTER:

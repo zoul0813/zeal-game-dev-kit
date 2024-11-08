@@ -54,6 +54,13 @@ Sound* sound_play(uint8_t voice, uint16_t freq, uint16_t duration) {
   return sound;
 }
 
+Sound* sound_set(uint8_t voice, uint16_t waveform) {
+  if(voice >= MAX_VOICES) return NULL;
+  Sound *sound = &sounds[voice];
+  sound->waveform = waveform;
+  return sound;
+}
+
 void sound_stop(Sound *sound) {
   sound->remaining = 0;
   zvb_sound_set_voices(sound->voice, 0, WAV_SQUARE);

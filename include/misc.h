@@ -29,10 +29,23 @@ typedef struct {
   uint16_t h;
 } Rect;
 
-static const uint16_t rect_top(Rect *rect) { return rect->y; }
-static const uint16_t rect_bottom(Rect *rect) { return rect->y + rect->h; }
-static const uint16_t rect_left(Rect *rect) { return rect->x; }
-static const uint16_t rect_right(Rect *rect) { return rect->x + rect->w; }
+typedef struct {
+  uint16_t x;
+  uint16_t y;
+} Point;
+
+static const uint16_t rect_top(Rect *rect) {
+  return rect->y - rect->h;
+}
+static const uint16_t rect_bottom(Rect *rect) {
+  return rect->y;
+}
+static const uint16_t rect_left(Rect *rect) {
+  return rect->x - rect->w;
+}
+static const uint16_t rect_right(Rect *rect) {
+  return rect->x;
+}
 
 typedef struct {
   int8_t x;

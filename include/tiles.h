@@ -31,6 +31,15 @@ extern uint16_t tilemap_offset_y;
  * @return Tile representing the tile boundaries, x/y 127 means out of bounds
  */
 bool tile_get(Rect *rect, Tile *tile);
+/**
+ * Get the Tile located at X/Y in Tile coordinates
+  *
+ * @param x tile coordinate
+ * @param y tile coordinate
+ *
+ * @return Tile representing the tile boundaries, x/y 127 means out of bounds
+ */
+void tile_at(uint8_t tx, uint8_t ty, Tile *tile);
 Edge tile_collide(Rect *rect, Direction *direction, Tile *tile);
 
 #endif
