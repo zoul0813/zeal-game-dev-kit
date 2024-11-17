@@ -65,11 +65,12 @@ Edge tile_collide(Rect *rect, Direction *direction, Tile *tile) {
   const uint16_t rect_r = rect_right(rect);
 
   Edge edge = EdgeNone;
-  if(rect_r <= target_l) edge |= EdgeLeft;
-  else if(rect_l >= target_r) edge |= EdgeRight;
 
-  if(rect_b <= target_t) edge |= EdgeTop;
-  else if(rect_t >= target_b) edge |= EdgeBottom;
+  if(rect_r > target_r && rect_l <= target_r) edge |= EdgeRight;
+  else if(rect_l < target_l && rect_r >= target_l) edge |= EdgeLeft;
+
+  if(rect_b > target_b && rect_t <= target_b) edge |= EdgeBottom;
+  else if(rect_t < target_t && rect_b >= target_t) edge |= EdgeTop;
 
   // which target?
   memcpy(tile, &target_h, sizeof(Tile));

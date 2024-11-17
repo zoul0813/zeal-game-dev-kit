@@ -23,18 +23,28 @@ ZTM_SRCS ?= $(TILEMAP_SRCS:.tmx=.ztm)
 ZOS_CFLAGS += -I$(ZGDK_PATH)/include $(EXTRA_CFLAGS)
 ZOS_LDFLAGS += -k $(ZGDK_PATH)/lib -l zgdk $(EXTRA_LDFLAGS)
 
+ENABLE_GFX ?= 1
 ENABLE_SOUND ?= 1
-ifdef EMULATOR
-ZOS_CFLAGS += -DEMULATOR
+ENABLE_CRC32 ?= 0
+EMULATOR ?= 0
+FRAMELOCK ?= 0
+DEBUG ?= 0
+ifeq ($(EMULATOR), 1)
+ZOS_CFLAGS += -DEMULATOR=1
 endif
-ifdef FRAMELOCK
-ZOS_CFLAGS += -DFRAMELOCK
+ifeq ($(FRAMELOCK), 1)
+ZOS_CFLAGS += -DFRAMELOCK=1
 endif
-ifdef DEBUG
-ZOS_CFLAGS += -DDEBUG
+ifeq ($(DEBUG), 1)
+ZOS_CFLAGS += -DDEBUG=1
 endif
 
 all:: $(GIF_SRCS) $(ZTS_SRCS) $(ZTM_SRCS)
+	@echo "Enable GFX", $(ENABLE_GFX)
+	@echo "Enable Sound", $(ENABLE_SOUND)
+	@echo "Emulator", $(EMULATOR)
+	@echo "Frame Lock", $(FRAMELOCK)
+	@echo "Debug", $(DEBUG)
 
 %.gif: %.aseprite
 	@if [ -f $(ASEPRITE_PATH) ]; then $(ASEPRITE_PATH) -b --sheet $@ $<; fi
