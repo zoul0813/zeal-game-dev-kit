@@ -5,7 +5,7 @@
 #include "input/keyboard.h"
 #include <input/button_map.h>
 
-uint16_t keys = 0;
+uint16_t KEYBOARD_keys = 0;
 
 // DIRTY: trick to align key_buffer
 static uint8_t array[32 + 31];
@@ -16,7 +16,7 @@ static uint8_t* key_buffer;
  */
 zos_err_t keyboard_flush(void) {
   /* Flush the keyboard fifo */
-  keys = 0;
+  KEYBOARD_keys = 0;
   uint16_t size = sizeof(key_buffer);
   while (size) {
     zos_err_t err = read(DEV_STDIN, key_buffer, &size);
@@ -45,12 +45,12 @@ uint16_t keyboard_read(void) {
     zos_err_t err = read(DEV_STDIN, key_buffer, &size);
     if(err != ERR_SUCCESS) {
       printf("Failed to read DEV_STDIN, clearing keys: %d", err);
-      keys = 0;
-      return keys;
+      KEYBOARD_keys = 0;
+      return KEYBOARD_keys;
     }
 
     if (size == 0) {
-      return keys;
+      return KEYBOARD_keys;
     }
 
     uint8_t released = 0;
@@ -62,10 +62,10 @@ uint16_t keyboard_read(void) {
           case KB_KEY_W:
           case KB_UP_ARROW:
             if(released) {
-              keys &= ~BUTTON_UP;
+              KEYBOARD_keys &= ~BUTTON_UP;
             } else {
-              // keys |= BUTTON_UP;
-              keys = (keys & ~BUTTON_DOWN) | BUTTON_UP;
+              // KEYBOARD_keys |= BUTTON_UP;
+              KEYBOARD_keys = (KEYBOARD_keys & ~BUTTON_DOWN) | BUTTON_UP;
 
             }
             break;
@@ -73,52 +73,51 @@ uint16_t keyboard_read(void) {
           case KB_KEY_S:
           case KB_DOWN_ARROW:
             if(released) {
-              keys &= ~BUTTON_DOWN;
+              KEYBOARD_keys &= ~BUTTON_DOWN;
             } else {
-              // keys |= BUTTON_DOWN;
-              keys = (keys & ~BUTTON_UP) | BUTTON_DOWN;
+              // KEYBOARD_keys |= BUTTON_DOWN;
+              KEYBOARD_keys = (KEYBOARD_keys & ~BUTTON_UP) | BUTTON_DOWN;
             }
             break;
 
           case KB_KEY_A:
           case KB_LEFT_ARROW:
             if(released) {
-              keys &= ~BUTTON_LEFT;
+              KEYBOARD_keys &= ~BUTTON_LEFT;
             } else {
-              // keys |= BUTTON_LEFT;
-              keys = (keys & ~BUTTON_RIGHT) | BUTTON_LEFT;
+              // KEYBOARD_keys |= BUTTON_LEFT;
+              KEYBOARD_keys = (KEYBOARD_keys & ~BUTTON_RIGHT) | BUTTON_LEFT;
             }
             break;
 
           case KB_KEY_D:
           case KB_RIGHT_ARROW:
             if(released) {
-              keys &= ~BUTTON_RIGHT;
+              KEYBOARD_keys &= ~BUTTON_RIGHT;
             } else {
-              // keys |= BUTTON_RIGHT;
-              keys = (keys & ~BUTTON_LEFT) | BUTTON_RIGHT;
+              KEYBOARD_keys = (KEYBOARD_keys & ~BUTTON_LEFT) | BUTTON_RIGHT;
 
             }
             break;
           case KB_KEY_ENTER:
             if(released) {
-              keys &= ~BUTTON_START;
+              KEYBOARD_keys &= ~BUTTON_START;
             } else {
-              keys |= BUTTON_START;
+              KEYBOARD_keys |= BUTTON_START;
             }
             break;
           case KB_KEY_QUOTE:
             if(released) {
-              keys &= ~BUTTON_SELECT;
+              KEYBOARD_keys &= ~BUTTON_SELECT;
             } else {
-              keys |= BUTTON_SELECT;
+              KEYBOARD_keys |= BUTTON_SELECT;
             }
             break;
           case KB_KEY_SPACE:
             if(released) {
-              keys &= ~BUTTON_B;
+              KEYBOARD_keys &= ~BUTTON_B;
             } else {
-              keys |= BUTTON_B;
+              KEYBOARD_keys |= BUTTON_B;
             }
             break;
         }
