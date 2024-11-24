@@ -8,6 +8,9 @@
 #include <stdint.h>
 #include <zvb_gfx.h>
 
+#ifdef __SDCC_VERSION_MAJOR
+#define __attribute__(a)
+#endif
 
 #ifdef EMULATOR
 __sfr __at(0x86) debug_register; // t-state counter

@@ -7,3 +7,4 @@
 #include "utils.h"
 #include "sprites.h"
 #include "misc.h"
+#include "arrays.h"
