@@ -41,6 +41,7 @@ void music_loop(uint8_t loop);
 music_state_t music_state(void);
 Record* music_next(uint8_t tick);
 Record* music_at(uint16_t position);
+uint16_t music_frame(void);
 
 uint16_t music_length(void);
 uint16_t music_pos(void);

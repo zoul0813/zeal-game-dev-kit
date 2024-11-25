@@ -5,11 +5,12 @@
 #include <zos_errors.h>
 #include <zos_time.h>
 #include <zos_vfs.h>
+#include "sound/sounds.h"
 #include "sound/music.h"
 
 static Track *_track;
 static uint16_t music_position;
-static uint16_t frames;
+static uint16_t frames = 0;
 
 zos_err_t music_load_from_file(const char* path, Track *track) {
   // const char* filename = "B:/piano.ptz";
@@ -84,6 +85,7 @@ void music_transport(music_state_t state, uint16_t frame) {
 
   switch(state) {
     case T_PLAY:
+      frames = frame;
       if(frame > 0) {
         Record *prev = NULL;
         for(uint16_t i = 0; i < MAX_RECORDS; i++) {
@@ -109,6 +111,9 @@ void music_transport(music_state_t state, uint16_t frame) {
         music_position = 0;
       }
       break;
+    case T_NONE:
+      zvb_sound_set_voices(VOICEALL, 0, 0);
+      break;
   }
 }
 
@@ -127,6 +132,10 @@ Record* music_at(uint16_t position) {
     return &_track->records[position];
   }
   return NULL;
+}
+
+uint16_t music_frame(void) {
+  return frames;
 }
 
 void music_store(Record *record) {
@@ -149,7 +158,7 @@ void music_loop(uint8_t loop) {
     Record *record = music_next(0);
     frames++;
     do {
-        if(record->frame == frames) {
+        if(frames >= record->frame) {
             uint16_t frame = record->frame;
             uint16_t freq = record->freq;
             uint8_t voice_wave = record->voice_wave;
