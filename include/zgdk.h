@@ -1,10 +1,11 @@
 #include <stdint.h>
 #include "types.h"
 #include "input.h"
-#include "sounds.h"
+#include "sound.h"
 #include "tiles.h"
 #include "ascii.h"
 #include "utils.h"
 #include "sprites.h"
 #include "misc.h"
 #include "arrays.h"
+#include "sdcc.h"

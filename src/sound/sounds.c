@@ -3,7 +3,7 @@
 #include <zvb_sound.h>
 #include <zos_errors.h>
 #include <zos_time.h>
-#include "sounds.h"
+#include "sound/sounds.h"
 
 static Sound sounds[MAX_VOICES];
 

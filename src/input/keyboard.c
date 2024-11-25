@@ -29,9 +29,10 @@ zos_err_t keyboard_flush(void) {
  * Initializes the keyboard
  */
 zos_err_t keyboard_init(void) {
+  zos_err_t err = ERR_FAILURE;
   /* Initialize the keyboard by setting it to raw and non-blocking */
   void* arg = (void*) (KB_READ_NON_BLOCK | KB_MODE_RAW);
-  zos_err_t err = ioctl(DEV_STDIN, KB_CMD_SET_MODE, arg);
+  err = ioctl(DEV_STDIN, KB_CMD_SET_MODE, arg);
 
   // DIRTY: trick to align key_buffer
   key_buffer = (uint8_t*)((uintptr_t)(array + 31) & (~(uintptr_t)31));
