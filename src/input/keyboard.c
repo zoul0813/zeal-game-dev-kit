@@ -8,7 +8,8 @@
 uint16_t KEYBOARD_keys = 0;
 
 // DIRTY: trick to align key_buffer
-static uint8_t array[32 + 31];
+#define KB_BUFFER_SIZE  32
+static uint8_t array[KB_BUFFER_SIZE + (KB_BUFFER_SIZE - 1)];
 static uint8_t* key_buffer;
 
 /**
@@ -41,7 +42,7 @@ zos_err_t keyboard_init(void) {
 }
 
 uint16_t keyboard_read(void) {
-  uint16_t size = sizeof(key_buffer);
+  uint16_t size = KB_BUFFER_SIZE;
   while(1) {
     zos_err_t err = read(DEV_STDIN, key_buffer, &size);
     if(err != ERR_SUCCESS) {
