@@ -5,7 +5,7 @@
 #pragma once
 
 #define MAX_VOICES    4
-#define VOICEALL      VOICE0 | VOICE1 | VOICE2 | VOICE3
+#define VOICEALL      (VOICE0 | VOICE1 | VOICE2 | VOICE3)
 
 typedef struct {
   sound_voice_t voice;
