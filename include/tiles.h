@@ -4,7 +4,7 @@
 #ifndef TILES_H
 #define TILES_H
 
-#define TILE_SIZE           (16 * 16)U
+#define TILE_SIZE           (16U * 16U)
 #define TILE_WIDTH          16U
 #define TILE_HEIGHT         16U
 #define TILE_HALF           8U
