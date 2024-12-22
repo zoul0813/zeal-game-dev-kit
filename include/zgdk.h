@@ -8,3 +8,4 @@
 #include "sprites.h"
 #include "misc.h"
 #include "arrays.h"
+#include "assets.h"
