@@ -31,6 +31,13 @@ char rand8_quick(void) __naked
     );
 }
 
+static uint16_t rseed = 1;
+void rand8_seed(uint16_t seed) {
+    if(seed != 0) {
+        rseed = seed;
+    }
+}
+
 /**
  * Return an 8-bit pseudo-random number
  *
@@ -70,13 +77,15 @@ char rand8(void) __naked
     // ;-------------------------------------------------------------------------------
 
     __asm__(
-    "            ;opcode cc\n"
-    "add hl,hl   ; 29    11\n"
-    "sbc a,a     ; 9F     4\n"
-    "and #0x2D   ; E62D   7\n"
-    "xor l       ; AD     4\n"
-    "ld l,a      ; 6F     4\n"
-    "ld a,r      ; ED5F   9\n"
-    "add a,h     ; 84     4\n"
+    "ld hl, (_rseed)\n"
+    "add hl,hl\n"
+    "sbc a,a\n"
+    "and #0x2D\n"
+    "xor l\n"
+    "ld l,a\n"
+    "ld a,r\n"
+    "add a,h\n"
+    "ld (_rseed), hl\n"
+    "ret\n"
     );
 }
