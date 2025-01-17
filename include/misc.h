@@ -34,6 +34,28 @@ typedef struct {
   uint16_t y;
 } Point;
 
+typedef struct {
+    uint16_t x;
+    uint16_t y;
+} Vector2_u16;
+
+typedef struct {
+    uint8_t x;
+    uint8_t y;
+} Vector2_u8;
+
+typedef struct {
+  int16_t x;
+  int16_t y;
+} Vector2;
+
+typedef struct {
+  int8_t x;
+  int8_t y;
+} Vector2_8;
+
+typedef Vector2_8 Direction;
+
 static const uint16_t rect_top(Rect *rect) {
   return rect->y - rect->h;
 }
@@ -46,10 +68,5 @@ static const uint16_t rect_left(Rect *rect) {
 static const uint16_t rect_right(Rect *rect) {
   return rect->x;
 }
-
-typedef struct {
-  int8_t x;
-  int8_t y;
-} Direction;
 
 #endif
