@@ -9,3 +9,4 @@
 #include "misc.h"
 #include "arrays.h"
 #include "assets.h"
+#include "tilemap.h"
