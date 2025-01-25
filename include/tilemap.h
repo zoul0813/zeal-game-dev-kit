@@ -6,7 +6,7 @@
 #define TILEMAP_H
 
 /**
- * set the current tilemap `x` offset on `layer`
+ * @brief set the current tilemap `x` offset on `layer`
  */
 static void tilemap_scroll_x(uint8_t layer, uint16_t value)
 {
@@ -20,7 +20,7 @@ static void tilemap_scroll_x(uint8_t layer, uint16_t value)
 }
 
 /**
- * set the current tilemap `y` offset on `layer`
+ * @brief set the current tilemap `y` offset on `layer`
  */
 static void tilemap_scroll_y(uint8_t layer, uint16_t value)
 {
@@ -34,7 +34,7 @@ static void tilemap_scroll_y(uint8_t layer, uint16_t value)
 }
 
 /**
- * set the current tilemap `x` and `y` offset on `layer`
+ * @brief set the current tilemap `x` and `y` offset on `layer`
  */
 static void tilemap_scroll(uint8_t layer, uint16_t x, uint16_t y)
 {
@@ -43,7 +43,7 @@ static void tilemap_scroll(uint8_t layer, uint16_t x, uint16_t y)
 }
 
 /**
- * get the current tilemap `layer` x offset
+ * @brief get the current tilemap `layer` x offset
  */
 static uint16_t tilemap_scroll_get_x(uint8_t layer)
 {
@@ -59,7 +59,7 @@ static uint16_t tilemap_scroll_get_x(uint8_t layer)
 }
 
 /**
- * get the current tilemap `layer` y offset
+ * @brief get the current tilemap `layer` y offset
  */
 static uint16_t tilemap_scroll_get_y(uint8_t layer)
 {
@@ -75,7 +75,7 @@ static uint16_t tilemap_scroll_get_y(uint8_t layer)
 }
 
 /**
- * Fill the tilemap with `tile` from x,y to x+width,y+height with `tile` on `layer`
+ * @brief Fill the tilemap with `tile` from x,y to x+width,y+height with `tile` on `layer`
  */
 static void tilemap_fill(gfx_context *ctx, uint8_t tile, uint8_t layer, uint8_t x, uint8_t y, uint8_t width, uint8_t height) {
     for(uint8_t j = 0; j < height; j++) {

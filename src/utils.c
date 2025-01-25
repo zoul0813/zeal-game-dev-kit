@@ -18,11 +18,6 @@ void nprint_string(gfx_context* ctx, const char* str, uint8_t len, uint8_t x, ui
     gfx_tilemap_load(ctx, line, len, 1, x, y);
 }
 
-/**
- * Retrieve the value of the R register
- *
- * This is can be used for a quick dirty "random" value
-*/
 char rand8_quick(void) __naked
 {
     __asm__(
@@ -38,11 +33,6 @@ void rand8_seed(uint16_t seed) {
     }
 }
 
-/**
- * Return an 8-bit pseudo-random number
- *
- * This is a combination of an LFSR w/ Counter
-*/
 char rand8(void) __naked
 {
     // credit: https://spectrumcomputing.co.uk/forums/viewtopic.php?t=4571

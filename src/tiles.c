@@ -3,8 +3,8 @@
 #include "misc.h"
 #include "tiles.h"
 
-uint16_t tilemap_offset_x = 0;
-uint16_t tilemap_offset_y = 0;
+static uint16_t tilemap_offset_x = 0;
+static uint16_t tilemap_offset_y = 0;
 
 void tile_at(uint8_t tx, uint8_t ty, Tile *tile) {
   // tile pixel coords
