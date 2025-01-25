@@ -10,7 +10,7 @@
 
 static Track *_track;
 static uint16_t music_position;
-static uint16_t frames = 0;
+static uint16_t ticks = 0;
 
 zos_err_t music_load_from_file(const char* path, Track *track) {
   // const char* filename = "B:/piano.ptz";
@@ -85,7 +85,7 @@ void music_transport(music_state_t state, uint16_t frame) {
 
   switch(state) {
     case T_PLAY:
-      frames = frame;
+      ticks = frame;
       if(frame > 0) {
         Record *prev = NULL;
         for(uint16_t i = 0; i < MAX_RECORDS; i++) {
@@ -135,7 +135,7 @@ Record* music_at(uint16_t position) {
 }
 
 uint16_t music_frame(void) {
-  return frames;
+  return ticks;
 }
 
 void music_store(Record *record) {
@@ -156,9 +156,9 @@ void music_tick(void) {
 void music_loop(uint8_t loop) {
     if(_track->state != T_PLAY) return;
     Record *record = music_next(0);
-    frames++;
+    ticks++;
     do {
-        if(frames >= record->frame) {
+        if(ticks >= record->frame) {
             uint16_t frame = record->frame;
             uint16_t freq = record->freq;
             uint8_t voice_wave = record->voice_wave;
@@ -168,10 +168,10 @@ void music_loop(uint8_t loop) {
             music_tick();
             if(voice_wave == 0xFF) {
               if(loop) {
-                frames = 0;
+                ticks = 0;
                 music_position = 0;
               } else {
-                music_transport(T_NONE, frames);
+                music_transport(T_NONE, ticks);
               }
               return;
             } else {

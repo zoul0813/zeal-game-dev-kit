@@ -2,9 +2,8 @@
 #include "types.h"
 #include "misc.h"
 #include "tiles.h"
+#include "tilemap.h"
 
-static uint16_t tilemap_offset_x = 0;
-static uint16_t tilemap_offset_y = 0;
 
 void tile_at(uint8_t tx, uint8_t ty, Tile *tile) {
   // tile pixel coords
@@ -17,8 +16,8 @@ void tile_at(uint8_t tx, uint8_t ty, Tile *tile) {
   tile->y = ty;
 
   // transpose into "sprite space"
-  tile->rect.x = tile_r + tilemap_offset_x;
-  tile->rect.y = tile_b + tilemap_offset_y;
+  tile->rect.x = tile_r + tilemap_scroll_get_x(0);
+  tile->rect.y = tile_b + tilemap_scroll_get_y(0);
   tile->rect.w = TILE_WIDTH;
   tile->rect.h = TILE_HEIGHT;
 }

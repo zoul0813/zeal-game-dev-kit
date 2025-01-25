@@ -87,10 +87,10 @@
 #define NUM_ARRANGEMENTS  64U
 #define TRACKER_TITLE_LEN 12U
 
-#define FRAMES_PER_QUARTER(tempo)   (temp)
-#define FRAMES_PER_EIGHT(tempo)     (tempo >> 1)
-#define FRAMES_PER_SIXTEENTH(tempo) (tempo >> 2)
-#define FRAMES_PER_STEP(tempo)      FRAMES_PER_SIXTEENTH(tempo)
+#define TICKS_PER_QUARTER(tempo)    (temp)
+#define TICKS_PER_EIGHT(tempo)      (tempo >> 1)
+#define TICKS_PER_SIXTEENTH(tempo)  (tempo >> 2)
+#define TICKS_PER_STEP(tempo)       TICKS_PER_SIXTEENTH(tempo)
 #define LESSTHAN(val, max)          (val <= max)
 #define GREATERTHAN(val, min)       (val >= min)
 #define RANGE(val, min, max)        ((val >= min) && (val <= max))

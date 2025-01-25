@@ -19,9 +19,6 @@ typedef struct {
   Rect rect;
 } Tile;
 
-extern uint16_t tilemap_offset_x;
-extern uint16_t tilemap_offset_y;
-
 /**
  * Get the Tile X/Y from a Pixel X/Y coordinate
  *

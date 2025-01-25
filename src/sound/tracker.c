@@ -4,7 +4,7 @@
 #include <zvb_sound.h>
 #include "sound/tracker.h"
 
-static uint8_t frames              = 0;
+static uint8_t ticks              = 0;
 static uint8_t current_pattern     = 0;
 static uint8_t current_arrangement = 0;
 static uint8_t next_step           = 0;
@@ -279,10 +279,10 @@ note_name_t NOTE_NAMES[] = {
 uint8_t zmt_tick(track_t* track, uint8_t use_arrangement)
 {
     pattern_t* pattern = track->patterns[current_pattern];
-    if (frames > track->current_tempo)
-        frames = 0;
-    // if(frames % FRAMES_PER_EIGTH == 0) { }
-    if (frames % FRAMES_PER_SIXTEENTH(track->current_tempo) == 0) {
+    if (ticks > track->current_tempo)
+        ticks = 0;
+    // if(ticks % ticks_PER_EIGTH == 0) { }
+    if (ticks % TICKS_PER_SIXTEENTH(track->current_tempo) == 0) {
         last_step = next_step;
         zmt_play_pattern(pattern, next_step);
 
@@ -302,7 +302,7 @@ uint8_t zmt_tick(track_t* track, uint8_t use_arrangement)
             next_step = 0;
         }
     }
-    frames++;
+    ticks++;
 
     return next_step;
 }
@@ -330,7 +330,7 @@ uint8_t zmt_track_get_last_step(track_t* track)
 uint8_t zmt_track_get_frame(track_t* track)
 {
     track; // unreferenced
-    return frames;
+    return ticks;
 }
 
 void zmt_process_arrangement_fx(track_t* track, arrangement_t* arrangement)
@@ -368,7 +368,7 @@ void zmt_process_fx(step_t* step, fx_t fx, sound_voice_t voice)
 
     if(RANGE(fx, FX_GOTO_0, FX_GOTO_31)) {
         next_step = (fx - FX_GOTO_0) - 1;
-        frames    = (next_step % 16) - 1; // TODO: yeah?
+        ticks     = (next_step % 16) - 1; // TODO: yeah?
         return;
     }
 
@@ -1206,7 +1206,7 @@ void zmt_track_init(track_t* track)
 /* Reset a pattern, zeroing out playback values */
 void zmt_pattern_reset(pattern_t* pattern)
 {
-    frames    = 0;
+    ticks     = 0;
     next_step = 0;
     for (uint8_t s = 0; s < STEPS_PER_PATTERN; s++) {
         for (uint8_t v = 0; v < NUM_VOICES; v++) {
@@ -1230,7 +1230,7 @@ uint8_t zmt_track_reset(track_t* track, uint8_t reset_pattern)
         }
         zmt_process_arrangement_fx(track, a);
     }
-    frames             = 0;
+    ticks              = 0;
     next_step          = 0;
     pattern_t* pattern = track->patterns[current_pattern];
     zmt_pattern_reset(pattern);
