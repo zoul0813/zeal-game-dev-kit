@@ -29,31 +29,46 @@ typedef struct {
   uint16_t h;
 } Rect;
 
-typedef struct {
-  uint16_t x;
-  uint16_t y;
-} Point;
-
+/**
+ * 16-bit Unsigned Vector2
+ */
 typedef struct {
     uint16_t x;
     uint16_t y;
 } Vector2_u16;
 
+/**
+ * 8-bit Unsigned Vector2
+ */
 typedef struct {
     uint8_t x;
     uint8_t y;
 } Vector2_u8;
 
+/**
+ * 16-bit Signed Vector2
+ */
 typedef struct {
   int16_t x;
   int16_t y;
 } Vector2;
 
+/**
+ * 8-bit Signed Vector2
+ */
 typedef struct {
   int8_t x;
   int8_t y;
 } Vector2_8;
 
+/**
+ * 16-bit Unsigned Point (Vector2_u16)
+ */
+typedef Vector2_u16 Point;
+
+/**
+ * 8-bit Direction (Vector2_8)
+ */
 typedef Vector2_8 Direction;
 
 static const uint16_t rect_top(Rect *rect) {
