@@ -29,7 +29,7 @@ static void tilemap_scroll_y(uint8_t layer, uint16_t value)
         zvb_ctrl_l0_scr_y_high = value >> 8;
     } else {
         zvb_ctrl_l1_scr_y_low  = value & 0xFF;
-        zvb_ctrl_l1_scr_y_high = value > 8;
+        zvb_ctrl_l1_scr_y_high = value >> 8;
     }
 }
 
