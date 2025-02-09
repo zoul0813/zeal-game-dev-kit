@@ -48,20 +48,25 @@ ZOS_CFLAGS += -DDEBUG=1
 endif
 
 GFX_ALLOWED_BITS := 1 4 8
-GFX_BITS ?= 8
+GFX_BITS ?= 0
 ifneq ($(filter $(GFX_BITS), $(GFX_ALLOWED_BITS)),)
 GIF2ZEAL_ARGS += -b $(GFX_BITS)
-else
-	@echo "Invalid GFX_BITS (" $(GFX_BITS) "), allowed (" $(GFX_ALLOWED_BITS) ")"
 endif
 
-GFX_COMPRESSED ?= 1
+GFX_COMPRESSED ?= 0
 ifeq ($(GFX_COMPRESSED), 1)
-GIF2ZEAL_ARGS += -c
+GIF2ZEAL_ARGS += -z
 endif
 
 GFX_STRIP ?= 0
+ifneq ($(GFX_STRIP), 0)
 GIF2ZEAL_ARGS += -s $(GFX_STRIP)
+endif
+
+GFX_COLORS ?= 0
+ifneq ($(GFX_COLORS), 0)
+GIF2ZEAL_ARGS += -c $(GFX_COLORS)
+endif
 
 all:: $(GIF_SRCS) $(ZTS_SRCS) $(ZTM_SRCS)
 	@echo "Enable GFX", $(ENABLE_GFX)
@@ -70,13 +75,14 @@ all:: $(GIF_SRCS) $(ZTS_SRCS) $(ZTM_SRCS)
 	@echo "Frame Lock", $(FRAMELOCK)
 	@echo "Debug", $(DEBUG)
 	@echo "Gfx Compressed", $(GFX_COMPRESSED)
+	@echo "Gfx Colors", $(GFX_COLORS)
 	@echo "Gfx Bits", $(GFX_BITS)
 
 %.gif: %.aseprite
 	@if [ -f $(ASEPRITE_PATH) ]; then $(ASEPRITE_PATH) -b --sheet $@ $<; fi
 
 %.zts: %.gif
-	$(ZVB_SDK_PATH)/tools/zeal2gif/gif2zeal.py -i $< -t $@ -p $(patsubst %.zts,%.ztp,$@) $(GIF2ZEAL_ARGS)
+	$(ZVB_SDK_PATH)/tools/zeal2gif/gif2zeal.py -i $< $(GIF2ZEAL_ARGS)
 
 %.ztm: %.tmx
 	$(ZVB_SDK_PATH)/tools/tiled2zeal/tiled2zeal.py -i $< -m $@
