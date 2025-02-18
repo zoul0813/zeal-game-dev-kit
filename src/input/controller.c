@@ -4,10 +4,9 @@
  * SPDX-License-Identifier: CC0-1.0
  */
 
-#include <stdio.h>
 #include <zos_errors.h>
 #include <zos_keyboard.h>
-#include "input/controller.h"
+#include "zgdk/input/controller.h"
 
 /**
  * @brief Define some variables to access the PIO from C code

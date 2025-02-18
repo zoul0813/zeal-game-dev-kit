@@ -1,8 +1,9 @@
 #include <string.h>
-#include "types.h"
-#include "misc.h"
-#include "tiles.h"
-#include "tilemap.h"
+#include "zgdk/types.h"
+#include "zgdk/types.h"
+#include "zgdk/rect.h"
+#include "zgdk/tiles.h"
+#include "zgdk/tilemap.h"
 
 
 void tile_at(uint8_t tx, uint8_t ty, Tile *tile) {

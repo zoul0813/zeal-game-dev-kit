@@ -1,5 +1,5 @@
 #include <stdint.h>
-#include "misc.h"
+#include "zgdk/types.h"
 
 #ifndef TILES_H
 #define TILES_H

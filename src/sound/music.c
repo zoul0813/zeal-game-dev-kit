@@ -5,8 +5,8 @@
 #include <zos_errors.h>
 #include <zos_time.h>
 #include <zos_vfs.h>
-#include "sound/sounds.h"
-#include "sound/music.h"
+#include "zgdk/sound/sounds.h"
+#include "zgdk/sound/music.h"
 
 static Track *_track;
 static uint16_t music_position;

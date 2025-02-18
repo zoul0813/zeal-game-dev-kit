@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <zvb_sound.h>
-#include "sound/tracker.h"
+#include "zgdk/sound/tracker.h"
 
 static uint8_t ticks              = 0;
 static uint8_t current_pattern     = 0;

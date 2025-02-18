@@ -1,4 +1,5 @@
-#include "ascii.h"
+#include <stdio.h>
+#include "zgdk/ascii.h"
 
 
 uint8_t ASCII_MAP[95] = {

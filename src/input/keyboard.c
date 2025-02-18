@@ -2,8 +2,8 @@
 #include <zos_sys.h>
 #include <zos_vfs.h>
 #include <zos_keyboard.h>
-#include "input/keyboard.h"
-#include <input/button_map.h>
+#include "zgdk/input/keyboard.h"
+#include "zgdk/input/button_map.h"
 
 uint16_t KEYBOARD_keys = 0;
 

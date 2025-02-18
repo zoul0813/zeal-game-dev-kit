@@ -1,5 +1,5 @@
 #include <string.h>
-#include "sprites.h"
+#include "zgdk/sprites.h"
 
 static gfx_sprite *ARENA;
 static uint8_t ARENA_SIZE;

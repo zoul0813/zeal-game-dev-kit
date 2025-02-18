@@ -1,4 +1,4 @@
-#include "input.h"
+#include "zgdk/input.h"
 
 static uint8_t controller_mode = 0;
 

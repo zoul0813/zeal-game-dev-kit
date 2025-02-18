@@ -1,9 +1,10 @@
-#include <stdio.h>
 #include <stdint.h>
 #include <zvb_sound.h>
 #include <zos_errors.h>
 #include <zos_time.h>
-#include "sound/sounds.h"
+
+#include "zgdk/types.h"
+#include "zgdk/sound/sounds.h"
 
 static Sound sounds[MAX_VOICES];
 

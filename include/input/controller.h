@@ -7,7 +7,7 @@
 
 #include <stdint.h>
 #include <zos_errors.h>
-#include <input/button_map.h>
+#include <zgdk/input/button_map.h>
 
 extern uint16_t CONTROLLER_buttons;
 

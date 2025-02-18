@@ -1,7 +1,5 @@
-#include <stdio.h>
-
-#include "utils.h"
-#include "ascii.h"
+#include "zgdk/utils.h"
+#include "zgdk/ascii.h"
 #include <string.h>
 
 void print_string(gfx_context* ctx, const char* str, uint8_t x, uint8_t y)

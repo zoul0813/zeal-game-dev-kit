@@ -1,3 +1,3 @@
-#include "sound/sounds.h"
-#include "sound/music.h"
-#include "sound/tracker.h"
+#include "zgdk/sound/sounds.h"
+#include "zgdk/sound/music.h"
+#include "zgdk/sound/tracker.h"

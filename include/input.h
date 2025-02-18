@@ -1,7 +1,7 @@
 #include <zos_errors.h>
-#include "input/button_map.h"
-#include "input/controller.h"
-#include "input/keyboard.h"
+#include "zgdk/input/button_map.h"
+#include "zgdk/input/controller.h"
+#include "zgdk/input/keyboard.h"
 
 /**
  * @brief Initialize input
