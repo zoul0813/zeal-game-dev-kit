@@ -34,6 +34,13 @@ ZOS_LDFLAGS += -k $(ZGDK_PATH)/lib -l zgdk $(EXTRA_LDFLAGS)
 ENABLE_GFX ?= 1
 ENABLE_SOUND ?= 1
 ENABLE_CRC32 ?= 0
+ENABLE_ZAR ?= 0
+
+ifeq ($(ENABLE_ZAR), 1)
+ZOS_CFLAGS += -I$(ZAR_PATH)/include/
+ZOS_LDFLAGS += -k $(ZAR_PATH)/lib/ -l zar
+endif
+
 EMULATOR ?= 0
 FRAMELOCK ?= 0
 DEBUG ?= 0
@@ -71,6 +78,8 @@ endif
 all:: $(GIF_SRCS) $(ZTS_SRCS) $(ZTM_SRCS)
 	@echo "Enable GFX", $(ENABLE_GFX)
 	@echo "Enable Sound", $(ENABLE_SOUND)
+	@echo "Enable CRC32", $(ENABLE_CRC32)
+	@echo "Enable ZAR", $(ENABLE_ZAR)
 	@echo "Emulator", $(EMULATOR)
 	@echo "Frame Lock", $(FRAMELOCK)
 	@echo "Debug", $(DEBUG)
