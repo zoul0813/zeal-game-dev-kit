@@ -54,6 +54,13 @@ ifeq ($(DEBUG), 1)
 ZOS_CFLAGS += -DDEBUG=1
 endif
 
+ASSETS_OUTPUT ?= 0
+ifneq ($(ASSETS_OUTPUT), 0)
+# ASSETS_OUTPUT_DEST=$(ASSETS_OUTPUT_DEST)
+GIF2ZEAL_ARGS += -o $(ASSETS_OUTPUT)
+TILED2ZEAL_ARGS += -o $(ASSETS_OUTPUT)
+endif
+
 GFX_ALLOWED_BITS := 1 4 8
 GFX_BITS ?= 0
 ifneq ($(filter $(GFX_BITS), $(GFX_ALLOWED_BITS)),)
@@ -75,17 +82,32 @@ ifneq ($(GFX_COLORS), 0)
 GIF2ZEAL_ARGS += -c $(GFX_COLORS)
 endif
 
+TILED_SIZE ?= 0
+ifneq ($(TILED_SIZE), 0)
+TILED2ZEAL_ARGS += --size $(TILED_SIZE)
+endif
+
+TILED_LAYER ?= 0
+ifneq ($(TILED_LAYER), 0)
+TILED2ZEAL_ARGS += --layer $(TILED_LAYER)
+endif
+
+TILED_OUTPUT ?= 0
+ifneq ($(TILED_OUTPUT), 0)
+TILED2ZEAL_ARGS += -o $(TILED_OUTPUT)
+endif
+
 all:: $(GIF_SRCS) $(ZTS_SRCS) $(ZTM_SRCS)
-	@echo "Enable GFX", $(ENABLE_GFX)
-	@echo "Enable Sound", $(ENABLE_SOUND)
-	@echo "Enable CRC32", $(ENABLE_CRC32)
-	@echo "Enable ZAR", $(ENABLE_ZAR)
-	@echo "Emulator", $(EMULATOR)
-	@echo "Frame Lock", $(FRAMELOCK)
-	@echo "Debug", $(DEBUG)
-	@echo "Gfx Compressed", $(GFX_COMPRESSED)
-	@echo "Gfx Colors", $(GFX_COLORS)
-	@echo "Gfx Bits", $(GFX_BITS)
+	$(if $(ZGDK_DEBUG),@echo "Enable GFX: $(ENABLE_GFX)")
+	$(if $(ZGDK_DEBUG),@echo "Enable Sound: $(ENABLE_SOUND)")
+	$(if $(ZGDK_DEBUG),@echo "Enable CRC32: $(ENABLE_CRC32)")
+	$(if $(ZGDK_DEBUG),@echo "Enable ZAR: $(ENABLE_ZAR)")
+	$(if $(ZGDK_DEBUG),@echo "Emulator: $(EMULATOR)")
+	$(if $(ZGDK_DEBUG),@echo "Frame Lock: $(FRAMELOCK)")
+	$(if $(ZGDK_DEBUG),@echo "Debug: $(DEBUG)")
+	$(if $(ZGDK_DEBUG),@echo "Gfx Compressed: $(GFX_COMPRESSED)")
+	$(if $(ZGDK_DEBUG),@echo "Gfx Colors: $(GFX_COLORS)")
+	$(if $(ZGDK_DEBUG),@echo "Gfx Bits: $(GFX_BITS)")
 
 %.gif: %.aseprite
 	@if [ -f $(ASEPRITE_PATH) ]; then $(ASEPRITE_PATH) -b --sheet $@ $<; fi
@@ -94,7 +116,7 @@ all:: $(GIF_SRCS) $(ZTS_SRCS) $(ZTM_SRCS)
 	$(ZVB_SDK_PATH)/tools/zeal2gif/gif2zeal.py -i $< $(GIF2ZEAL_ARGS)
 
 %.ztm: %.tmx
-	$(ZVB_SDK_PATH)/tools/tiled2zeal/tiled2zeal.py -i $< -m $@
+	$(ZVB_SDK_PATH)/tools/tiled2zeal/tiled2zeal.py -i $< $(TILED2ZEAL_ARGS)
 
 
 # include $(ZOS_PATH)/kernel_headers/sdcc/base_sdcc.mk
