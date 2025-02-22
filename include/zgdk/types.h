@@ -4,62 +4,61 @@
 #define TYPES_H
 
 #ifndef bool
-    #define bool    uint8_t
+#define bool uint8_t
 #endif
 
 #ifndef false
-    #define false   0
+#define false 0
 #endif
 
 #ifndef true
-    #define true    1
+#define true 1
 #endif
 
 #ifndef NULL
-    #define NULL ((void *)0)
+#define NULL ((void*) 0)
 #endif
 
-#define DIRECTION_NONE      (0)
-#define DIRECTION_LEFT      (-1)
-#define DIRECTION_RIGHT     (1)
-#define DIRECTION_UP        (-1)
-#define DIRECTION_DOWN      (1)
+#define DIRECTION_NONE  (0)
+#define DIRECTION_LEFT  (-1)
+#define DIRECTION_RIGHT (1)
+#define DIRECTION_UP    (-1)
+#define DIRECTION_DOWN  (1)
 
 typedef enum {
-  EdgeNone          = 0,
-  EdgeTop           = 1,
-  EdgeBottom        = 2,
-  EdgeLeft          = 4,
-  EdgeRight         = 8,
-  EdgeContained     = 16, // inside
+  EdgeNone      = 0,
+  EdgeTop       = 1,
+  EdgeBottom    = 2,
+  EdgeLeft      = 4,
+  EdgeRight     = 8,
+  EdgeContained = 16, // inside
 } Edge;
-
-/**
- * This represents Sprite Space
- * (X - 16, Y - 16) coordinates
- */
-typedef struct {
-  uint16_t x;
-  uint16_t y;
-  uint16_t w;
-  uint16_t h;
-} Rect;
 
 /**
  * 16-bit Unsigned Vector2
  */
 typedef struct {
-    uint16_t x;
-    uint16_t y;
+  uint16_t x;
+  uint16_t y;
 } Vector2_u16;
+
+typedef struct {
+  uint16_t w;
+  uint16_t h;
+} Size_u16;
 
 /**
  * 8-bit Unsigned Vector2
  */
 typedef struct {
-    uint8_t x;
-    uint8_t y;
+  uint8_t x;
+  uint8_t y;
 } Vector2_u8;
+
+typedef struct {
+  uint8_t w;
+  uint8_t h;
+} Size_u8;
 
 /**
  * 16-bit Signed Vector2
@@ -83,8 +82,35 @@ typedef struct {
 typedef Vector2_u16 Point;
 
 /**
+ * 16-bit Unsigned Point (Size_u16)
+ */
+typedef Size_u16 Size;
+
+/**
  * 8-bit Direction (Vector2_8)
  */
 typedef Vector2_8 Direction;
 
+/**
+ * 16-bit X,Y,W,H with Point/Size union
+ */
+typedef struct {
+// Point (x/y)
+  union {
+    struct {
+      uint16_t x;
+      uint16_t y;
+    };
+    Point point;
+  };
+
+  // Size (w/h)
+  union {
+    struct {
+      uint16_t w;
+      uint16_t h;
+    };
+    Size size;
+  };
+} Rect;
 #endif

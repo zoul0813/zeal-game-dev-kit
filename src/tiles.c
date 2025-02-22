@@ -24,9 +24,30 @@ void tile_at(uint8_t tx, uint8_t ty, Tile *tile) {
 }
 
 bool tile_get(Rect *src, Tile *tile) {
-
+  // center of point
   uint16_t srcx = src->x - (src->w / 2);
   uint16_t srcy = src->y - (src->h / 2);
+
+  int8_t tx = (srcx >> 4); // tilemap x
+  int8_t ty = (srcy >> 4); // tilemap y
+  if(tx < 0 || ty < 0) return false;
+
+  tile_at(tx, ty, tile);
+  return true;
+}
+
+bool tile_get_edge(Rect* rect, Edge edge, Tile* tile) {
+  uint16_t srcx = rect->x;
+  uint16_t srcy = rect->y;
+  // center of point
+  switch(edge) {
+    case EdgeRight:
+      srcx += rect->w;
+      break;
+    case EdgeBottom:
+      srcy += rect->h;
+      break;
+  }
 
   int8_t tx = (srcx >> 4); // tilemap x
   int8_t ty = (srcy >> 4); // tilemap y
