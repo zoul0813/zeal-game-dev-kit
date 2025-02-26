@@ -1,4 +1,4 @@
-#include "zgdk/compress.h"
+#include "zgdk/compress/rle.h"
 
 void decompress_rle(uint8_t *data, uint8_t size, uint8_t *buffer) {
     uint8_t length = 0;

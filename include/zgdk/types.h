@@ -19,11 +19,17 @@
 #define NULL ((void*) 0)
 #endif
 
+#define SPRITE_HEIGHT       16
+#define SPRITE_WIDTH        16
+
 #define DIRECTION_NONE  (0)
 #define DIRECTION_LEFT  (-1)
 #define DIRECTION_RIGHT (1)
 #define DIRECTION_UP    (-1)
 #define DIRECTION_DOWN  (1)
+
+#define LAYER0     0
+#define LAYER1     1
 
 typedef enum {
     EdgeNone      = 0,

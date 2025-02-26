@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include "zgdk/ascii.h"
 
 
@@ -26,10 +25,9 @@ void ascii_map(uint8_t start, uint8_t length, uint8_t from) {
   }
 }
 
-
-void ascii_print(void) {
-  for(uint8_t i = 0; i < sizeof(ASCII_MAP); i++) {
-    printf("%d ", ASCII_MAP[i]);
-  }
-  printf("\ntest lib %d %d\n\n", ASCII_MAP[12], ascii_to(','));
-}
+// void ascii_print(void) {
+//   for(uint8_t i = 0; i < sizeof(ASCII_MAP); i++) {
+//     printf("%d ", ASCII_MAP[i]);
+//   }
+//   printf("\ntest lib %d %d\n\n", ASCII_MAP[12], ascii_to(','));
+// }

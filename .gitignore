@@ -1,5 +1,6 @@
 build/
 bin/
+extras/
 *.zip
 /release
 /tmp
