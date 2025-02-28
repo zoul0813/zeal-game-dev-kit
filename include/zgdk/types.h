@@ -1,19 +1,8 @@
 #include <stdint.h>
+#include <stdbool.h>
 
 #ifndef TYPES_H
 #define TYPES_H
-
-#ifndef bool
-#define bool uint8_t
-#endif
-
-#ifndef false
-#define false 0
-#endif
-
-#ifndef true
-#define true 1
-#endif
 
 #ifndef NULL
 #define NULL ((void*) 0)
@@ -86,6 +75,16 @@ typedef struct {
  * 16-bit Unsigned Point (Vector2_u16)
  */
 typedef Vector2_u16 Point;
+
+inline void point_set(Point *point, uint16_t x, uint16_t y) {
+    point->x = x;
+    point->y = y;
+}
+
+inline void point_copy(Point *dst, Point *src) {
+    dst->x = src->x;
+    dst->y = src->y;
+}
 
 /**
  * 16-bit Unsigned Point (Size_u16)

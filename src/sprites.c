@@ -26,3 +26,18 @@ gfx_sprite* sprites_register(gfx_sprite sprite) {
 gfx_error sprites_render(gfx_context* ctx) {
     return gfx_sprite_render_array(ctx, 0, ARENA, registered);
 }
+
+inline void sprite_get_point(gfx_sprite *sprite, Point *point) {
+    point->x = sprite->x;
+    point->y = sprite->y;
+}
+
+inline void sprite_set_point(gfx_sprite *sprite, Point *point) {
+    sprite->x = point->x;
+    sprite->y = point->y;
+}
+
+inline void sprite_set_xy(gfx_sprite *sprite, uint16_t x, uint16_t y) {
+    sprite->x = x;
+    sprite->y = y;
+}
