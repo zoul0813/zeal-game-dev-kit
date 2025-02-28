@@ -9,6 +9,11 @@
 char rand8_quick(void);
 
 /**
+ * Seed the rand8() RNG
+ */
+void rand8_seed(uint16_t seed);
+
+/**
  * Generate an 8-bit random number using a combination of an LFSR w/ Counter
  *
  * @return 8-bit random value
