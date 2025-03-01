@@ -28,8 +28,8 @@ gfx_error tilemap_fill_rect(gfx_context *ctx, uint8_t layer, uint8_t tile, Rect 
 gfx_error tilemap_place(gfx_context *ctx, uint8_t layer, uint8_t tile, Point *point)
 {
     uint8_t x, y;
-    x = point->x;
-    y = point->y;
+    x = ((uint8_t)point->x) & 0xFF;
+    y = ((uint8_t)point->y) & 0xFF;
 
     return gfx_tilemap_place(ctx, tile, layer, x, y);
 }
