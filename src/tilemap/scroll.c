@@ -62,11 +62,11 @@ uint16_t tilemap_scroll_get_y(uint8_t layer)
 {
     uint16_t value;
     if (layer == 0) {
-        value  = zvb_ctrl_l0_scr_x_high << 8;
-        value |= zvb_ctrl_l0_scr_x_low;
+        value  = zvb_ctrl_l0_scr_y_high << 8;
+        value |= zvb_ctrl_l0_scr_y_low;
     } else {
-        value  = zvb_ctrl_l1_scr_x_high << 8;
-        value |= zvb_ctrl_l1_scr_x_low;
+        value  = zvb_ctrl_l1_scr_y_high << 8;
+        value |= zvb_ctrl_l1_scr_y_low;
     }
     return value;
 }
