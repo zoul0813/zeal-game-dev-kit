@@ -20,6 +20,17 @@
 #define LAYER0     0
 #define LAYER1     1
 
+#define TILESET_8BIT 8
+#define TILESET_4BIT 4
+
+/**
+ * @brief convert tile index into tile offset (from_byte)
+ * @param bits  The bit depth of the tiles (TILESET_8BIT, TILESET_4BIT)
+ * @param index The tile index to offset to
+ * @returns The byte offset of the tile at index
+ */
+#define TILE_BYTE_OFFSET(bits, index) (index << bits)
+
 typedef enum {
     EdgeNone      = 0,
     EdgeTop       = 1,
