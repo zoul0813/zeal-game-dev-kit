@@ -129,4 +129,11 @@ typedef struct {
                 Size size;
         };
 } Rect;
+
+inline void rect_set(Rect *rect, uint16_t x, uint16_t y, uint16_t width, uint16_t height) {
+    rect->x = x;
+    rect->y = y;
+    rect->w = width;
+    rect->h = height;
+}
 #endif

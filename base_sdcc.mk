@@ -102,7 +102,15 @@ ifneq ($(TILED_OUTPUT), 0)
 TILED2ZEAL_ARGS += -o $(TILED_OUTPUT)
 endif
 
-all:: $(GIF_SRCS) $(ZTS_SRCS) $(ZTM_SRCS)
+ZAR_HEADER ?= 0
+ifneq ($(ZAR_HEADER), 0)
+ZAR_ARGS += -c
+ifneq ($(ZAR_HEADER), 1)
+ZAR_ARGS += ${ZAR_HEADER}
+endif
+endif
+
+all:: $(GIF_SRCS) $(ZTS_SRCS) $(ZTM_SRCS) $(ZAR_ARCHIVE)
 	$(if $(ZGDK_DEBUG),@echo "Enable GFX: $(ENABLE_GFX)")
 	$(if $(ZGDK_DEBUG),@echo "Enable Sound: $(ENABLE_SOUND)")
 	$(if $(ZGDK_DEBUG),@echo "Enable CRC32: $(ENABLE_CRC32)")
@@ -123,9 +131,14 @@ all:: $(GIF_SRCS) $(ZTS_SRCS) $(ZTM_SRCS)
 %.ztm: %.tmx
 	$(ZVB_SDK_PATH)/tools/tiled2zeal/tiled2zeal.py -i $< $(TILED2ZEAL_ARGS)
 
+$(ZAR_ARCHIVE):
+	mkdir -p assets/archive
+	$(ZAR_PATH)/zar.py -i $(ASSETS_OUTPUT) -o ${ASSETS_DIR}/$(ZAR_ARCHIVE) ${ZAR_ARGS}
 
 # include $(ZOS_PATH)/kernel_headers/sdcc/base_sdcc.mk
 include $(ZVB_SDK_PATH)/sdcc/base_sdcc.mk
 
 all::
 	@echo "Binary Size" $$($(STAT_BYTES) $(OUTPUT_DIR)/$(BIN)) $(BIN)
+	@if [ -f ${ASSETS_DIR}/$(ZAR_ARCHIVE) ]; then ls -l ${ASSETS_DIR}/$(ZAR_ARCHIVE); fi
+	@if [ -f ${ASSETS_DIR}/$(ZAR_ARCHIVE) ]; then cp ${ASSETS_DIR}/$(ZAR_ARCHIVE) $(OUTPUT_DIR); fi
