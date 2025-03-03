@@ -32,10 +32,20 @@ gfx_error tilemap_fill_rect(gfx_context *ctx, uint8_t layer, uint8_t tile, Rect 
 
 gfx_error tilemap_place(gfx_context *ctx, uint8_t layer, uint8_t tile, Point *point)
 {
-    uint8_t x, y;
-    x = ((uint8_t)point->x) & 0xFF;
-    y = ((uint8_t)point->y) & 0xFF;
+    Point map_point;
+    point_copy(&map_point, point);
+    map_point.x -= (_TILEMAP->rect.x);
+    map_point.y -= (_TILEMAP->rect.y);
 
+    uint8_t x, y;
+    x = ((uint8_t)map_point.x) & 0xFF;
+    y = ((uint8_t)map_point.y) & 0xFF;
+
+    return gfx_tilemap_place(ctx, tile, layer, x, y);
+}
+
+gfx_error tilemap_place_xy(gfx_context *ctx, uint8_t layer, uint8_t tile, uint8_t x, uint8_t y)
+{
     return gfx_tilemap_place(ctx, tile, layer, x, y);
 }
 

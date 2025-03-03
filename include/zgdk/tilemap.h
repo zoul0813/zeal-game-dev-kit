@@ -24,4 +24,5 @@ int16_t tilemap_set_xy(uint8_t x, uint8_t y, uint8_t value);
 gfx_error tilemap_fill(gfx_context *ctx, uint8_t layer, uint8_t tile, uint16_t x, uint16_t y, uint16_t width, uint16_t height);
 gfx_error tilemap_fill_rect(gfx_context *ctx, uint8_t layer, uint8_t tile, Rect *rect);
 gfx_error tilemap_place(gfx_context *ctx, uint8_t layer, uint8_t tile, Point *point);
+gfx_error tilemap_place_xy(gfx_context *ctx, uint8_t layer, uint8_t tile, uint8_t x, uint8_t y);
 #endif

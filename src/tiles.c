@@ -27,8 +27,8 @@ void tile_at(uint8_t tx, uint8_t ty, Tile* tile)
 bool tile_get(Rect* src, Tile* tile)
 {
     // center of point
-    uint16_t srcx = src->x - (src->w / 2);
-    uint16_t srcy = src->y - (src->h / 2);
+    uint16_t srcx = src->x - SPRITE_WIDTH + (src->w / 2);
+    uint16_t srcy = src->y - SPRITE_HEIGHT + (src->h / 2);
 
     int8_t tx = (srcx >> 4); // tilemap x
     int8_t ty = (srcy >> 4); // tilemap y
