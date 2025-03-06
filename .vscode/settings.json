@@ -12,8 +12,6 @@
   "editor.insertSpaces": true,
   "editor.detectIndentation": false,
   "files.associations": {
-    "stdint.h": "c",
-    "string.h": "c",
-    "memory_resource": "c"
+    "*.asm": "z80-macroasm"
   }
 }

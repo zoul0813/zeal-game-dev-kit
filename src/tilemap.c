@@ -33,7 +33,7 @@ gfx_error tilemap_fill_rect(gfx_context *ctx, uint8_t layer, uint8_t tile, Rect 
 gfx_error tilemap_place(gfx_context *ctx, uint8_t layer, uint8_t tile, Point *point)
 {
     Point map_point;
-    point_copy(&map_point, point);
+    vect2_copy_pointer(&map_point, point);
     map_point.x -= (_TILEMAP->rect.x);
     map_point.y -= (_TILEMAP->rect.y);
 
@@ -58,7 +58,7 @@ zos_err_t tilemap_register(Tilemap *tilemap, uint8_t *tiles) {
 int16_t tilemap_get(Point *point) {
     // offset to map space
     Point map_point;
-    point_copy(&map_point, point);
+    vect2_copy_pointer(&map_point, point);
     map_point.x -= (_TILEMAP->rect.x);
     map_point.y -= (_TILEMAP->rect.y);
 
@@ -77,7 +77,7 @@ int16_t tilemap_get_xy(uint8_t x, uint8_t y) {
 int16_t tilemap_set(Point *point, uint8_t value) {
     // offset to map space
     Point map_point;
-    point_copy(&map_point, point);
+    vect2_copy_pointer(&map_point, point);
     map_point.x -= (_TILEMAP->rect.x);
     map_point.y -= (_TILEMAP->rect.y);
 

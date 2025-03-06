@@ -8,6 +8,7 @@
 
 gfx_error sprites_register_arena(gfx_sprite* arena, uint8_t size);
 gfx_sprite* sprites_register(gfx_sprite sprite);
+void sprites_deregister(void);
 gfx_error sprites_render(gfx_context* ctx);
 
 inline void sprite_get_point(gfx_sprite *sprite, Point *point);

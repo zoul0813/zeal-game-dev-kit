@@ -23,6 +23,12 @@ gfx_sprite* sprites_register(gfx_sprite sprite) {
     return s;
 }
 
+void sprites_deregister(void) {
+    for(uint8_t i = 0; i < ARENA_SIZE; i++) {
+        ARENA[i].tile = 0;
+    }
+}
+
 gfx_error sprites_render(gfx_context* ctx) {
     return gfx_sprite_render_array(ctx, 0, ARENA, registered);
 }
