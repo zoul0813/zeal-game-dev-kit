@@ -82,20 +82,19 @@ typedef struct {
         int8_t y;
 } Vector2_8;
 
+#define vect2_copy(dst, src) do { (dst).x = (src).x; (dst).y = (src).y; } while(0)
+#define vect2_copy_pointer(dst, src) do { (dst)->x = (src)->x; (dst)->y = (src)->y; } while(0)
+#define vect2_set(vec, vx, vy) do { (vec).x = (vx); (vec).y = (vy); } while(0)
+#define vect2_set_pointer(vec, vx, vy) do { (vec)->x = (vx); (vec)->y = (vy); } while(0)
+#define vect2_direction(vec, src, dst) do { \
+    (vec)->x = ((src)->x > (dst)->x) - ((src)->x < (dst)->x); \
+    (vec)->y = ((src)->y > (dst)->y) - ((src)->y < (dst)->y); \
+    } while(0)
+
 /**
  * 16-bit Unsigned Point (Vector2_u16)
  */
 typedef Vector2_u16 Point;
-
-inline void point_set(Point *point, uint16_t x, uint16_t y) {
-    point->x = x;
-    point->y = y;
-}
-
-inline void point_copy(Point *dst, Point *src) {
-    dst->x = src->x;
-    dst->y = src->y;
-}
 
 /**
  * 16-bit Unsigned Point (Size_u16)
@@ -136,4 +135,41 @@ inline void rect_set(Rect *rect, uint16_t x, uint16_t y, uint16_t width, uint16_
     rect->w = width;
     rect->h = height;
 }
+
+/**
+ * @brief A union defining a Moveable object (player, etc)
+ */
+typedef union {
+    struct {
+        union {
+                Rect rect;
+                struct {
+                        Point point;
+                        Size size;
+                };
+        };
+        Point last_point;
+        Direction direction;
+    };
+} MoveableUnion;
+
+/**
+ * @brief Used to extend MoveableUnion as member
+ */
+#define Moveable(member) \
+    union { \
+        MoveableUnion member; \
+        struct { \
+            union { \
+                Rect rect; \
+                struct { \
+                    Point point; \
+                    Size size; \
+                }; \
+            }; \
+            Point last_point; \
+            Direction direction; \
+        }; \
+    }
+
 #endif
