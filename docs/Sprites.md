@@ -1,4 +1,4 @@
-# ZGDK: Sound
+# ZGDK: Sprites
 
 ZGDK provides a Sprite Arena to help with allocating a large number of sprites and rendering them effeciently.
 
