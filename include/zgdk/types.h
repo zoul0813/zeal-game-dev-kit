@@ -82,11 +82,11 @@ typedef struct {
         int8_t y;
 } Vector2_8;
 
-#define vect2_copy(dst, src) do { (dst).x = (src).x; (dst).y = (src).y; } while(0)
-#define vect2_copy_pointer(dst, src) do { (dst)->x = (src)->x; (dst)->y = (src)->y; } while(0)
-#define vect2_set(vec, vx, vy) do { (vec).x = (vx); (vec).y = (vy); } while(0)
-#define vect2_set_pointer(vec, vx, vy) do { (vec)->x = (vx); (vec)->y = (vy); } while(0)
-#define vect2_direction(vec, src, dst) do { \
+#define vec2_copy(dst, src) do { (dst).x = (src).x; (dst).y = (src).y; } while(0)
+#define vec2_copy_pointer(dst, src) do { (dst)->x = (src)->x; (dst)->y = (src)->y; } while(0)
+#define vec2_set(vec, vx, vy) do { (vec).x = (vx); (vec).y = (vy); } while(0)
+#define vec2_set_pointer(vec, vx, vy) do { (vec)->x = (vx); (vec)->y = (vy); } while(0)
+#define vec2_direction(vec, src, dst) do { \
     (vec)->x = ((src)->x > (dst)->x) - ((src)->x < (dst)->x); \
     (vec)->y = ((src)->y > (dst)->y) - ((src)->y < (dst)->y); \
     } while(0)
@@ -129,12 +129,25 @@ typedef struct {
         };
 } Rect;
 
-inline void rect_set(Rect *rect, uint16_t x, uint16_t y, uint16_t width, uint16_t height) {
-    rect->x = x;
-    rect->y = y;
-    rect->w = width;
-    rect->h = height;
-}
+#define rect_set(r, x1, y1, w1, h1) do {\
+        (r).x = (x1); (r).y = (y1); \
+        (r).w = (w1); (r).h = (h1); \
+    } while(0)
+
+#define rect_set_pointer(r, x1, y1, w1, h1) do {\
+        (r)->x = (x1); (r)->y = (y1); \
+        (r)->w = (w1); (r)->h = (h1); \
+    } while(0)
+
+#define rect_copy(r1, r2) do {\
+        (r1).x = (r2).x; (r1).y = (r2).y; \
+        (r1).w = (r2).w; (r1).h = (r2).h; \
+    }
+
+#define rect_copy_pointer(r1, r2) do {\
+        (r1)->x = (r2)->x; (r1)->y = (r2)->y; \
+        (r1)->w = (r2)->w; (r1)->h = (r2)->h; \
+    }
 
 /**
  * @brief A union defining a Moveable object (player, etc)

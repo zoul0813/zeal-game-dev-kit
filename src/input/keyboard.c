@@ -61,7 +61,7 @@ uint16_t keyboard_read(void) {
         released = 1;
       } else {
         switch(key_buffer[i]) {
-          case KB_KEY_W:
+          // case KB_KEY_W:
           case KB_UP_ARROW:
             if(released) {
               KEYBOARD_keys &= ~BUTTON_UP;
@@ -72,7 +72,7 @@ uint16_t keyboard_read(void) {
             }
             break;
 
-          case KB_KEY_S:
+          // case KB_KEY_S:
           case KB_DOWN_ARROW:
             if(released) {
               KEYBOARD_keys &= ~BUTTON_DOWN;
@@ -82,7 +82,7 @@ uint16_t keyboard_read(void) {
             }
             break;
 
-          case KB_KEY_A:
+          // case KB_KEY_A:
           case KB_LEFT_ARROW:
             if(released) {
               KEYBOARD_keys &= ~BUTTON_LEFT;
@@ -92,7 +92,7 @@ uint16_t keyboard_read(void) {
             }
             break;
 
-          case KB_KEY_D:
+          // case KB_KEY_D:
           case KB_RIGHT_ARROW:
             if(released) {
               KEYBOARD_keys &= ~BUTTON_RIGHT;
@@ -108,6 +108,7 @@ uint16_t keyboard_read(void) {
               KEYBOARD_keys |= BUTTON_START;
             }
             break;
+          case KB_RIGHT_SHIFT:
           case KB_KEY_QUOTE:
             if(released) {
               KEYBOARD_keys &= ~BUTTON_SELECT;
@@ -115,6 +116,9 @@ uint16_t keyboard_read(void) {
               KEYBOARD_keys |= BUTTON_SELECT;
             }
             break;
+
+
+          case KB_KEY_Z:
           case KB_KEY_SPACE:
             if(released) {
               KEYBOARD_keys &= ~BUTTON_B;
@@ -122,6 +126,42 @@ uint16_t keyboard_read(void) {
               KEYBOARD_keys |= BUTTON_B;
             }
             break;
+          case KB_KEY_X:
+            if(released) {
+              KEYBOARD_keys &= ~BUTTON_A;
+            } else {
+              KEYBOARD_keys |= BUTTON_A;
+            }
+            break;
+          case KB_KEY_A:
+            if(released) {
+              KEYBOARD_keys &= ~BUTTON_Y;
+            } else {
+              KEYBOARD_keys |= BUTTON_Y;
+            }
+            break;
+          case KB_KEY_S:
+            if(released) {
+              KEYBOARD_keys &= ~BUTTON_X;
+            } else {
+              KEYBOARD_keys |= BUTTON_X;
+            }
+            break;
+          case KB_KEY_Q:
+            if(released) {
+              KEYBOARD_keys &= ~BUTTON_L;
+            } else {
+              KEYBOARD_keys |= BUTTON_L;
+            }
+            break;
+          case KB_KEY_W:
+            if(released) {
+              KEYBOARD_keys &= ~BUTTON_R;
+            } else {
+              KEYBOARD_keys |= BUTTON_R;
+            }
+            break;
+
         }
         released = 0;
       }
