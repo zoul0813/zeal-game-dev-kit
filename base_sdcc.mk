@@ -138,6 +138,9 @@ $(ZAR_ARCHIVE):
 # include $(ZOS_PATH)/kernel_headers/sdcc/base_sdcc.mk
 include $(ZVB_SDK_PATH)/sdcc/base_sdcc.mk
 
+scrub: clean
+	rm -rf $(ASSETS_DIR)/*.zt[spm]
+
 all::
 	@echo "Binary Size" $$($(STAT_BYTES) $(OUTPUT_DIR)/$(BIN)) $(BIN)
 	@if [ -f ${ASSETS_DIR}/$(ZAR_ARCHIVE) ]; then ls -l ${ASSETS_DIR}/$(ZAR_ARCHIVE); fi
