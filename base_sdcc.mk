@@ -54,8 +54,8 @@ ifeq ($(DEBUG), 1)
 ZOS_CFLAGS += -DDEBUG=1
 endif
 
-ASSETS_OUTPUT ?= 0
-ifneq ($(ASSETS_OUTPUT), 0)
+ASSETS_OUTPUT ?= $(ASSETS_DIR)
+ifneq ($(ASSETS_OUTPUT), $(ASSETS_DIR))
 # ASSETS_OUTPUT_DEST=$(ASSETS_OUTPUT_DEST)
 GIF2ZEAL_ARGS += -o $(ASSETS_OUTPUT)
 TILED2ZEAL_ARGS += -o $(ASSETS_OUTPUT)
@@ -111,6 +111,7 @@ endif
 endif
 
 all:: $(GIF_SRCS) $(ZTS_SRCS) $(ZTM_SRCS) $(ZAR_ARCHIVE)
+	$(if $(ZGDK_DEBUG),@echo "Asset Output: $(ASSETS_OUTPUT)")
 	$(if $(ZGDK_DEBUG),@echo "Enable GFX: $(ENABLE_GFX)")
 	$(if $(ZGDK_DEBUG),@echo "Enable Sound: $(ENABLE_SOUND)")
 	$(if $(ZGDK_DEBUG),@echo "Enable CRC32: $(ENABLE_CRC32)")
@@ -123,12 +124,15 @@ all:: $(GIF_SRCS) $(ZTS_SRCS) $(ZTM_SRCS) $(ZAR_ARCHIVE)
 	$(if $(ZGDK_DEBUG),@echo "Gfx Bits: $(GFX_BITS)")
 
 %.gif: %.aseprite
+	mkdir -p $(ASSETS_OUTPUT)
 	@if [ -f $(ASEPRITE_PATH) ]; then $(ASEPRITE_PATH) -b --sheet $@ $<; fi
 
 %.zts: %.gif
+	mkdir -p $(ASSETS_OUTPUT)
 	$(ZVB_SDK_PATH)/tools/zeal2gif/gif2zeal.py -i $< $(GIF2ZEAL_ARGS)
 
 %.ztm: %.tmx
+	mkdir -p $(ASSETS_OUTPUT)
 	$(ZVB_SDK_PATH)/tools/tiled2zeal/tiled2zeal.py -i $< $(TILED2ZEAL_ARGS)
 
 $(ZAR_ARCHIVE):
