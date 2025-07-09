@@ -22,7 +22,7 @@ zos_err_t sound_init(void) {
 
   zvb_sound_initialize(1);
 
-  zvb_sound_set_voices(VOICEALL, 0, WAV_SQUARE);
+  zvb_sound_set_voices(VOICEALL, 0, WAV_SQUARE | DUTY_CYCLE_50_0);
   zvb_sound_set_hold(VOICEALL, 0);
 
   zvb_sound_set_volume(VOL_75);
@@ -31,7 +31,7 @@ zos_err_t sound_init(void) {
 }
 
 zos_err_t sound_deinit(void) {
-  zvb_sound_set_voices(VOICEALL, 0, WAV_SQUARE);
+  zvb_sound_set_voices(VOICEALL, 0, WAV_SQUARE | DUTY_CYCLE_50_0);
   zvb_sound_set_hold(VOICEALL, 1);
   zvb_sound_set_volume(VOL_0);
   return ERR_SUCCESS;
@@ -51,7 +51,7 @@ Sound* sound_play(uint8_t voice, uint16_t freq, uint16_t duration) {
   sound->remaining = duration;
 
   uint16_t note = SOUND_FREQ_TO_DIV(sound->freq);
-  zvb_sound_set_voices(sound->voice, note, sound->waveform);
+  zvb_sound_set_voices(sound->voice, note, sound->waveform | DUTY_CYCLE_50_0);
   return sound;
 }
 
@@ -64,11 +64,11 @@ Sound* sound_set(uint8_t voice, uint16_t waveform) {
 
 void sound_stop(Sound *sound) {
   sound->remaining = 0;
-  zvb_sound_set_voices(sound->voice, 0, WAV_SQUARE);
+  zvb_sound_set_voices(sound->voice, 0, WAV_SQUARE | DUTY_CYCLE_50_0);
 }
 
 void sound_stop_all(void) {
-  zvb_sound_set_voices(VOICEALL, 0, WAV_SQUARE);
+  zvb_sound_set_voices(VOICEALL, 0, WAV_SQUARE | DUTY_CYCLE_50_0);
 }
 
 void sound_loop(void) {
