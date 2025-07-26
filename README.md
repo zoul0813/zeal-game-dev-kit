@@ -1,5 +1,7 @@
 # Zeal Game Dev Kit
 
+![Zeal Game Development Kit](docs/imgs/logo.png "Zeal Game Development Kit")
+
 This is a "simple" framework/library for building games for the [Zeal 8-bit Computer](https://zeal8bit.com).
 
 ## Documentation
