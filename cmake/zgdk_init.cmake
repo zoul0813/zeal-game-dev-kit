@@ -1,0 +1,3 @@
+if (NOT DEFINED ZGDK_DIR)
+    set(ZGDK_DIR "${CMAKE_CURRENT_LIST_DIR}")
+endif()
