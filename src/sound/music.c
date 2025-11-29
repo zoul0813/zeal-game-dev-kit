@@ -61,6 +61,8 @@ zos_err_t music_init(Track *track) {
   //   memcpy(&_track->records[i], &record, sizeof(Record));
   // }
 
+  zvb_sound_initialize(1);
+
   return ERR_SUCCESS;
 }
 
