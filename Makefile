@@ -51,7 +51,7 @@ $(BUILD_DIR):
 $(LIB_DIR):
 	mkdir -p $(LIB_DIR)
 
-$(LIB_DIR)/$(LIB_FILE): $(RELS)
+$(LIB_DIR)/$(LIB_FILE): $(RELS) | $(LIB_DIR)
 	echo "Archiving library..."
 	$(AR) -rc $@ $(RELS)
 
