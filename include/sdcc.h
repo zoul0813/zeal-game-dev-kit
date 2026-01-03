@@ -1,4 +1,4 @@
-#ifndef SDDC_H
+#ifndef SDCC_H
 #define SDCC_H
 
 // intellisense trick for vscode
