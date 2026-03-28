@@ -1,0 +1,13 @@
+.TH demo 1 "28 Mar 2026" demo "demo manual"
+.SH NAME
+demo \- Short description of the project
+.SH SYNOPSIS
+demo
+.SH DESCRIPTION
+Short description of the project
+.SH OPTIONS
+
+.SH SEE ALSO
+
+.SH BUGS
+No known bugs.

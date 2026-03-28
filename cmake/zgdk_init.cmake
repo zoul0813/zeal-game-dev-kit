@@ -42,3 +42,84 @@ function(add_asset target)
         add_dependencies(${target_name} ${custom_target_name})
     endforeach()
 endfunction()
+
+function(_zgdk_asset_to_source_relative out_var asset_path)
+    if(IS_ABSOLUTE "${asset_path}")
+        file(RELATIVE_PATH asset_rel "${CMAKE_SOURCE_DIR}" "${asset_path}")
+        if(asset_rel MATCHES "^\\.\\.")
+            message(FATAL_ERROR "Asset path must be inside CMAKE_SOURCE_DIR: ${asset_path}")
+        endif()
+    else()
+        set(asset_rel "${asset_path}")
+    endif()
+
+    set(${out_var} "${asset_rel}" PARENT_SCOPE)
+endfunction()
+
+function(embed_asset target asset_file)
+    if(NOT COMMAND zos_add_assets)
+        message(FATAL_ERROR "embed_asset requires zos_add_assets (include zos_init.cmake first).")
+    endif()
+
+    cmake_parse_arguments(
+        EMBED_ASSET
+        ""
+        "BUILD_DIR"
+        ""
+        ${ARGN}
+    )
+
+    if(NOT EMBED_ASSET_BUILD_DIR)
+        set(EMBED_ASSET_BUILD_DIR "build/assets")
+    endif()
+
+    get_filename_component(asset_ext "${asset_file}" EXT)
+    string(TOLOWER "${asset_ext}" asset_ext)
+    get_filename_component(asset_stem "${asset_file}" NAME_WE)
+
+    if(asset_ext STREQUAL ".gif")
+        zos_add_assets(${target}
+            "${EMBED_ASSET_BUILD_DIR}/${asset_stem}.zts"
+            "${EMBED_ASSET_BUILD_DIR}/${asset_stem}.ztp"
+        )
+    elseif(asset_ext STREQUAL ".tmx")
+        zos_add_assets(${target}
+            "${EMBED_ASSET_BUILD_DIR}/${asset_stem}.ztm"
+        )
+    elseif(asset_ext STREQUAL ".zts" OR asset_ext STREQUAL ".ztp" OR asset_ext STREQUAL ".ztm")
+        _zgdk_asset_to_source_relative(asset_rel "${asset_file}")
+        zos_add_assets(${target} "${asset_rel}")
+    else()
+        message(FATAL_ERROR
+            "embed_asset: unsupported asset extension '${asset_ext}' for '${asset_file}'. "
+            "Supported: .gif .tmx .zts .ztp .ztm"
+        )
+    endif()
+
+    target_compile_definitions(${target} PUBLIC GENERATED_ASSETS=1)
+endfunction()
+
+function(embed_assets target)
+    if(NOT COMMAND zos_add_assets)
+        message(FATAL_ERROR "embed_assets requires zos_add_assets (include zos_init.cmake first).")
+    endif()
+
+    cmake_parse_arguments(
+        EMBED
+        ""
+        "BUILD_DIR"
+        "FILES"
+        ${ARGN}
+    )
+
+    if(EMBED_FILES)
+        list(REMOVE_DUPLICATES EMBED_FILES)
+        foreach(asset_file ${EMBED_FILES})
+            if(EMBED_BUILD_DIR)
+                embed_asset(${target} "${asset_file}" BUILD_DIR "${EMBED_BUILD_DIR}")
+            else()
+                embed_asset(${target} "${asset_file}")
+            endif()
+        endforeach()
+    endif()
+endfunction()

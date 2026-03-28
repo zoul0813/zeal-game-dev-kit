@@ -1,0 +1,75 @@
+cmake_minimum_required(VERSION 3.16)
+
+# -------------------------------
+# CMake Setup
+# -------------------------------
+# Application Version
+set(APP_VERSION_MAJOR 0)
+set(APP_VERSION_MINOR 0)
+set(APP_VERSION_PATCH 0)
+set(APP_NAME "demo")
+set(target_name "demo")
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/bin)
+
+# Ensure the bin directory exists
+file(MAKE_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+
+# -------------------------------
+# Toolchain
+# -------------------------------
+set(ZOS_TOOLCHAIN sdcc)
+include($ENV{ZOS_PATH}/cmake/zos_init.cmake)
+
+# -------------------------------
+# Project
+# -------------------------------
+project(${target_name} C ASM)
+
+# -------------------------------
+# Include and link SDKs
+# -------------------------------
+zos_use(zvb)
+find_package(ZVB_SDK REQUIRED)
+
+zos_use(zgdk)
+find_package(ZGDK REQUIRED)
+
+
+# -------------------------------
+# Executable
+# -------------------------------
+add_executable(${target_name}
+  src/main.c
+  src/player.c
+  src/assets.c
+)
+
+# -------------------------------
+# Linking/Libraries/Includes
+# -------------------------------
+# Include ZVB includes, even if not linking to ZVB libs to use zvb_hardware.h
+target_include_directories(${target_name} PRIVATE $ENV{ZVB_SDK_PATH}/include)
+# Projects /include dir
+target_include_directories(${target_name} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/include)
+target_include_directories(${target_name} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/src)
+# Link to zvb_gfx and zgdk
+target_link_libraries(${target_name} PUBLIC zvb_gfx zvb_sound zvb_dma zvb_crc zgdk)
+
+
+# -------------------------------
+# Assets (gif2zeal, tiled2zeal, etc)
+# -------------------------------
+gif2zeal(${target_name} FILES
+    "assets/tileset.gif"
+    COMPRESSED)
+
+# tiled2zeal(microbe FILES
+#     "assets/tilemap.tmx"
+#     VERBOSE
+#     LAYER 0)
+
+# -------------------------------
+# Convert to binary
+# -------------------------------
+zos_add_outputs(${target_name})
