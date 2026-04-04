@@ -5,5 +5,6 @@
 // #include "zgdk/utils/string.h" /* include manually */
 #include "zgdk/utils/rand.h"
 #include "zgdk/utils/debug.h"
+#include "zgdk/utils/log.h"
 
 #endif

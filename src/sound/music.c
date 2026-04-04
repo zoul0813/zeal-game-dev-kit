@@ -1,10 +1,10 @@
-#include <stdio.h>
 #include <core.h>
 #include <stdint.h>
 #include <zvb_sound.h>
 #include <zos_errors.h>
 #include <zos_time.h>
 #include <zos_vfs.h>
+#include "zgdk/utils/log.h"
 #include "zgdk/sound/sounds.h"
 #include "zgdk/sound/music.h"
 
@@ -17,7 +17,7 @@ zos_err_t music_load_from_file(const char* path, Track *track) {
   zos_dev_t dev = open(path, O_RDONLY);
   if(dev < 0) {
     // failed to open
-    printf("Failed to load file, '%s'", path);
+    log_str("Failed to load file: ", path);
     return -dev;
   }
 
@@ -27,14 +27,14 @@ zos_err_t music_load_from_file(const char* path, Track *track) {
   uint16_t size = sizeof(uint16_t);
   zos_err_t err = read(dev, &track->length, &size);
   if(err != ERR_SUCCESS) {
-    printf("Failed to load header, read %d with error %d (%02x)\n", size, err, err);
+    log_error("Failed to load header,", err);
     return err;
   }
 
   size = sizeof(Record) * track->length;
   err = read(dev, track->records, &size);
   if(err != ERR_SUCCESS) {
-    printf("Failed to load records, read %d with %d (%02x)\n", size, err, err);
+    log_error("Failed to load records,", err);
     return err;
   }
 

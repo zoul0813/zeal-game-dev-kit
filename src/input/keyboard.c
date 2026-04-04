@@ -1,9 +1,10 @@
-#include <stdio.h>
+#include <core.h>
 #include <zos_sys.h>
 #include <zos_vfs.h>
 #include <zos_keyboard.h>
 #include "zgdk/input/keyboard.h"
 #include "zgdk/input/button_map.h"
+#include "zgdk/utils/log.h"
 
 uint16_t KEYBOARD_keys = 0;
 
@@ -46,7 +47,7 @@ uint16_t keyboard_read(void) {
   while(1) {
     zos_err_t err = read(DEV_STDIN, key_buffer, &size);
     if(err != ERR_SUCCESS) {
-      printf("Failed to read DEV_STDIN, clearing keys: %d", err);
+      log_error("Failed to read DEV_STDIN, clearing keys: ", err);
       KEYBOARD_keys = 0;
       return KEYBOARD_keys;
     }
