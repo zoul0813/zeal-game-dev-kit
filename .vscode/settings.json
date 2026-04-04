@@ -3,7 +3,8 @@
     "${workspaceFolder}/include",
     "${env:ZVB_SDK_PATH}/include",
     "${env:ZVB_SDK_PATH}/sdcc",
-    "${env:ZOS_PATH}/kernel_headers/sdcc/include"
+    "${env:ZOS_PATH}/kernel_headers/sdcc/include",
+    "${env:COREUTILS_PATH}/libsrc/*/"
   ],
   "C_Cpp.default.forcedInclude": ["${ZDE_PATH}/includes/vscode.h"],
   "C_Cpp.clang_format_sortIncludes": false,

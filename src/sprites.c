@@ -1,4 +1,4 @@
-#include <string.h>
+#include <core.h>
 #include "zgdk/sprites.h"
 
 static gfx_sprite *ARENA;
@@ -17,7 +17,7 @@ gfx_sprite* sprites_register(gfx_sprite sprite) {
     if(registered >= (ARENA_SIZE - 1)) return NULL;
 
     gfx_sprite* s = &ARENA[registered];
-    memcpy(s, &sprite, sizeof(gfx_sprite));
+    mem_cpy(s, &sprite, sizeof(gfx_sprite));
     registered++;
 
     return s;

@@ -1,6 +1,6 @@
 #include <inttypes.h>
 #include <stdio.h>
-#include <string.h>
+#include <core.h>
 #include <zvb_sound.h>
 #include "zgdk/sound/tracker.h"
 
@@ -487,7 +487,7 @@ zos_err_t zmt_pattern_rom_load(pattern_t* pattern, uint8_t **start)
 
     /** Voice Bitmap */
     size = sizeof(uint8_t);
-    memcpy(&voice_bitmap, pos, size);
+    mem_cpy(&voice_bitmap, pos, size);
     pos += size;
 
     // printf("  Voices: %02x\n", voice_bitmap);
@@ -501,7 +501,7 @@ zos_err_t zmt_pattern_rom_load(pattern_t* pattern, uint8_t **start)
 
         /** Voice Header */
         size = sizeof(uint32_t);
-        memcpy(&voice_header, pos, size);
+        mem_cpy(&voice_header, pos, size);
         pos += size;
 
         for (j = 0; j < STEPS_PER_PATTERN; j++) {
@@ -512,30 +512,30 @@ zos_err_t zmt_pattern_rom_load(pattern_t* pattern, uint8_t **start)
                 continue; // empty step
 
             size = sizeof(uint8_t);
-            memcpy(&step_header, pos, size);
+            mem_cpy(&step_header, pos, size);
             pos += size;
 
             if (step_header & STEP_CELL_NOTE) {
                 size = sizeof(note_index_t);
-                memcpy(&step->note, pos, size);
+                mem_cpy(&step->note, pos, size);
                 pos += size;
             }
 
             if (step_header & STEP_CELL_WAVE) {
                 size = sizeof(waveform_t);
-                memcpy(&step->waveform, pos, size);
+                mem_cpy(&step->waveform, pos, size);
                 pos += size;
             }
 
             if (step_header & STEP_CELL_FX1) {
                 size = sizeof(fx_t);
-                memcpy(&step->fx1, pos, size);
+                mem_cpy(&step->fx1, pos, size);
                 pos += size;
             }
 
             if (step_header & STEP_CELL_FX2) {
                 size = sizeof(fx_t);
-                memcpy(&step->fx2, pos, size);
+                mem_cpy(&step->fx2, pos, size);
                 pos += size;
             }
         }
@@ -751,11 +751,11 @@ zos_err_t zmt_arrangement_rom_load(arrangement_t arrangement[NUM_ARRANGEMENTS], 
     uint8_t bit          = 0;
 
     size = sizeof(uint32_t);
-    memcpy(&bitmap_low, pos, size);
+    mem_cpy(&bitmap_low, pos, size);
     pos += size;
 
     size = sizeof(uint32_t);
-    memcpy(&bitmap_high, pos, size);
+    mem_cpy(&bitmap_high, pos, size);
     pos += size;
 
 
@@ -766,7 +766,7 @@ zos_err_t zmt_arrangement_rom_load(arrangement_t arrangement[NUM_ARRANGEMENTS], 
             continue;
         a    = &arrangement[i];
         size = sizeof(arrangement_t);
-        memcpy(a, pos, size);
+        mem_cpy(a, pos, size);
         pos += size;
     }
     for (i = NUM_ARRANGEMENTS / 2; i < NUM_ARRANGEMENTS; i++) {
@@ -776,7 +776,7 @@ zos_err_t zmt_arrangement_rom_load(arrangement_t arrangement[NUM_ARRANGEMENTS], 
             continue;
         a    = &arrangement[i];
         size = sizeof(arrangement_t);
-        memcpy(a, pos, size);
+        mem_cpy(a, pos, size);
         pos += size;
     }
 
@@ -931,7 +931,7 @@ zos_err_t zmt_file_load(track_t* track, const char* filename)
         printf("error reading track title, %d (%02x)\n", err, err);
         return err;
     }
-    memcpy(track->title, textbuff, size);
+    mem_cpy(track->title, textbuff, size);
     track->title[TRACKER_TITLE_LEN] = 0x00; // NUL
     // printf("Track: %12s (read: %d)\n", track->title, size);
 
@@ -1055,30 +1055,30 @@ zos_err_t zmt_rom_load(track_t* track, uint8_t* const start, uint16_t len) {
     zmt_track_init(track); // clear out the track, before loading data
 
     size = 3;
-    memcpy(textbuff, pos, size);
+    mem_cpy(textbuff, pos, size);
     pos += size;
     // printf("Format: %.3s, pointer: %04x, %u\n", textbuff, pos, size);
 
     size = sizeof(uint8_t);
-    memcpy(textbuff, pos, size);
+    mem_cpy(textbuff, pos, size);
     pos += size;
     // printf("Version: %d, pointer: %04x, %u\n", textbuff[0], pos, size);
 
     size = TRACKER_TITLE_LEN;
-    memcpy(track->title, textbuff, size);
+    mem_cpy(track->title, textbuff, size);
     pos += size;
     track->title[TRACKER_TITLE_LEN] = 0x00; // NUL
     // printf("Track: %12s (read: %d), pointer: %04x, %u\n", track->title, size, pos, size);
 
     size = sizeof(uint8_t);
-    memcpy(&track->tempo, pos, size);
+    mem_cpy(&track->tempo, pos, size);
     pos += size;
     // printf("Tempo: %d, pointer: %04x, %u\n", track->tempo, pos, size);
 
     track->current_tempo = track->tempo;
 
     size = sizeof(uint8_t);
-    memcpy(&track->pattern_count, pos, size);
+    mem_cpy(&track->pattern_count, pos, size);
     pos += size;
     // printf("Patterns: %d, pointer: %04x, %u\n", track->pattern_count, pos, size);
 
@@ -1192,7 +1192,7 @@ void zmt_arrangement_init(arrangement_t arrangement[NUM_ARRANGEMENTS])
 /* Initialize a new track, zeroes out everything */
 void zmt_track_init(track_t* track)
 {
-    memcpy(track->title, "New Track", 9);
+    mem_cpy(track->title, "New Track", 9);
     track->pattern_count = 1;
     track->tempo         = 32;
     track->current_tempo = track->tempo;

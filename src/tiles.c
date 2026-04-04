@@ -1,4 +1,4 @@
-#include <string.h>
+#include <core.h>
 #include "zgdk/types.h"
 #include "zgdk/types.h"
 #include "zgdk/rect.h"
@@ -98,7 +98,7 @@ Edge tile_collide(Rect* rect, Direction* direction, Tile* tile)
         edge |= EdgeTop;
 
     // which target?
-    memcpy(tile, &target_h, sizeof(Tile));
-    // memcpy(tile, &target_v, sizeof(Tile));
+    mem_cpy(tile, &target_h, sizeof(Tile));
+    // mem_cpy(tile, &target_v, sizeof(Tile));
     return edge;
 }

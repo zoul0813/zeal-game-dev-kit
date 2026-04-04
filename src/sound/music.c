@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <string.h>
+#include <core.h>
 #include <stdint.h>
 #include <zvb_sound.h>
 #include <zos_errors.h>
@@ -58,7 +58,7 @@ zos_err_t music_init(Track *track) {
 
   // for(uint16_t i = 0; i < MAX_RECORDS; i++) {
   //   Record record = { 0, 0xFF, 0xFF };
-  //   memcpy(&_track->records[i], &record, sizeof(Record));
+  //   mem_cpy(&_track->records[i], &record, sizeof(Record));
   // }
 
   zvb_sound_initialize(1);
@@ -141,7 +141,7 @@ uint16_t music_frame(void) {
 }
 
 void music_store(Record *record) {
-  memcpy(&_track->records[music_position], record, sizeof(Record));
+  mem_cpy(&_track->records[music_position], record, sizeof(Record));
   music_tick();
   _track->length = music_position;
 }
