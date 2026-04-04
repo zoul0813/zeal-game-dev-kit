@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <zos_errors.h>
 #include "sdcc.h"
 
 #ifndef MUSIC_H

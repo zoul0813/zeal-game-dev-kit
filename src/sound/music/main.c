@@ -1,49 +1,8 @@
-#include <core.h>
 #include <stdint.h>
-#include <zvb_sound.h>
 #include <zos_errors.h>
-#include <zos_time.h>
-#include <zos_vfs.h>
-#include "zgdk/utils/log.h"
+#include <zvb_sound.h>
 #include "zgdk/sound/sounds.h"
-#include "zgdk/sound/music.h"
-
-static Track *_track;
-static uint16_t music_position;
-static uint16_t ticks = 0;
-
-zos_err_t music_load_from_file(const char* path, Track *track) {
-  // const char* filename = "B:/piano.ptz";
-  zos_dev_t dev = open(path, O_RDONLY);
-  if(dev < 0) {
-    // failed to open
-    log_str("Failed to load file: ", path);
-    return -dev;
-  }
-
-  uint16_t position = 0;
-  music_init(track);
-
-  uint16_t size = sizeof(uint16_t);
-  zos_err_t err = read(dev, &track->length, &size);
-  if(err != ERR_SUCCESS) {
-    log_error("Failed to load header,", err);
-    return err;
-  }
-
-  size = sizeof(Record) * track->length;
-  err = read(dev, track->records, &size);
-  if(err != ERR_SUCCESS) {
-    log_error("Failed to load records,", err);
-    return err;
-  }
-
-  close(dev);
-
-  _track = track;
-
-  return ERR_SUCCESS;
-}
+#include "private.h"
 
 zos_err_t music_init(Track *track) {
   if(track == NULL) return ERR_INVALID_PARAMETER;
@@ -64,6 +23,21 @@ zos_err_t music_init(Track *track) {
   zvb_sound_initialize(1);
 
   return ERR_SUCCESS;
+}
+
+void music_tick(void) {
+  music_position++;
+  if(music_position >= MAX_RECORDS) {
+    music_position = MAX_RECORDS - 1;
+    uint16_t frame = _track->records[music_position].frame;
+    music_transport(T_NONE, frame);
+  }
+}
+
+Record* music_next(uint8_t tick) {
+  Record *record = &_track->records[music_position];
+  if(tick) music_tick();
+  return record;
 }
 
 void music_transport(music_state_t state, uint16_t frame) {
@@ -119,42 +93,6 @@ void music_transport(music_state_t state, uint16_t frame) {
   }
 }
 
-music_state_t music_state(void) {
-  return _track->state;
-}
-
-Record* music_next(uint8_t tick) {
-  Record *record = &_track->records[music_position];
-  if(tick) music_tick();
-  return record;
-}
-
-Record* music_at(uint16_t position) {
-  if(position < _track->length) {
-    return &_track->records[position];
-  }
-  return NULL;
-}
-
-uint16_t music_frame(void) {
-  return ticks;
-}
-
-void music_store(Record *record) {
-  mem_cpy(&_track->records[music_position], record, sizeof(Record));
-  music_tick();
-  _track->length = music_position;
-}
-
-void music_tick(void) {
-  music_position++;
-  if(music_position >= MAX_RECORDS) {
-    music_position = MAX_RECORDS - 1;
-    uint16_t frame = _track->records[music_position].frame;
-    music_transport(T_NONE, frame);
-  }
-}
-
 void music_loop(uint8_t loop) {
     if(_track->state != T_PLAY) return;
     Record *record = music_next(0);
@@ -188,12 +126,4 @@ void music_loop(uint8_t loop) {
             record = NULL;
         }
     } while(record != NULL);
-}
-
-uint16_t music_length(void) {
-  return _track->length;
-}
-
-uint16_t music_pos(void) {
-  return music_position;
 }
