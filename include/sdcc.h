@@ -3,6 +3,7 @@
 
 // intellisense trick for vscode
 #ifndef __SDCC_VERSION_MAJOR
+#define __sdcccall(a)
 #define __at(addr)
 #define __sfr
 #define __banked
