@@ -2,6 +2,10 @@ if (NOT DEFINED ZGDK_DIR)
     set(ZGDK_DIR "${CMAKE_CURRENT_LIST_DIR}")
 endif()
 
+if(NOT COMMAND coreutils_if_exists)
+    zos_use(coreutils)
+endif()
+
 include("${ZGDK_DIR}/helpers.cmake")
 include("${ZGDK_DIR}/asset_copy.cmake")
 include("${ZGDK_DIR}/asset_embed.cmake")

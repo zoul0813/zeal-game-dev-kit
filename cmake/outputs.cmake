@@ -28,31 +28,17 @@ function(zgdk_add_outputs target)
     zos_add_outputs(${target_name} ${ZGDK_ADD_OUTPUTS_UNPARSED_ARGUMENTS})
 
     _zgdk_runtime_out_dir(runtime_out_dir ${target_name})
-    set(debug_out_dir "${CMAKE_SOURCE_DIR}/debug")
 
-    # zos_add_outputs creates the ${target}_bin output target.
-    add_custom_command(TARGET ${target_name}_bin POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E make_directory "${debug_out_dir}"
-        COMMAND ${CMAKE_COMMAND} -E rename
-            "${runtime_out_dir}/${target_name}.cdb"
-            "${debug_out_dir}/${target_name}.cdb"
-        COMMAND ${CMAKE_COMMAND} -E rename
-            "${runtime_out_dir}/${target_name}.map"
-            "${debug_out_dir}/${target_name}.map"
-        COMMAND ${CMAKE_COMMAND} -E rename
-            "${runtime_out_dir}/${target_name}.ihx"
-            "${debug_out_dir}/${target_name}.ihx"
-        COMMENT "Moving debug files to debug directory"
-        VERBATIM
-    )
-
-    if(NOT ZGDK_ADD_OUTPUTS_KEEP_BIN)
-        add_custom_command(TARGET ${target_name}_bin POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E rename
-                "${runtime_out_dir}/${target_name}.bin"
-                "${runtime_out_dir}/${target_name}"
-            COMMENT "Renaming ${target_name}.bin to ${target_name}"
-            VERBATIM
-        )
+    if(ZGDK_ADD_OUTPUTS_KEEP_BIN)
+        set(strip_bin_extension OFF)
+    else()
+        set(strip_bin_extension ON)
     endif()
+
+    coreutils_add_post_build_artifacts(
+        ${target_name}
+        OUT_DIR "${runtime_out_dir}"
+        DEBUG_DIR "${CMAKE_SOURCE_DIR}/debug"
+        STRIP_BIN_EXTENSION "${strip_bin_extension}"
+    )
 endfunction()
