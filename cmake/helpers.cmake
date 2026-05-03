@@ -55,3 +55,34 @@ function(_zgdk_asset_to_source_relative out_var asset_path)
 
     set(${out_var} "${asset_rel}" PARENT_SCOPE)
 endfunction()
+
+# zgdk_set_hiscore_path(target_name [path_override])
+# Defines HISCORE_PATH for a target.
+# Defaults to: <ZGDK_HISCORE_ROOT>/<target_name>.zhs
+# Override root globally with ZGDK_HISCORE_ROOT, or pass a full path_override.
+function(zgdk_set_hiscore_path target_name)
+    if(ARGC GREATER 1 AND NOT "${ARGV1}" STREQUAL "")
+        set(hiscore_path "${ARGV1}")
+    else()
+        if(DEFINED ZGDK_HISCORE_ROOT AND NOT ZGDK_HISCORE_ROOT STREQUAL "")
+            set(hiscore_root "${ZGDK_HISCORE_ROOT}")
+        else()
+            set(hiscore_root "b:/hiscores")
+        endif()
+
+        if(ZGDK_HISCORE_EXTENSION)
+            set(hiscore_ext "${ZGDK_HISCORE_EXTENSION}")
+        else()
+            set(hiscore_ext "zhs")
+        endif()
+
+        string(REGEX REPLACE "/+$" "" hiscore_root "${hiscore_root}")
+        string(REGEX REPLACE "^\\.+" "" hiscore_ext "${hiscore_ext}")
+        set(hiscore_path "${hiscore_root}/${target_name}.${hiscore_ext}")
+    endif()
+
+    target_compile_definitions(${target_name} PRIVATE
+        HISCORE_PATH=\"${hiscore_path}\"
+    )
+    set(${target_name}_HISCORE_PATH "${hiscore_path}" PARENT_SCOPE)
+endfunction()

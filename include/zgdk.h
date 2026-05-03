@@ -10,3 +10,4 @@
 #include "zgdk/arrays.h"
 #include "zgdk/assets.h"
 #include "zgdk/tilemap.h"
+#include "zgdk/hiscore.h"
