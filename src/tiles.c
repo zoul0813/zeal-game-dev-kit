@@ -55,7 +55,7 @@ bool tile_get_edge(Rect* rect, Edge edge, Tile* tile)
     return true;
 }
 
-static bool tile_get_point(int16_t x, int16_t y, Tile* tile)
+bool tile_get_at_point(int16_t x, int16_t y, Tile* tile)
 {
     if (x < 0 || y < 0)
         return false;
@@ -70,33 +70,60 @@ static bool tile_get_point(int16_t x, int16_t y, Tile* tile)
     return true;
 }
 
-Edge tile_collide(Rect* rect, Direction* direction, Tile* tile)
+void tile_collide_ex(Rect* rect, Direction* direction, TileCollision* collision)
 {
-    int16_t probe_x = (int16_t)rect->x - SPRITE_WIDTH + (rect->w / 2);
-    int16_t probe_y = (int16_t)rect->y - SPRITE_HEIGHT + (rect->h / 2);
-    Edge edge = EdgeNone;
+    mem_set(collision, 0, sizeof(TileCollision));
+    int16_t center_x = (int16_t)rect->x - SPRITE_WIDTH + (rect->w / 2);
+    int16_t center_y = (int16_t)rect->y - SPRITE_HEIGHT + (rect->h / 2);
+    int16_t edge_x   = center_x;
+    int16_t edge_y   = center_y;
 
     if (direction->x > 0) {
-        probe_x = (int16_t)rect->x - SPRITE_WIDTH + rect->w;
-        edge |= EdgeLeft;
+        edge_x = (int16_t)rect->x - SPRITE_WIDTH + rect->w;
+        collision->edge_h = EdgeLeft;
     } else if (direction->x < 0) {
-        probe_x = (int16_t)rect->x - SPRITE_WIDTH;
-        edge |= EdgeRight;
+        edge_x = (int16_t)rect->x - SPRITE_WIDTH;
+        collision->edge_h = EdgeRight;
     }
 
     if (direction->y > 0) {
-        probe_y = (int16_t)rect->y - SPRITE_HEIGHT + rect->h;
-        edge |= EdgeTop;
+        edge_y = (int16_t)rect->y - SPRITE_HEIGHT + rect->h;
+        collision->edge_v = EdgeTop;
     } else if (direction->y < 0) {
-        probe_y = (int16_t)rect->y - SPRITE_HEIGHT;
-        edge |= EdgeBottom;
+        edge_y = (int16_t)rect->y - SPRITE_HEIGHT;
+        collision->edge_v = EdgeBottom;
     }
 
-    if (edge == EdgeNone)
-        return EdgeNone;
+    collision->edge = collision->edge_h | collision->edge_v;
 
-    if (!tile_get_point(probe_x, probe_y, tile))
-        return EdgeNone;
+    if (collision->edge_h != EdgeNone)
+        collision->hit_h = tile_get_at_point(edge_x, center_y, &collision->tile_h);
+    if (collision->edge_v != EdgeNone)
+        collision->hit_v = tile_get_at_point(center_x, edge_y, &collision->tile_v);
+    if (collision->edge != EdgeNone)
+        collision->hit_c = tile_get_at_point(edge_x, edge_y, &collision->tile_c);
 
-    return edge;
+    collision->edge_c = collision->edge;
+
+}
+
+Edge tile_collide(Rect* rect, Direction* direction, Tile* tile)
+{
+    TileCollision collision;
+    tile_collide_ex(rect, direction, &collision);
+
+    if (collision.hit_c) {
+        mem_cpy(tile, &collision.tile_c, sizeof(Tile));
+        return collision.edge_c;
+    }
+    if (collision.hit_v) {
+        mem_cpy(tile, &collision.tile_v, sizeof(Tile));
+        return collision.edge_v;
+    }
+    if (collision.hit_h) {
+        mem_cpy(tile, &collision.tile_h, sizeof(Tile));
+        return collision.edge_h;
+    }
+
+    return EdgeNone;
 }
