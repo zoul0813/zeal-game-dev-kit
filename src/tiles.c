@@ -55,50 +55,48 @@ bool tile_get_edge(Rect* rect, Edge edge, Tile* tile)
     return true;
 }
 
+static bool tile_get_point(int16_t x, int16_t y, Tile* tile)
+{
+    if (x < 0 || y < 0)
+        return false;
+
+    uint8_t tx = (uint8_t)(x >> 4);
+    uint8_t ty = (uint8_t)(y >> 4);
+
+    if (tx >= (SCROLL_WIDTH >> 4) || ty >= (SCROLL_HEIGHT >> 4))
+        return false;
+
+    tile_at(tx, ty, tile);
+    return true;
+}
+
 Edge tile_collide(Rect* rect, Direction* direction, Tile* tile)
 {
-    // (void)rect;
-    (void) direction; // TODO: use the direction to determine which tile to retrieve
-    // (void)tile;
-
-
-    Tile target_h; //, target_v;
-    bool found_h;  //, found_v;
-    // if(direction->x > 0) {
-    // } else if(direction->x < 0) {
-    // }
-    // if(direction->y > 0) {
-    // } else if(direction->y < 0) {
-    // }
-
-    found_h = tile_get(rect, &target_h);
-    if (!found_h)
-        return EdgeNone;
-
-    const uint16_t target_t = rect_top(&target_h.rect);
-    const uint16_t target_b = rect_bottom(&target_h.rect);
-    const uint16_t target_l = rect_left(&target_h.rect);
-    const uint16_t target_r = rect_right(&target_h.rect);
-
-    const uint16_t rect_t = rect_top(rect);
-    const uint16_t rect_b = rect_bottom(rect);
-    const uint16_t rect_l = rect_left(rect);
-    const uint16_t rect_r = rect_right(rect);
-
+    int16_t probe_x = (int16_t)rect->x - SPRITE_WIDTH + (rect->w / 2);
+    int16_t probe_y = (int16_t)rect->y - SPRITE_HEIGHT + (rect->h / 2);
     Edge edge = EdgeNone;
 
-    if (rect_r > target_r && rect_l <= target_r)
-        edge |= EdgeRight;
-    else if (rect_l < target_l && rect_r >= target_l)
+    if (direction->x > 0) {
+        probe_x = (int16_t)rect->x - SPRITE_WIDTH + rect->w;
         edge |= EdgeLeft;
+    } else if (direction->x < 0) {
+        probe_x = (int16_t)rect->x - SPRITE_WIDTH;
+        edge |= EdgeRight;
+    }
 
-    if (rect_b > target_b && rect_t <= target_b)
-        edge |= EdgeBottom;
-    else if (rect_t < target_t && rect_b >= target_t)
+    if (direction->y > 0) {
+        probe_y = (int16_t)rect->y - SPRITE_HEIGHT + rect->h;
         edge |= EdgeTop;
+    } else if (direction->y < 0) {
+        probe_y = (int16_t)rect->y - SPRITE_HEIGHT;
+        edge |= EdgeBottom;
+    }
 
-    // which target?
-    mem_cpy(tile, &target_h, sizeof(Tile));
-    // mem_cpy(tile, &target_v, sizeof(Tile));
+    if (edge == EdgeNone)
+        return EdgeNone;
+
+    if (!tile_get_point(probe_x, probe_y, tile))
+        return EdgeNone;
+
     return edge;
 }
