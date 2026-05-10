@@ -1,3 +1,4 @@
+/*                             */ // Bit
 #define BUTTON_B          0x0001  // 1
 #define BUTTON_Y          0x0002  // 2
 #define BUTTON_SELECT     0x0004  // 3
@@ -14,3 +15,12 @@
 #define BUTTON_UNUSED2    0x2000  // 14
 #define BUTTON_UNUSED3    0x4000  // 15
 #define BUTTON_UNUSED4    0x8000  // 16
+
+/*                       */ // Bits
+#define MOUSE_IGNORE 0x00FF // 0-7
+#define MOUSE_RIGHT  0x0100 // 8
+#define MOUSE_LEFT   0x0200 // 9
+#define MOUSE_SPEED  0x0C00 // 10-11
+#define MOUSE_ID     0x8000 // 12-15
+// #define MOUSE_Y      0x00FF // 16-23
+// #define MOUSE_X      0xFF00 // 24-31

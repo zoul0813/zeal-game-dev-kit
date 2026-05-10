@@ -15,7 +15,10 @@ zos_err_t input_init(uint8_t use_controller);
  *
  * @return 16-bit mask of ZGDK Inputs
  */
-uint16_t input_get(void);
+uint16_t input_read(void);
+
+/** @deprecated */
+#define input_get() input_read()
 
 /**
  * @brief flush inputs to zero them out
