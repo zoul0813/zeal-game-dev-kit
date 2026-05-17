@@ -36,6 +36,7 @@ uint16_t controller_read_port(uint8_t port);
 uint16_t controller_get(uint8_t port);
 
 uint8_t controller_read_mouse(uint8_t port);
+MouseSensitivity controller_get_mouse_sensitivity(uint8_t port);
 uint8_t controller_set_mouse_sensitivity(uint8_t port, MouseSensitivity s);
 int8_t controller_get_mousey(void);
 int8_t controller_get_mousex(void);

@@ -71,6 +71,19 @@ if(LEFT1) x--;
 if(RIGHT1) x++;
 ```
 
+### SNES Mouse Sensitivity
+
+Original SNS-016 mice support software-selectable sensitivity:
+
+```C
+MouseSensitivity controller_get_mouse_sensitivity(uint8_t port);
+uint8_t controller_set_mouse_sensitivity(uint8_t port, MouseSensitivity s);
+```
+
+`controller_set_mouse_sensitivity()` returns the achieved `MouseSensitivity`, or `0xFF` if the port, requested sensitivity, mouse signature, or convergence check fails.
+
+Hyperkin-style clone mice may ignore software sensitivity cycling and always report low sensitivity. Use the physical button on those mice instead.
+
 ### Control Mapping
 
 | SNES   | Keyboard |
