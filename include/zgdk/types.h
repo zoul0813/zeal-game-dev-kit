@@ -8,8 +8,9 @@
 #define NULL ((void*) 0)
 #endif
 
-#define SPRITE_HEIGHT       16
-#define SPRITE_WIDTH        16
+#define SPRITE_HEIGHT       16U
+#define SPRITE_WIDTH        16U
+#define SPRITE_HALF         8U
 
 #define DIRECTION_NONE  (0)
 #define DIRECTION_LEFT  (-1)
@@ -20,8 +21,8 @@
 #define LAYER0     0
 #define LAYER1     1
 
-#define TILESET_8BIT 8
-#define TILESET_4BIT 4
+#define TILESET_8BIT 8U
+#define TILESET_4BIT 4U
 
 /**
  * @brief convert tile index into tile offset (from_byte)
