@@ -18,5 +18,8 @@ void zmt_reset(sound_volume_t vol)
     uint8_t backup_page = zvb_config_dev_idx;
     zvb_map_peripheral(ZVB_PERI_SOUND_IDX);
     SOUND_RESET(vol);
+    SOUND_WAVE(WAV_SQUARE);
+    zvb_peri_sound_left_channel = VOICEALL;
+    zvb_peri_sound_right_channel = VOICEALL;
     zvb_map_peripheral(backup_page);
 }

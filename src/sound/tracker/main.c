@@ -135,6 +135,10 @@ void zmt_play_step(step_t* step, sound_voice_t voice)
     if (step->fx1 != FX_OUT_OF_RANGE)
         zmt_process_fx(step, step->fx1, voice);
 
+    // Volume effects select every voice, so restore the current voice before
+    // changing its note or waveform.
+    SOUND_SELECT(voice);
+
     if (step->note != NOTE_OUT_OF_RANGE) {
         note_t note = NOTES[step->note];
         SOUND_DIV(note);
