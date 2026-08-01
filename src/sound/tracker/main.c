@@ -9,33 +9,33 @@ const __sfr __banked __at(0xF0) mmu_page0_ro;
 
 uint8_t zmt_tick(track_t* track, uint8_t use_arrangement)
 {
-    pattern_t* pattern = track->patterns[current_pattern];
-    if (ticks > track->current_tempo)
-        ticks = 0;
+    pattern_t* pattern = track->patterns[zmt_current_pattern];
+    if (zmt_ticks > track->current_tempo)
+        zmt_ticks = 0;
     // if(ticks % ticks_PER_EIGTH == 0) { }
-    if (ticks % TICKS_PER_SIXTEENTH(track->current_tempo) == 0) {
-        last_step = next_step;
-        zmt_play_pattern(pattern, next_step);
+    if (zmt_ticks % TICKS_PER_SIXTEENTH(track->current_tempo) == 0) {
+        zmt_last_step = zmt_next_step;
+        zmt_play_pattern(pattern, zmt_next_step);
 
-        next_step++;
-        if (next_step >= STEPS_PER_PATTERN) {
+        zmt_next_step++;
+        if (zmt_next_step >= STEPS_PER_PATTERN) {
             if (use_arrangement) {
-                current_arrangement++;
-                arrangement_t* arrangement = &track->arrangement[current_arrangement];
+                zmt_current_arrangement++;
+                arrangement_t* arrangement = &track->arrangement[zmt_current_arrangement];
                 if (arrangement->pattern_index == ARRANGEMENT_OUT_OF_RANGE) {
                     // reset
-                    current_arrangement = 0;
-                    arrangement         = &track->arrangement[current_arrangement];
+                    zmt_current_arrangement = 0;
+                    arrangement             = &track->arrangement[zmt_current_arrangement];
                 }
                 zmt_process_arrangement_fx(track, arrangement);
-                current_pattern = arrangement->pattern_index;
+                zmt_current_pattern = arrangement->pattern_index;
             }
-            next_step = 0;
+            zmt_next_step = 0;
         }
     }
-    ticks++;
+    zmt_ticks++;
 
-    return next_step;
+    return zmt_next_step;
 }
 
 void zmt_process_arrangement_fx(track_t* track, arrangement_t* arrangement)
@@ -44,7 +44,7 @@ void zmt_process_arrangement_fx(track_t* track, arrangement_t* arrangement)
     // Check arrangement FX ...
     uint8_t value = arrangement->fx;
     if (LESSTHAN(value, 0x1F)) {
-        current_arrangement = value;
+        zmt_current_arrangement = value;
         return;
     }
     if (LESSTHAN(value, 0x3F)) {
@@ -72,8 +72,8 @@ void zmt_process_fx(step_t* step, fx_t fx, sound_voice_t voice)
     }
 
     if(RANGE(fx, FX_GOTO_0, FX_GOTO_31)) {
-        next_step = (fx - FX_GOTO_0) - 1;
-        ticks     = (next_step % 16) - 1; // TODO: yeah?
+        zmt_next_step = (fx - FX_GOTO_0) - 1;
+        zmt_ticks     = (zmt_next_step % 16) - 1; // TODO: yeah?
         return;
     }
 
@@ -129,11 +129,11 @@ void zmt_play_step(step_t* step, sound_voice_t voice)
 {
     // pattern_t *pattern = active_pattern; // TODO: gonna have more than one pattern soon, lol
 
+    SOUND_SELECT(voice);
+
     // FX1 is pre-processed
     if (step->fx1 != FX_OUT_OF_RANGE)
         zmt_process_fx(step, step->fx1, voice);
-
-    SOUND_SELECT(voice);
 
     if (step->note != NOTE_OUT_OF_RANGE) {
         note_t note = NOTES[step->note];
@@ -162,7 +162,7 @@ void zmt_play_pattern(pattern_t* pattern, uint8_t step_index)
     step_t* step3 = &pattern->voices[2].steps[step_index];
     step_t* step4 = &pattern->voices[3].steps[step_index];
 
-    uint8_t backup_page = mmu_page0_ro;
+    uint8_t backup_page = zvb_config_dev_idx;
     zvb_map_peripheral(ZVB_PERI_SOUND_IDX);
     zmt_play_step(step1, VOICE0);
     zmt_play_step(step2, VOICE1);
@@ -227,15 +227,15 @@ void zmt_track_init(track_t* track)
     track->pattern_count = 1;
     track->tempo         = 32;
     track->current_tempo = track->tempo;
-    current_pattern      = 0;
+    zmt_current_pattern  = 0;
     zmt_arrangement_init(track->arrangement);
-    zmt_pattern_init(track->patterns[current_pattern]);
+    zmt_pattern_init(track->patterns[zmt_current_pattern]);
 }
 
 void zmt_pattern_reset(pattern_t* pattern)
 {
-    ticks     = 0;
-    next_step = 0;
+    zmt_ticks     = 0;
+    zmt_next_step = 0;
     for (uint8_t s = 0; s < STEPS_PER_PATTERN; s++) {
         for (uint8_t v = 0; v < NUM_VOICES; v++) {
             pattern->voices[v].steps[s].fx1_attr = 0x00;
@@ -248,18 +248,18 @@ uint8_t zmt_track_reset(track_t* track, uint8_t reset_pattern)
 {
     track->current_tempo = track->tempo;
     if (reset_pattern) {
-        current_arrangement = 0;
+        zmt_current_arrangement = 0;
         arrangement_t* a    = &track->arrangement[0];
         if (a->pattern_index != ARRANGEMENT_OUT_OF_RANGE) {
-            current_pattern = a->pattern_index;
+            zmt_current_pattern = a->pattern_index;
         } else {
-            current_pattern = 0;
+            zmt_current_pattern = 0;
         }
         zmt_process_arrangement_fx(track, a);
     }
-    ticks              = 0;
-    next_step          = 0;
-    pattern_t* pattern = track->patterns[current_pattern];
+    zmt_ticks          = 0;
+    zmt_next_step      = 0;
+    pattern_t* pattern = track->patterns[zmt_current_pattern];
     zmt_pattern_reset(pattern);
-    return current_pattern;
+    return zmt_current_pattern;
 }

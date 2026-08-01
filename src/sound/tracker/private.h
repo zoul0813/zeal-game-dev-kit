@@ -2,11 +2,11 @@
 
 #include "zgdk/sound/tracker.h"
 
-extern uint8_t ticks;
-extern uint8_t current_pattern;
-extern uint8_t current_arrangement;
-extern uint8_t next_step;
-extern uint8_t last_step;
+extern uint8_t zmt_ticks;
+extern uint8_t zmt_current_pattern;
+extern uint8_t zmt_current_arrangement;
+extern uint8_t zmt_next_step;
+extern uint8_t zmt_last_step;
 
 void tracker_log_io_error(const char* operation, uint8_t step, zos_err_t err);
 void tracker_log_open_error(const char* message, const char* filename, zos_err_t err);

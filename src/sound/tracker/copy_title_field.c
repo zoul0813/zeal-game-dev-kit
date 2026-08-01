@@ -3,7 +3,7 @@
 
 void tracker_copy_title_field(char* dst, const char* src)
 {
-    mem_set(dst, CH_SPACE, TRACKER_TITLE_LEN);
+    mem_set(dst, CH_NULL, TRACKER_TITLE_LEN);
     for (uint8_t i = 0; i < TRACKER_TITLE_LEN; i++) {
         if (src[i] == CH_NULL)
             break;

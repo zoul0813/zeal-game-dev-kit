@@ -4,26 +4,25 @@
 uint8_t zmt_track_get_arrangement(track_t* track)
 {
     track; // unreferenced
-    return current_arrangement;
+    return zmt_current_arrangement;
 }
 uint8_t zmt_track_get_pattern(track_t* track)
 {
     track; // unreferenced
-    return current_pattern;
+    return zmt_current_pattern;
 }
 uint8_t zmt_track_get_next_step(track_t* track)
 {
     track; // unreferenced
-    return next_step;
+    return zmt_next_step;
 }
 uint8_t zmt_track_get_last_step(track_t* track)
 {
     track; // unreferenced
-    return last_step;
+    return zmt_last_step;
 }
 uint8_t zmt_track_get_frame(track_t* track)
 {
     track; // unreferenced
-    return ticks;
+    return zmt_ticks;
 }
-
