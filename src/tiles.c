@@ -26,9 +26,9 @@ void tile_at(uint8_t tx, uint8_t ty, Tile* tile)
 
 bool tile_get(Rect* src, Tile* tile)
 {
-    // center of point
-    uint16_t srcx = src->x - SPRITE_WIDTH + (src->w / 2);
-    uint16_t srcy = src->y - SPRITE_HEIGHT + (src->h / 2);
+    // center of point (rect uses bottom-right origin, so derive it from the rect itself)
+    uint16_t srcx = src->x - (src->w / 2);
+    uint16_t srcy = src->y - (src->h / 2);
 
     int8_t tx = (srcx >> 4); // tilemap x
     int8_t ty = (srcy >> 4); // tilemap y
@@ -73,24 +73,28 @@ bool tile_get_at_point(int16_t x, int16_t y, Tile* tile)
 void tile_collide_ex(Rect* rect, Direction* direction, TileCollision* collision)
 {
     mem_set(collision, 0, sizeof(TileCollision));
-    int16_t center_x = (int16_t)rect->x - SPRITE_WIDTH + (rect->w / 2);
-    int16_t center_y = (int16_t)rect->y - SPRITE_HEIGHT + (rect->h / 2);
+    /* Rect uses bottom-right origin: the box is [x - w, x) x [y - h, y), so the
+     * center and leading edges must be derived from the rect's own w/h. Using
+     * SPRITE_WIDTH/SPRITE_HEIGHT here offsets every probe by (SPRITE_WIDTH - w)
+     * horizontally and (SPRITE_HEIGHT - h) vertically for any non-16x16 rect. */
+    int16_t center_x = (int16_t)rect->x - (int16_t)(rect->w / 2);
+    int16_t center_y = (int16_t)rect->y - (int16_t)(rect->h / 2);
     int16_t edge_x   = center_x;
     int16_t edge_y   = center_y;
 
     if (direction->x > 0) {
-        edge_x = (int16_t)rect->x - SPRITE_WIDTH + rect->w;
+        edge_x = (int16_t)rect->x;
         collision->edge_h = EdgeLeft;
     } else if (direction->x < 0) {
-        edge_x = (int16_t)rect->x - SPRITE_WIDTH;
+        edge_x = (int16_t)rect->x - (int16_t)rect->w;
         collision->edge_h = EdgeRight;
     }
 
     if (direction->y > 0) {
-        edge_y = (int16_t)rect->y - SPRITE_HEIGHT + rect->h;
+        edge_y = (int16_t)rect->y;
         collision->edge_v = EdgeTop;
     } else if (direction->y < 0) {
-        edge_y = (int16_t)rect->y - SPRITE_HEIGHT;
+        edge_y = (int16_t)rect->y - (int16_t)rect->h;
         collision->edge_v = EdgeBottom;
     }
 
