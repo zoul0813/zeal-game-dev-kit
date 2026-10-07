@@ -252,13 +252,13 @@ uint8_t zmt_tick(track_t* track, uint8_t use_arrangement);
 
 /* load a pattern from file */
 zos_err_t zmt_pattern_load(pattern_t* pattern, zos_dev_t dev);
-/* load a pattern from rom */
+/* Load a pattern from a complete trusted ROM buffer (no length in legacy API). */
 zos_err_t zmt_pattern_rom_load(pattern_t* pattern, uint8_t **start);
 /* save a pattern to file */
 zos_err_t zmt_pattern_save(pattern_t* pattern, zos_dev_t dev);
 /* load arrange from file */
 zos_err_t zmt_arrangement_load(arrangement_t arrangement[NUM_ARRANGEMENTS], zos_dev_t dev);
-/* load arrangement from rom */
+/* Load arrangements from a complete trusted ROM buffer (legacy API). */
 zos_err_t zmt_arrangement_rom_load(arrangement_t arrangement[NUM_ARRANGEMENTS], uint8_t **start);
 /* save arrangement to file */
 zos_err_t zmt_arrangement_save(arrangement_t arrangement[NUM_ARRANGEMENTS], zos_dev_t dev);
@@ -266,7 +266,7 @@ zos_err_t zmt_arrangement_save(arrangement_t arrangement[NUM_ARRANGEMENTS], zos_
 zos_err_t zmt_file_load(track_t* track, const char* filename);
 /* save a track to file */
 zos_err_t zmt_file_save(track_t* track, const char* filename);
-/* load a track from rom */
+/* Load a bounded ROM asset; invalid input leaves the track unchanged. */
 zos_err_t zmt_rom_load(track_t* track, const uint8_t *start, uint16_t size);
 
 

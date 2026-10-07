@@ -1,48 +1,31 @@
 #include <core.h>
-#include "zgdk/sound/tracker.h"
+#include "private.h"
 
+uint8_t tracker_rom_arrangement(tracker_rom_cursor_t *cursor, arrangement_t *out, uint8_t count)
+{
+    uint8_t bitmap[8];
+    if (!tracker_rom_read(cursor, bitmap, sizeof(bitmap))) return 0;
+    for (uint8_t i = 0; i < NUM_ARRANGEMENTS; i++) {
+        arrangement_t cell = {ARRANGEMENT_OUT_OF_RANGE, FX_OUT_OF_RANGE};
+        if (bitmap[i >> 3] & (1U << (i & 7))) {
+            if (!tracker_rom_read(cursor, &cell, sizeof(cell))) return 0;
+            if (cell.pattern_index != ARRANGEMENT_OUT_OF_RANGE && cell.pattern_index >= count)
+                return 0;
+        }
+        if (out != NULL) out[i] = cell;
+    }
+    return 1;
+}
+
+/* Legacy API: caller must provide a complete, trusted arrangement buffer. */
 zos_err_t zmt_arrangement_rom_load(arrangement_t arrangement[NUM_ARRANGEMENTS], uint8_t **start)
 {
-    uint8_t *pos = *start;
-    zos_err_t err = ERR_SUCCESS;
-    uint16_t size = 0;
-    uint8_t i     = 0;
-    arrangement_t* a;
-
-    uint32_t bitmap_high = 0;
-    uint32_t bitmap_low  = 0;
-    uint8_t bit          = 0;
-
-    size = sizeof(uint32_t);
-    mem_cpy(&bitmap_low, pos, size);
-    pos += size;
-
-    size = sizeof(uint32_t);
-    mem_cpy(&bitmap_high, pos, size);
-    pos += size;
-
-
-    for (i = 0; i < NUM_ARRANGEMENTS / 2; i++) {
-        bit        = bitmap_low & 0x01;
-        bitmap_low = bitmap_low >> 1;
-        if (bit == 0)
-            continue;
-        a    = &arrangement[i];
-        size = sizeof(arrangement_t);
-        mem_cpy(a, pos, size);
-        pos += size;
-    }
-    for (i = NUM_ARRANGEMENTS / 2; i < NUM_ARRANGEMENTS; i++) {
-        bit         = bitmap_high & 0x01;
-        bitmap_high = bitmap_high >> 1;
-        if (bit == 0)
-            continue;
-        a    = &arrangement[i];
-        size = sizeof(arrangement_t);
-        mem_cpy(a, pos, size);
-        pos += size;
-    }
-
-    *start = pos;
-    return err;
+    if (arrangement == NULL || start == NULL || *start == NULL) return ERR_INVALID_PARAMETER;
+    tracker_rom_cursor_t cursor = {*start, UINT16_MAX};
+    if (!tracker_rom_arrangement(&cursor, NULL, NUM_PATTERNS)) return ERR_ENTRY_CORRUPTED;
+    cursor.pos = *start;
+    cursor.remaining = UINT16_MAX;
+    tracker_rom_arrangement(&cursor, arrangement, NUM_PATTERNS);
+    *start = (uint8_t *)cursor.pos;
+    return ERR_SUCCESS;
 }
