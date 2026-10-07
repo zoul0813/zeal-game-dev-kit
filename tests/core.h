@@ -2,3 +2,5 @@
 #include <string.h>
 #define mem_set memset
 #define mem_cpy memcpy
+
+#define CH_NULL '\0'

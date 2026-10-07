@@ -6,6 +6,10 @@
 /* save a track to file */
 zos_err_t zmt_file_save(track_t* track, const char* filename)
 {
+    if (track == NULL || filename == NULL || track->pattern_count == 0
+        || track->pattern_count > NUM_PATTERNS) return ERR_INVALID_PARAMETER;
+    for (uint8_t p = 0; p < track->pattern_count; p++)
+        if (track->patterns[p] == NULL) return ERR_INVALID_PARAMETER;
     zos_err_t err;
     uint16_t size = 0;
     char textbuff[TRACKER_TITLE_LEN + 1];
@@ -17,56 +21,59 @@ zos_err_t zmt_file_save(track_t* track, const char* filename)
 
     /** FILE HEADER */
     size = 3;
-    err  = write(file_dev, "ZMT", &size);
+    err  = tracker_write_exact(file_dev, "ZMT", size);
     if (err != ERR_SUCCESS) {
         log_error("error saving format header", err);
-        return err;
+        goto done;
     }
 
     size        = sizeof(uint8_t);
     textbuff[0] = 0;
-    err         = write(file_dev, textbuff, &size);
+    err         = tracker_write_exact(file_dev, textbuff, size);
     if (err != ERR_SUCCESS) {
         log_error("error saving version header", err);
-        return err;
+        goto done;
     }
 
     size = TRACKER_TITLE_LEN;
     tracker_copy_title_field(textbuff, track->title);
-    err = write(file_dev, textbuff, &size);
+    err = tracker_write_exact(file_dev, textbuff, size);
     if (err != ERR_SUCCESS) {
         log_error("error saving title length", err);
-        return err;
+        goto done;
     }
 
     size = sizeof(uint8_t);
-    err  = write(file_dev, &track->tempo, &size);
+    err  = tracker_write_exact(file_dev, &track->tempo, size);
     if (err != ERR_SUCCESS) {
         log_error("error saving tempo", err);
-        return err;
+        goto done;
     }
 
     size = sizeof(uint8_t);
-    err  = write(file_dev, &track->pattern_count, &size);
+    err  = tracker_write_exact(file_dev, &track->pattern_count, size);
     if (err != ERR_SUCCESS) {
         log_error("error saving pattern count", err);
-        return err;
+        goto done;
     }
 
     err = zmt_arrangement_save(track->arrangement, file_dev);
     if (err != ERR_SUCCESS) {
         log_error("error saving arrangement", err);
-        return err;
+        goto done;
     }
 
     for (uint8_t p = 0; p < track->pattern_count; p++) {
         err = zmt_pattern_save(track->patterns[p], file_dev);
         if (err != ERR_SUCCESS) {
             log_error("error saving patterns", err);
-            return err;
+            goto done;
         }
     }
 
-    err = close(file_dev);
-    return err;
+done:
+    {
+        zos_err_t close_err = close(file_dev);
+        return err != ERR_SUCCESS ? err : close_err;
+    }
 }
