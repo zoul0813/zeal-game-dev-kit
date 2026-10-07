@@ -30,7 +30,8 @@
  * @param index The tile index to offset to
  * @returns The byte offset of the tile at index
  */
-#define TILE_BYTE_OFFSET(bits, index) (index << bits)
+#define TILE_BYTE_OFFSET(bits, index) \
+    ((uint16_t)((uint16_t)(index) << ((bits) == TILESET_4BIT ? 7U : 8U)))
 
 typedef enum {
     EdgeNone      = 0,
