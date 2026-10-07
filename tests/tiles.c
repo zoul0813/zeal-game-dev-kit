@@ -106,6 +106,14 @@ int main(void) {
     d.x = 1; d.y = 1;
     tile_collide_ex(&r, &d, &c);
     assert(!c.hit_h && !c.hit_v && !c.hit_c);
+    assert(tile_get_at_point(1279,639,&tile)); expect_tile(&tile,79,39);
+    const int16_t outside[][2]={{1280,0},{0,640},{4096,0},{0,4096},{32767,0},{-1,0}};
+    for(unsigned i=0;i<sizeof(outside)/sizeof(outside[0]);i++)
+        assert(!tile_get_at_point(outside[i][0],outside[i][1],&tile));
+    rect_set(r,4,4,16,16); assert(!tile_get(&r,&tile));
+    rect_set(r,4104,8,16,16); assert(!tile_get(&r,&tile));
+    rect_set(r,1288,8,16,16); assert(!tile_get(&r,&tile));
+    rect_set(r,65535,65535,1,1); assert(!tile_get(&r,&tile));
     puts("tile regression checks passed");
     return 0;
 }

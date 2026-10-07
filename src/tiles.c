@@ -26,17 +26,13 @@ void tile_at(uint8_t tx, uint8_t ty, Tile* tile)
 
 bool tile_get(Rect* src, Tile* tile)
 {
-    // center of point (rect uses bottom-right origin, so derive it from the rect itself)
-    uint16_t srcx = src->x - (src->w / 2);
-    uint16_t srcy = src->y - (src->h / 2);
-
-    int8_t tx = (srcx >> 4); // tilemap x
-    int8_t ty = (srcy >> 4); // tilemap y
-    if (tx < 0 || ty < 0)
+    uint16_t half_w = src->w / 2, half_h = src->h / 2;
+    if (src->x < half_w || src->y < half_h)
         return false;
-
-    tile_at(tx, ty, tile);
-    return true;
+    uint16_t srcx = src->x - half_w, srcy = src->y - half_h;
+    if (srcx >= SCROLL_WIDTH || srcy >= SCROLL_HEIGHT)
+        return false;
+    return tile_get_at_point(srcx, srcy, tile);
 }
 
 bool tile_get_edge(Rect* rect, Edge edge, Tile* tile)
@@ -58,14 +54,11 @@ bool tile_get_edge(Rect* rect, Edge edge, Tile* tile)
 
 bool tile_get_at_point(int16_t x, int16_t y, Tile* tile)
 {
-    if (x < 0 || y < 0)
+    if (x < 0 || y < 0 || x >= SCROLL_WIDTH || y >= SCROLL_HEIGHT)
         return false;
 
     uint8_t tx = (uint8_t)(x >> 4);
     uint8_t ty = (uint8_t)(y >> 4);
-
-    if (tx >= (SCROLL_WIDTH >> 4) || ty >= (SCROLL_HEIGHT >> 4))
-        return false;
 
     tile_at(tx, ty, tile);
     return true;
