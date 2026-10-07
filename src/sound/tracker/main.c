@@ -60,7 +60,7 @@ void zmt_process_arrangement_fx(track_t* track, arrangement_t* arrangement)
 
 void zmt_process_fx(step_t* step, fx_t fx, sound_voice_t voice)
 {
-    (void*) voice; // TODO: per channel effects
+    SOUND_SELECT(voice);
     // pattern_t *pattern = active_pattern; // TODO: gonna have more than one pattern soon, lol
 
     if (RANGE(fx, FX_COUNT_0, FX_COUNT_8)) {
@@ -123,6 +123,8 @@ void zmt_process_fx(step_t* step, fx_t fx, sound_voice_t voice)
             SOUND_VOL(VOL_100);
         } break;
     }
+    /* Global volume effects must not redirect the following note to all voices. */
+    SOUND_SELECT(voice);
 }
 
 void zmt_play_step(step_t* step, sound_voice_t voice)

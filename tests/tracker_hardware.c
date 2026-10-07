@@ -1,0 +1,4 @@
+#include <zvb_sound.h>
+uint8_t zvb_config_dev_idx,zvb_peri_sound_freq_low,zvb_peri_sound_freq_high,zvb_peri_sound_wave;
+uint8_t zvb_peri_sound_select,zvb_peri_sound_volume,zvb_peri_sound_master_vol,zvb_peri_sound_hold;
+void zvb_map_peripheral(uint8_t page){zvb_config_dev_idx=page;}
