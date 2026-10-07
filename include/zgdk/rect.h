@@ -19,13 +19,18 @@ static const uint16_t rect_right(Rect *rect) {
   return rect->x;
 }
 
+/* Rect coordinates are exclusive bottom/right edges. Touching edges do not
+ * overlap. Compare edge distances to avoid unsigned origin underflow. */
 static const uint8_t rect_collide(Rect *src, Rect *dst) {
-    uint8_t left = (src->x + src->w > dst->x) && (src->x + src->w < dst->x + dst->w);
-    uint8_t right = (src->x > dst->x) && (src->x < dst->x + dst->w);
-    uint8_t top = (src->y + src->h > dst->y) && (src->y + src->h < dst->y + dst->h);
-    uint8_t bottom = (src->y > dst->y) && (src->y < dst->y + dst->h);
-
-    return (left || right) && (top || bottom);
+    if (src->w == 0 || src->h == 0 || dst->w == 0 || dst->h == 0)
+        return false;
+    uint8_t horizontal = src->x <= dst->x
+        ? dst->x - src->x < dst->w
+        : src->x - dst->x < src->w;
+    uint8_t vertical = src->y <= dst->y
+        ? dst->y - src->y < dst->h
+        : src->y - dst->y < src->h;
+    return horizontal && vertical;
 }
 
 #endif
