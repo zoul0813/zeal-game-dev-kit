@@ -52,6 +52,7 @@ bool tile_get_edge(Rect* rect, Edge edge, Tile* tile)
     if(edge & EdgeTop) tile->y--;
     else if(edge & EdgeBottom) tile->y++;
 
+    tile_at(tile->x, tile->y, tile);
     return true;
 }
 

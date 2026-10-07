@@ -3,8 +3,9 @@
 #include <string.h>
 #include "zgdk/tiles.h"
 
-uint16_t tilemap_scroll_get_x(uint8_t layer) { (void)layer; return 0; }
-uint16_t tilemap_scroll_get_y(uint8_t layer) { (void)layer; return 0; }
+static uint16_t scroll_x, scroll_y;
+uint16_t tilemap_scroll_get_x(uint8_t layer) { (void)layer; return scroll_x; }
+uint16_t tilemap_scroll_get_y(uint8_t layer) { (void)layer; return scroll_y; }
 
 static void expect_tile(Tile *tile, int x, int y) {
     assert(tile->x == x && tile->y == y);
@@ -63,7 +64,15 @@ int main(void) {
     assert(tile_get(&r, &tile));
     expect_tile(&tile, 1, 1);
     assert(tile_get_edge(&r, EdgeLeft, &tile));
-    assert(tile.x == 0 && tile.y == 1);
+    expect_tile(&tile, 0, 1);
+    assert(tile_get_edge(&r, EdgeRight, &tile)); expect_tile(&tile, 2, 1);
+    assert(tile_get_edge(&r, EdgeTop, &tile)); expect_tile(&tile, 1, 0);
+    assert(tile_get_edge(&r, EdgeBottom, &tile)); expect_tile(&tile, 1, 2);
+    assert(tile_get_edge(&r, EdgeTop | EdgeLeft, &tile)); expect_tile(&tile, 0, 0);
+    scroll_x = 7; scroll_y = 9;
+    assert(tile_get_edge(&r, EdgeRight, &tile));
+    assert(tile.x == 2 && tile.y == 1 && tile.rect.x == 55 && tile.rect.y == 41);
+    scroll_x = scroll_y = 0;
     for (int dx = -1; dx <= 1; ++dx) {
         for (int dy = -1; dy <= 1; ++dy) {
             d.x = dx; d.y = dy;
