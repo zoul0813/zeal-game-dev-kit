@@ -1,8 +1,6 @@
 #!/bin/sh
+# Build first with tests/build-sprites.sh (SDCC >= 4.2, ZVB_SDK_PATH).
+# Run in a Python environment containing z80==1.2.0.
 set -eu
 root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
-binary=$(mktemp "${TMPDIR:-/tmp}/zgdk-sprites.XXXXXX")
-trap 'rm -f "$binary"' EXIT HUP INT TERM
-"${CC:-cc}" -std=c11 -fsanitize=address,undefined -I"$root/tests/sdk" -I"$root/tests" -I"$root/include" \
-    "$root/src/sprites.c" "$root/tests/sprites.c" -o "$binary"
-"$binary"
+"${PYTHON:-python3}" -B "$root/tests/sprites.py" "${1:-$root/build/sprite-tests}"
