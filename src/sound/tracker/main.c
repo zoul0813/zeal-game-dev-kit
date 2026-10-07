@@ -23,7 +23,11 @@ uint8_t zmt_tick(track_t* track, uint8_t use_arrangement)
     if (zmt_next_step >= STEPS_PER_PATTERN)
         zmt_next_step = 0;
     pattern_t* pattern = track->patterns[zmt_current_pattern];
-    if (zmt_ticks % step_frames == 0) {
+    /* The quarter phase is below four step intervals, so these are its only
+     * step boundaries. Avoid the Z80 runtime division on every video frame. */
+    if (zmt_ticks == 0 || zmt_ticks == step_frames
+        || zmt_ticks == (uint8_t)(step_frames << 1)
+        || zmt_ticks == (uint8_t)((step_frames << 1) + step_frames)) {
         zmt_last_step = zmt_next_step;
         zmt_play_pattern(pattern, zmt_next_step);
         zmt_next_step++;

@@ -40,6 +40,31 @@ int main(void){
         init();patterns[0].voices[0].steps[0].fx1=FX_GOTO_0+target;
         zmt_tick(&track,0);assert(zmt_next_step==target && zmt_ticks==1);
     }
+    /* Compare every tempo/phase against the old remainder-based cadence,
+     * including paused tempos, quarter wrap and changes between ticks. */
+    init();
+    for (unsigned tempo=0; tempo<256; tempo++) {
+        track.current_tempo=tempo;
+        unsigned frames=tempo>>2;
+        for (unsigned phase=0; phase<256; phase++) {
+            zmt_ticks=phase;zmt_next_step=5;zmt_last_step=1;
+            unsigned normalized=(frames && phase>=frames*4)?0:phase;
+            unsigned boundary=frames && normalized%frames==0;
+            assert(zmt_tick(&track,0)==5+boundary);
+            assert(zmt_ticks==(frames?normalized+1:phase));
+            assert(zmt_last_step==(boundary?5:1));
+        }
+    }
+    /* Arrangement tempo effects apply to subsequent frames, keeping phase. */
+    init();track.arrangement[1].pattern_index=0;track.arrangement[1].fx=0x21;
+    zmt_next_step=31;zmt_tick(&track,1);
+    assert(track.current_tempo==8 && zmt_ticks==1 && zmt_next_step==0);
+    zmt_tick(&track,1);assert(zmt_ticks==2 && zmt_next_step==0);
+    zmt_tick(&track,1);assert(zmt_ticks==3 && zmt_next_step==1);
+    zmt_pattern_reset(&patterns[0]);zmt_tick(&track,0);
+    assert(zmt_ticks==1 && zmt_next_step==1);
+    zmt_track_reset(&track,1);assert(zmt_ticks==0 && zmt_next_step==0);
+    zmt_tick(&track,0);assert(zmt_ticks==1 && zmt_next_step==1);
     init();step_t s;zmt_step_init(&s,0);s.note=127;
     zvb_peri_sound_freq_low=77;zmt_play_step(&s,VOICE0);assert(zvb_peri_sound_freq_low==77);
     zmt_play_pattern(&patterns[0],32);zmt_play_pattern(NULL,0);
