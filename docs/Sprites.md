@@ -58,3 +58,9 @@ void draw(void) {
   gfx_wait_end_vblank(&vctx);
 }
 ```
+
+Arena size is a sprite count, not a byte count. Sizes 1 through 128 are supported;
+NULL arenas and invalid sizes return `GFX_INVALID_ARG`. All slots are available.
+`sprites_deregister()` frees every allocation and invalidates returned pointers.
+The next `sprites_render()` hides any previously uploaded sprites no longer in
+use, including when a smaller arena replaces the previous one.
