@@ -4,7 +4,7 @@ set(ZOS_TOOLCHAIN sdcc)
 include($ENV{ZOS_PATH}/cmake/zos_init.cmake)
 
 zos_use(coreutils)
-project(zgdk C)
+project(zgdk C ASM)
 
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 
@@ -12,6 +12,7 @@ find_package(COREUTILS REQUIRED)
 
 file(GLOB_RECURSE ZGDK_SRCS CONFIGURE_DEPENDS
     ${CMAKE_SOURCE_DIR}/src/*.c
+    ${CMAKE_SOURCE_DIR}/src/*.asm
 )
 
 add_library(zgdk STATIC ${ZGDK_SRCS})
@@ -19,7 +20,7 @@ add_library(zgdk STATIC ${ZGDK_SRCS})
 target_link_libraries(zgdk PUBLIC core)
 
 target_compile_options(zgdk PRIVATE
-    --opt-code-speed
+    $<$<COMPILE_LANGUAGE:C>:--opt-code-speed>
 )
 
 target_include_directories(zgdk

@@ -43,6 +43,24 @@ int8_t controller_get_mousex(void);
 
 uint8_t controller_is(uint8_t port, ControllerType type);
 
+/* Keep constant pad detection independent of the runtime mouse dispatcher.
+ * The original controller_is symbol remains available, including &controller_is.
+ * Both arguments are evaluated exactly once. SDCC inlines this dispatch.
+ */
+#ifdef __SDCC
+uint8_t zgdk_controller_is_pad(uint8_t port);
+/* Byte-typed alias avoids SDCC narrowing an enum with two members to a boolean. */
+uint8_t zgdk_controller_is_runtime(uint8_t port, uint8_t type);
+#pragma save
+#pragma disable_warning 126 /* Constant dispatch intentionally removes a branch. */
+inline uint8_t zgdk_controller_is_dispatch(uint8_t port, uint8_t type)
+{
+    return type == SNES_PAD ? zgdk_controller_is_pad(port) : zgdk_controller_is_runtime(port, type);
+}
+#pragma restore
+#define controller_is(port, type) zgdk_controller_is_dispatch((port), (type))
+#endif
+
 #define controller_pressed_port1(button) (PORT1_bits & button)
 #define controller_pressed_port2(button) (PORT2_bits & button)
 #define controller_pressed(button) controller_pressed_port1(button)

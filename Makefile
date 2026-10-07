@@ -11,8 +11,10 @@ BUILD_DIR = build
 LIB_DIR = lib
 LIB_FILE = zgdk.lib
 
-SRCS = $(shell find $(SRC_DIR) -name *.c)
-RELS = $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.rel,$(SRCS))
+C_SRCS = $(shell find $(SRC_DIR) -name '*.c')
+ASM_SRCS = $(shell find $(SRC_DIR) -name '*.asm')
+RELS = $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.rel,$(C_SRCS)) \
+       $(patsubst $(SRC_DIR)/%.asm,$(BUILD_DIR)/%.rel,$(ASM_SRCS))
 
 ifndef ZOS_PATH
 $(error "Please define ZOS_PATH environment variable. It must point to Zeal 8-bit OS source code path.")
@@ -31,6 +33,7 @@ ZGDK_INCLUDE=include/
 
 CC = sdcc
 AR = sdar
+AS = sdasz80
 # Specify Z80 as the target, compile without linking, and place all the code in TEXT section
 # (_CODE must be replace).
 CFLAGS := -mz80 -c --codeseg TEXT -I$(ZOS_INCLUDE) -I$(ZVB_INCLUDE) -I$(ZGDK_INCLUDE) --opt-code-speed
@@ -44,6 +47,10 @@ $(BUILD_DIR)/%.rel: $(SRC_DIR)/%.c | $(BUILD_DIR) $(BUILD_DIR)/$(dir $<)
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -c $< -o $@
 
+$(BUILD_DIR)/%.rel: $(SRC_DIR)/%.asm | $(BUILD_DIR)
+	@mkdir -p $(dir $@)
+	$(AS) -o $@ $<
+
 # Create build directory if it doesn't exist
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
@@ -51,9 +58,11 @@ $(BUILD_DIR):
 $(LIB_DIR):
 	mkdir -p $(LIB_DIR)
 
-$(LIB_DIR)/$(LIB_FILE): $(RELS) | $(LIB_DIR)
+$(LIB_DIR)/$(LIB_FILE): $(RELS) Makefile | $(LIB_DIR)
 	echo "Archiving library..."
-	$(AR) -rc $@ $(RELS)
+	@rm -f $@.tmp
+	$(AR) -rc $@.tmp $(RELS)
+	mv $@.tmp $@
 
 clean:
 	rm -rf $(BUILD_DIR)
