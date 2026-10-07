@@ -87,7 +87,7 @@
 #define NUM_ARRANGEMENTS  64U
 #define TRACKER_TITLE_LEN 12U
 
-#define TICKS_PER_QUARTER(tempo)    (temp)
+#define TICKS_PER_QUARTER(tempo)    (tempo)
 #define TICKS_PER_EIGHT(tempo)      (tempo >> 1)
 #define TICKS_PER_SIXTEENTH(tempo)  (tempo >> 2)
 #define TICKS_PER_STEP(tempo)       TICKS_PER_SIXTEENTH(tempo)
