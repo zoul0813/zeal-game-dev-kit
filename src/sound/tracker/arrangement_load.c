@@ -13,13 +13,13 @@ zos_err_t zmt_arrangement_load(arrangement_t arrangement[NUM_ARRANGEMENTS], zos_
     uint8_t bit          = 0;
 
     size = sizeof(uint32_t);
-    err  = read(dev, &bitmap_low, &size);
+    err  = tracker_read_exact(dev, &bitmap_low, size);
     if (err != ERR_SUCCESS) {
         tracker_log_io_error("write", 26, err);
         return err;
     }
     size = sizeof(uint32_t);
-    err  = read(dev, &bitmap_high, &size);
+    err  = tracker_read_exact(dev, &bitmap_high, size);
     if (err != ERR_SUCCESS) {
         tracker_log_io_error("write", 27, err);
         return err;
@@ -32,7 +32,7 @@ zos_err_t zmt_arrangement_load(arrangement_t arrangement[NUM_ARRANGEMENTS], zos_
             continue;
         a    = &arrangement[i];
         size = sizeof(arrangement_t);
-        err  = read(dev, a, &size);
+        err  = tracker_read_exact(dev, a, size);
         if (err != ERR_SUCCESS) {
             tracker_log_io_error("write", 18, err);
             return err;
@@ -45,7 +45,7 @@ zos_err_t zmt_arrangement_load(arrangement_t arrangement[NUM_ARRANGEMENTS], zos_
             continue;
         a    = &arrangement[i];
         size = sizeof(arrangement_t);
-        err  = read(dev, a, &size);
+        err  = tracker_read_exact(dev, a, size);
         if (err != ERR_SUCCESS) {
             tracker_log_io_error("write", 18, err);
             return err;

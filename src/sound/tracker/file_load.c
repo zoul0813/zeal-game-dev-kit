@@ -1,83 +1,68 @@
 #include <core.h>
 #include "zgdk/sound/tracker.h"
-#include "zgdk/utils/log.h"
 #include "private.h"
 
 zos_err_t zmt_file_load(track_t* track, const char* filename)
 {
     zos_err_t err;
-    uint16_t size = 0;
-    char textbuff[TRACKER_TITLE_LEN + 1];
+    uint8_t header[4];
+    if (track == NULL || filename == NULL)
+        return ERR_INVALID_PARAMETER;
+    zos_dev_t dev = open(filename, O_RDONLY);
+    if (dev < 0)
+        return -dev;
 
-    zmt_track_init(track); // clear out the track, before loading data
-
-    zos_dev_t file_dev = open(filename, O_RDONLY);
-    if (file_dev < 0) {
-        tracker_log_open_error("failed to open file", filename, (zos_err_t)(-file_dev));
-        return -file_dev;
+    err = tracker_read_exact(dev, header, sizeof(header));
+    if (err != ERR_SUCCESS)
+        goto done;
+    if (header[0] != 'Z' || header[1] != 'M' || header[2] != 'T' || header[3] != 0) {
+        err = ERR_ENTRY_CORRUPTED;
+        goto done;
     }
-
-    // printf("Loading '%s' ...\n", filename);
-
-    size = 3;
-    err  = read(file_dev, textbuff, &size); // format header
-    if (err != ERR_SUCCESS) {
-        log_error("error reading format header", err);
-        return err;
+    zmt_track_init(track);
+    err = tracker_read_exact(dev, track->title, TRACKER_TITLE_LEN);
+    if (err != ERR_SUCCESS)
+        goto done;
+    track->title[TRACKER_TITLE_LEN] = 0;
+    err = tracker_read_exact(dev, &track->tempo, 1);
+    if (err != ERR_SUCCESS)
+        goto done;
+    if (track->tempo < 4 || track->tempo > 128 || (track->tempo & 3)) {
+        err = ERR_ENTRY_CORRUPTED;
+        goto done;
     }
-    // printf("Format: %.3s\n", textbuff);
-
-    size = sizeof(uint8_t);
-    err  = read(file_dev, textbuff, &size); // version header
-    if (err != ERR_SUCCESS) {
-        log_error("error reading version header", err);
-        return err;
-    }
-    // printf("Version: %d\n", textbuff[0]);
-
-    size = TRACKER_TITLE_LEN;
-    err  = read(file_dev, textbuff, &size); // track title
-    if (err != ERR_SUCCESS) {
-        log_error("error reading track title", err);
-        return err;
-    }
-    mem_cpy(track->title, textbuff, size);
-    track->title[TRACKER_TITLE_LEN] = 0x00; // NUL
-    // printf("Track: %12s (read: %d)\n", track->title, size);
-
-    size = sizeof(uint8_t);
-    err  = read(file_dev, &track->tempo, &size);
-    if (err != ERR_SUCCESS) {
-        log_error("error reading tempo", err);
-        return err;
-    }
-
     track->current_tempo = track->tempo;
-
-    size = sizeof(uint8_t);
-    err  = read(file_dev, &track->pattern_count, &size); // pattern count
-    if (err != ERR_SUCCESS) {
-        log_error("error reading pattern count", err);
-        return err;
+    err = tracker_read_exact(dev, &track->pattern_count, 1);
+    if (err != ERR_SUCCESS)
+        goto done;
+    if (track->pattern_count == 0 || track->pattern_count > NUM_PATTERNS) {
+        err = ERR_ENTRY_CORRUPTED;
+        goto done;
     }
-    // printf("Patterns: %d\n", track->pattern_count);
-
-    err = zmt_arrangement_load(track->arrangement, file_dev);
-    if (err != ERR_SUCCESS) {
-        log_error("error reading arrangement", err);
-        return err;
-    }
-
     for (uint8_t p = 0; p < track->pattern_count; p++) {
-        // printf("Loading pattern %d\n", p);
-        err = zmt_pattern_load(track->patterns[p], file_dev);
-        if (err != ERR_SUCCESS) {
-            log_error("error loading patterns", err);
-            return err;
+        if (track->patterns[p] == NULL) {
+            err = ERR_INVALID_PARAMETER;
+            goto done;
         }
     }
-
-    // printf("File loaded.\n\n");
-    err = close(file_dev);
-    return err;
+    err = zmt_arrangement_load(track->arrangement, dev);
+    if (err != ERR_SUCCESS)
+        goto done;
+    for (uint8_t a = 0; a < NUM_ARRANGEMENTS; a++) {
+        uint8_t pattern = track->arrangement[a].pattern_index;
+        if (pattern != ARRANGEMENT_OUT_OF_RANGE && pattern >= track->pattern_count) {
+            err = ERR_ENTRY_CORRUPTED;
+            goto done;
+        }
+    }
+    for (uint8_t p = 0; p < track->pattern_count; p++) {
+        err = zmt_pattern_load(track->patterns[p], dev);
+        if (err != ERR_SUCCESS)
+            goto done;
+    }
+done:
+    {
+        zos_err_t close_err = close(dev);
+        return err == ERR_SUCCESS ? close_err : err;
+    }
 }

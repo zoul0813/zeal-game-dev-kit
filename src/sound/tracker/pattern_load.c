@@ -22,11 +22,14 @@ zos_err_t zmt_pattern_load(pattern_t* pattern, zos_dev_t dev)
 
     /** Voice Bitmap */
     size = sizeof(uint8_t);
-    err  = read(dev, &voice_bitmap, &size);
+    err  = tracker_read_exact(dev, &voice_bitmap, size);
     if (err != ERR_SUCCESS) {
         tracker_log_io_error("read", 1, err);
         return err;
     }
+
+    if (voice_bitmap & 0xF0)
+        return ERR_ENTRY_CORRUPTED;
 
     // printf("  Voices: %02x\n", voice_bitmap);
     for (i = 0; i < NUM_VOICES; i++) {
@@ -39,7 +42,7 @@ zos_err_t zmt_pattern_load(pattern_t* pattern, zos_dev_t dev)
 
         /** Voice Header */
         size = sizeof(uint32_t);
-        err  = read(dev, &voice_header, &size);
+        err  = tracker_read_exact(dev, &voice_header, size);
         if (err != ERR_SUCCESS) {
             tracker_log_io_error("read", 2, err);
             return err;
@@ -54,15 +57,18 @@ zos_err_t zmt_pattern_load(pattern_t* pattern, zos_dev_t dev)
                 continue; // empty step
 
             size = sizeof(uint8_t);
-            err  = read(dev, &step_header, &size);
+            err  = tracker_read_exact(dev, &step_header, size);
             if (err != ERR_SUCCESS) {
                 tracker_log_io_error("read", 3, err);
                 return err;
             }
 
+            if (step_header & 0xF0)
+                return ERR_ENTRY_CORRUPTED;
+
             if (step_header & STEP_CELL_NOTE) {
                 size = sizeof(note_index_t);
-                err  = read(dev, &step->note, &size);
+                err  = tracker_read_exact(dev, &step->note, size);
                 if (err != ERR_SUCCESS) {
                     tracker_log_io_error("read", 4, err);
                     return err;
@@ -71,7 +77,7 @@ zos_err_t zmt_pattern_load(pattern_t* pattern, zos_dev_t dev)
 
             if (step_header & STEP_CELL_WAVE) {
                 size = sizeof(waveform_t);
-                err  = read(dev, &step->waveform, &size);
+                err  = tracker_read_exact(dev, &step->waveform, size);
                 if (err != ERR_SUCCESS) {
                     tracker_log_io_error("read", 5, err);
                     return err;
@@ -80,7 +86,7 @@ zos_err_t zmt_pattern_load(pattern_t* pattern, zos_dev_t dev)
 
             if (step_header & STEP_CELL_FX1) {
                 size = sizeof(fx_t);
-                err  = read(dev, &step->fx1, &size);
+                err  = tracker_read_exact(dev, &step->fx1, size);
                 if (err != ERR_SUCCESS) {
                     tracker_log_io_error("read", 6, err);
                     return err;
@@ -89,12 +95,15 @@ zos_err_t zmt_pattern_load(pattern_t* pattern, zos_dev_t dev)
 
             if (step_header & STEP_CELL_FX2) {
                 size = sizeof(fx_t);
-                err  = read(dev, &step->fx2, &size);
+                err  = tracker_read_exact(dev, &step->fx2, size);
                 if (err != ERR_SUCCESS) {
                     tracker_log_io_error("read", 7, err);
                     return err;
                 }
             }
+            if ((step->note >= NUM_NOTES && step->note != NOTE_OUT_OF_RANGE) ||
+                (step->waveform > WAV_NOISE && step->waveform != WAVEFORM_OUT_OF_RANGE))
+                return ERR_ENTRY_CORRUPTED;
         }
     }
 
