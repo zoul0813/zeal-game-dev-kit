@@ -155,6 +155,24 @@ static void test_arrangement_goto(void)
     assert(zmt_current_arrangement==0 && zmt_current_pattern==0);
 }
 
+static void test_pattern_goto_timing(void)
+{
+    const uint8_t tempos[]={4,16,32,128};
+    for(uint8_t t=0;t<4;t++) for(uint8_t target=0;target<32;target++) {
+        init();
+        track.current_tempo=tempos[t];
+        patterns[0].voices[0].steps[7].fx2=FX_GOTO_0+target;
+        zmt_next_step=7;
+        zmt_tick(&track,0);
+        assert(zmt_next_step==target);
+        for(uint8_t frame=1;frame<=tempos[t]/4;frame++) {
+            zmt_last_step=255;
+            zmt_tick(&track,0);
+            assert(zmt_last_step==(frame==tempos[t]/4 ? target : 255));
+        }
+    }
+}
+
 int main(void)
 {
     init();
@@ -165,6 +183,7 @@ int main(void)
     test_tempo();
     test_arrangement_bounds();
     test_arrangement_goto();
+    test_pattern_goto_timing();
     puts("tracker tests passed");
     return 0;
 }

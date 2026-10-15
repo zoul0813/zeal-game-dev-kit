@@ -83,7 +83,6 @@ void zmt_process_fx(step_t* step, fx_t fx, sound_voice_t voice)
 
     if(RANGE(fx, FX_GOTO_0, FX_GOTO_31)) {
         zmt_next_step = (fx - FX_GOTO_0) - 1;
-        zmt_ticks     = (zmt_next_step % 16) - 1; // TODO: yeah?
         return;
     }
 
