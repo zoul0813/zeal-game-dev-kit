@@ -39,6 +39,7 @@ uint8_t zmt_tick(track_t* track, uint8_t use_arrangement)
             if (use_arrangement) {
                 arrangement_t* arrangement = select_arrangement(track, zmt_current_arrangement + 1);
                 zmt_process_arrangement_fx(track, arrangement);
+                select_arrangement(track, zmt_current_arrangement);
             }
             zmt_next_step = 0;
         }
@@ -264,6 +265,7 @@ uint8_t zmt_track_reset(track_t* track, uint8_t reset_pattern)
     if (reset_pattern) {
         arrangement_t* a = select_arrangement(track, 0);
         zmt_process_arrangement_fx(track, a);
+        select_arrangement(track, zmt_current_arrangement);
     }
     zmt_ticks          = 0;
     zmt_next_step      = 0;
