@@ -1,11 +1,11 @@
 #include "zgdk/compress/rle.h"
 
-void decompress_rle(uint8_t *data, uint8_t size, uint8_t *buffer) {
+void decompress_rle(uint8_t *data, uint16_t size, uint8_t *buffer) {
     uint8_t length = 0;
     uint16_t i = 0; // data index
     uint16_t j = 0; // buffer index
     uint8_t k;
-    uint16_t length_of_data = size - 1;
+    uint16_t length_of_data = size > 0 ? size - 1 : 0;
 
     while(i < length_of_data) {
         length = data[i];

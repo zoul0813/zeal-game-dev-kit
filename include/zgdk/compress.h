@@ -4,4 +4,4 @@ typedef enum {
     COMPRESSION_RLE = 0,
 } CompressionType;
 
-void decompress(CompressionType type, uint8_t *data, uint8_t size, uint8_t *buffer);
+void decompress(CompressionType type, uint8_t *data, uint16_t size, uint8_t *buffer);
