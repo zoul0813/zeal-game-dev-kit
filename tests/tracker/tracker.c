@@ -8,6 +8,10 @@ uint8_t zvb_peri_sound_freq_low, zvb_peri_sound_freq_high;
 uint8_t zvb_peri_sound_wave, zvb_peri_sound_select, zvb_peri_sound_volume;
 uint8_t zvb_peri_sound_master_vol, zvb_peri_sound_hold, zvb_config_dev_idx;
 uint8_t zvb_peri_sound_left_channel, zvb_peri_sound_right_channel;
+void* tracker_test_memcpy(void* dst, const void* src, size_t size)
+{
+    return memcpy(dst,src,size);
+}
 static track_t track;
 static pattern_t patterns[NUM_PATTERNS];
 

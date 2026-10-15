@@ -12,6 +12,11 @@ zos_err_t zmt_arrangement_load(arrangement_t arrangement[NUM_ARRANGEMENTS], zos_
     uint32_t bitmap_low  = 0;
     uint8_t bit          = 0;
 
+    for (i = 0; i < NUM_ARRANGEMENTS; i++) {
+        arrangement[i].pattern_index = ARRANGEMENT_OUT_OF_RANGE;
+        arrangement[i].fx = FX_OUT_OF_RANGE;
+    }
+
     size = sizeof(uint32_t);
     err  = tracker_read_exact(dev, &bitmap_low, size);
     if (err != ERR_SUCCESS) {

@@ -10,14 +10,32 @@ uint8_t zvb_peri_sound_master_vol, zvb_peri_sound_hold, zvb_config_dev_idx;
 uint8_t zvb_peri_sound_left_channel, zvb_peri_sound_right_channel;
 static uint8_t data[2048];
 static uint16_t length, position;
+uint8_t tracker_mmu_page0;
+static uint8_t backup[0x4000];
+static int allocated, fail_alloc, fail_read, read_calls, fail_close;
+void* tracker_test_memcpy(void* dst, const void* src, size_t size)
+{
+    void* result=dst;
+    if ((uintptr_t)dst<sizeof backup) dst=backup+(uintptr_t)dst;
+    if ((uintptr_t)src<sizeof backup) src=backup+(uintptr_t)src;
+    memcpy(dst,src,size);
+    return result;
+}
+zos_err_t palloc(uint8_t* page)
+{
+    if(fail_alloc) return ERR_NO_MORE_MEMORY;
+    assert(!allocated); allocated=1;*page=7;return ERR_SUCCESS;
+}
+zos_err_t pfree(uint8_t page) { assert(page==7 && allocated);allocated=0;return ERR_SUCCESS; }
 static int opened;
 static int writes, fail_write, short_write;
 static track_t track;
 static pattern_t patterns[NUM_PATTERNS];
-zos_dev_t open(const char* name, uint8_t flags) { position=0; opened++; return 1; }
-zos_err_t close(zos_dev_t dev) { opened--; return ERR_SUCCESS; }
+zos_dev_t open(const char* name, uint8_t flags) { position=0; read_calls=0; opened++; return 1; }
+zos_err_t close(zos_dev_t dev) { opened--; return fail_close ? ERR_FAILURE : ERR_SUCCESS; }
 zos_err_t read(zos_dev_t dev, void* buf, uint16_t* size)
 {
+    if (++read_calls==fail_read) return ERR_FAILURE;
     if (*size > length-position) *size=length-position;
     memcpy(buf,data+position,*size);
     position+=*size;
@@ -48,8 +66,16 @@ static void fixture(void)
 }
 static void rejected(void)
 {
+    track_t previous=track;
+    pattern_t previous_patterns[NUM_PATTERNS];
+    memcpy(previous_patterns,patterns,sizeof patterns);
+    zmt_current_pattern=5; zmt_ticks=11;zmt_next_step=9;
+    tracker_mmu_page0=3;
     assert(zmt_file_load(&track,"test")!=ERR_SUCCESS);
-    assert(opened==0);
+    assert(memcmp(&previous,&track,sizeof track)==0);
+    assert(memcmp(previous_patterns,patterns,sizeof patterns)==0);
+    assert(zmt_current_pattern==5 && zmt_ticks==11 && zmt_next_step==9);
+    assert(opened==0 && allocated==0 && tracker_mmu_page0==3);
 }
 static void test_failed_saves(void)
 {
@@ -92,6 +118,9 @@ int main(void)
     fixture();data[33]=2;data[34]=4;rejected();
     fixture();data[34]=NOTE_OFF;assert(zmt_file_load(&track,"test")==ERR_SUCCESS);
     assert(opened==0);
+    fixture();fail_alloc=1;rejected();fail_alloc=0;
+    fixture();fail_close=1;rejected();fail_close=0;
+    for(int i=1;i<=11;i++) {fixture();fail_read=i;rejected();fail_read=0;}
     test_failed_saves();
     puts("tracker I/O tests passed");
 }
