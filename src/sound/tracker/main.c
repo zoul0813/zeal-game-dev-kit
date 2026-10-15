@@ -10,7 +10,7 @@ const __sfr __banked __at(0xF0) mmu_page0_ro;
 uint8_t zmt_tick(track_t* track, uint8_t use_arrangement)
 {
     pattern_t* pattern = track->patterns[zmt_current_pattern];
-    if (zmt_ticks > track->current_tempo)
+    if (zmt_ticks >= track->current_tempo)
         zmt_ticks = 0;
     // if(ticks % ticks_PER_EIGTH == 0) { }
     if (zmt_ticks % TICKS_PER_SIXTEENTH(track->current_tempo) == 0) {

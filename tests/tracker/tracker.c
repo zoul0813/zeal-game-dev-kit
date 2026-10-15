@@ -96,6 +96,26 @@ static void test_voice_volume(void)
     assert(zvb_peri_sound_volume==VOL_100);
 }
 
+static void test_tempo(void)
+{
+    for (uint8_t tempo=4;tempo<=128;tempo+=4) {
+        init();
+        track.tempo=track.current_tempo=tempo;
+        uint16_t previous=0;
+        uint16_t count=0;
+        for (uint16_t frame=0;frame<(uint16_t)tempo*4;frame++) {
+            uint8_t next=zmt_next_step;
+            zmt_tick(&track,0);
+            if (next!=zmt_next_step) {
+                if(count) assert(frame-previous==tempo/4);
+                previous=frame;
+                count++;
+            }
+        }
+        assert(count==16);
+    }
+}
+
 int main(void)
 {
     init();
@@ -103,6 +123,7 @@ int main(void)
     test_master_volume();
     test_note_mute();
     test_voice_volume();
+    test_tempo();
     puts("tracker tests passed");
     return 0;
 }
