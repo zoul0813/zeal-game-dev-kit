@@ -116,6 +116,27 @@ static void test_tempo(void)
     }
 }
 
+static void test_arrangement_bounds(void)
+{
+    init();
+    for(uint8_t i=0;i<NUM_ARRANGEMENTS;i++)
+        track.arrangement[i].pattern_index=0;
+    zmt_current_arrangement=63;
+    zmt_next_step=31;
+    zmt_tick(&track,1);
+    assert(zmt_current_arrangement==0 && zmt_current_pattern==0);
+    track.arrangement[0].pattern_index=ARRANGEMENT_OUT_OF_RANGE;
+    track.arrangement[1].pattern_index=99;
+    zmt_next_step=31;
+    zmt_ticks=0;
+    zmt_tick(&track,1);
+    assert(zmt_current_arrangement==0 && zmt_current_pattern==0);
+    zmt_ticks=0;
+    zmt_tick(&track,1);
+    assert(zmt_current_pattern==0);
+    assert(zmt_track_reset(&track,1)==0);
+}
+
 int main(void)
 {
     init();
@@ -124,6 +145,7 @@ int main(void)
     test_note_mute();
     test_voice_volume();
     test_tempo();
+    test_arrangement_bounds();
     puts("tracker tests passed");
     return 0;
 }

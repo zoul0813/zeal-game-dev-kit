@@ -7,8 +7,25 @@
 /** Page Banking for Sound Peripheral */
 const __sfr __banked __at(0xF0) mmu_page0_ro;
 
+/* Empty arrangements terminate the song; an empty first entry previews pattern 0. */
+static arrangement_t* select_arrangement(track_t* track, uint8_t index)
+{
+    if (index >= NUM_ARRANGEMENTS ||
+        track->arrangement[index].pattern_index >= track->pattern_count)
+        index = 0;
+    zmt_current_arrangement = index;
+    arrangement_t* arrangement = &track->arrangement[index];
+    zmt_current_pattern = arrangement->pattern_index < track->pattern_count
+        ? arrangement->pattern_index : 0;
+    return arrangement;
+}
+
 uint8_t zmt_tick(track_t* track, uint8_t use_arrangement)
 {
+    if (track->pattern_count == 0 || track->pattern_count > NUM_PATTERNS)
+        return 0;
+    if (zmt_current_pattern >= track->pattern_count)
+        zmt_current_pattern = 0;
     pattern_t* pattern = track->patterns[zmt_current_pattern];
     if (zmt_ticks >= track->current_tempo)
         zmt_ticks = 0;
@@ -20,15 +37,8 @@ uint8_t zmt_tick(track_t* track, uint8_t use_arrangement)
         zmt_next_step++;
         if (zmt_next_step >= STEPS_PER_PATTERN) {
             if (use_arrangement) {
-                zmt_current_arrangement++;
-                arrangement_t* arrangement = &track->arrangement[zmt_current_arrangement];
-                if (arrangement->pattern_index == ARRANGEMENT_OUT_OF_RANGE) {
-                    // reset
-                    zmt_current_arrangement = 0;
-                    arrangement             = &track->arrangement[zmt_current_arrangement];
-                }
+                arrangement_t* arrangement = select_arrangement(track, zmt_current_arrangement + 1);
                 zmt_process_arrangement_fx(track, arrangement);
-                zmt_current_pattern = arrangement->pattern_index;
             }
             zmt_next_step = 0;
         }
@@ -252,13 +262,7 @@ uint8_t zmt_track_reset(track_t* track, uint8_t reset_pattern)
 {
     track->current_tempo = track->tempo;
     if (reset_pattern) {
-        zmt_current_arrangement = 0;
-        arrangement_t* a    = &track->arrangement[0];
-        if (a->pattern_index != ARRANGEMENT_OUT_OF_RANGE) {
-            zmt_current_pattern = a->pattern_index;
-        } else {
-            zmt_current_pattern = 0;
-        }
+        arrangement_t* a = select_arrangement(track, 0);
         zmt_process_arrangement_fx(track, a);
     }
     zmt_ticks          = 0;
