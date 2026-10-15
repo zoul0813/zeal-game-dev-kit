@@ -142,6 +142,7 @@ void zmt_play_step(step_t* step, sound_voice_t voice)
     if (step->note != NOTE_OUT_OF_RANGE) {
         note_t note = NOTES[step->note];
         SOUND_DIV(note);
+        zmt_voice_active(voice, step->note != NOTE_OFF);
     }
 
     if (step->waveform != WAVEFORM_OUT_OF_RANGE) {

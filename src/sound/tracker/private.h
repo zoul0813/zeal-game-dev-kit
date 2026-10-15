@@ -11,3 +11,6 @@ extern uint8_t zmt_last_step;
 void tracker_log_io_error(const char* operation, uint8_t step, zos_err_t err);
 void tracker_log_open_error(const char* message, const char* filename, zos_err_t err);
 void tracker_copy_title_field(char* dst, const char* src);
+
+extern uint8_t zmt_voice_volumes[NUM_VOICES];
+void zmt_voice_active(sound_voice_t voice, uint8_t active);

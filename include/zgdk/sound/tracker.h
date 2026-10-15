@@ -335,6 +335,7 @@ static inline void SOUND_SELECT(uint8_t voices)
 static inline void SOUND_OFF(void)
 {
     SOUND_SELECT(VOICEALL);
+    zvb_peri_sound_volume = VOL_0;
     zvb_peri_sound_freq_low  = 0x00;
     zvb_peri_sound_freq_high = 0x00;
 }
