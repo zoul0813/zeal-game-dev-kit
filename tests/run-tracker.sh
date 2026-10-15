@@ -24,5 +24,9 @@ trap 'rm -f "$binary"' EXIT HUP INT TERM
     "$root/src/sound/tracker/notes.c" \
     "$root/src/sound/tracker/file_load.c" \
     "$root/src/sound/tracker/arrangement_load.c" \
-    "$root/src/sound/tracker/pattern_load.c" -o "$binary"
+    "$root/src/sound/tracker/pattern_load.c" \
+    "$root/src/sound/tracker/file_save.c" \
+    "$root/src/sound/tracker/pattern_save.c" \
+    "$root/src/sound/tracker/arrangement_save.c" \
+    "$root/src/sound/tracker/copy_title_field.c" -o "$binary"
 "$binary"

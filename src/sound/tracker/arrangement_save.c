@@ -34,14 +34,14 @@ zos_err_t zmt_arrangement_save(arrangement_t arrangement[NUM_ARRANGEMENTS], zos_
     }
 
     size = sizeof(uint32_t);
-    err  = write(dev, &bitmap_low, &size);
+    err  = tracker_write_exact(dev, &bitmap_low, size);
     if (err != ERR_SUCCESS) {
         tracker_log_io_error("write", 16, err);
         return err;
     }
 
     size = sizeof(uint32_t);
-    err  = write(dev, &bitmap_high, &size);
+    err  = tracker_write_exact(dev, &bitmap_high, size);
     if (err != ERR_SUCCESS) {
         tracker_log_io_error("write", 17, err);
         return err;
@@ -52,7 +52,7 @@ zos_err_t zmt_arrangement_save(arrangement_t arrangement[NUM_ARRANGEMENTS], zos_
         a = &arrangement[i];
         if (!ARRANGEMENT_IS_EMPTY(a)) {
             size = sizeof(arrangement_t);
-            err  = write(dev, a, &size);
+            err  = tracker_write_exact(dev, a, size);
             if (err != ERR_SUCCESS) {
                 tracker_log_io_error("write", 18, err);
                 return err;

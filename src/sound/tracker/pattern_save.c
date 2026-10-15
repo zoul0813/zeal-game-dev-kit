@@ -33,7 +33,7 @@ zos_err_t zmt_pattern_save(pattern_t* pattern, zos_dev_t dev)
     }
 
     size = sizeof(uint8_t);
-    err  = write(dev, &voice_bitmap, &size);
+    err  = tracker_write_exact(dev, &voice_bitmap, size);
     if (err != ERR_SUCCESS) {
         tracker_log_io_error("write", 1, err);
         return err;
@@ -46,7 +46,9 @@ zos_err_t zmt_pattern_save(pattern_t* pattern, zos_dev_t dev)
         voice = &pattern->voices[i];
 
         size = sizeof(uint32_t);
-        write(dev, &voice_headers[i], &size);
+        err = tracker_write_exact(dev, &voice_headers[i], size);
+        if (err != ERR_SUCCESS)
+            return err;
         if (err != ERR_SUCCESS) {
             tracker_log_io_error("write", 2, err);
             return err;
@@ -69,7 +71,7 @@ zos_err_t zmt_pattern_save(pattern_t* pattern, zos_dev_t dev)
                     step_header |= STEP_CELL_FX2;
 
                 size = sizeof(uint8_t);
-                err  = write(dev, &step_header, &size);
+                err  = tracker_write_exact(dev, &step_header, size);
                 if (err != ERR_SUCCESS) {
                     tracker_log_io_error("write", 3, err);
                     return err;
@@ -77,19 +79,27 @@ zos_err_t zmt_pattern_save(pattern_t* pattern, zos_dev_t dev)
 
                 if (step->note != NOTE_OUT_OF_RANGE) {
                     size = sizeof(note_index_t);
-                    write(dev, &step->note, &size);
+                    err = tracker_write_exact(dev, &step->note, size);
+                    if (err != ERR_SUCCESS)
+                        return err;
                 }
                 if (step->waveform != WAVEFORM_OUT_OF_RANGE) {
                     size = sizeof(waveform_t);
-                    write(dev, &step->waveform, &size);
+                    err = tracker_write_exact(dev, &step->waveform, size);
+                    if (err != ERR_SUCCESS)
+                        return err;
                 }
                 if (step->fx1 != FX_OUT_OF_RANGE) {
                     size = sizeof(fx_t);
-                    write(dev, &step->fx1, &size);
+                    err = tracker_write_exact(dev, &step->fx1, size);
+                    if (err != ERR_SUCCESS)
+                        return err;
                 }
                 if (step->fx2 != FX_OUT_OF_RANGE) {
                     size = sizeof(fx_t);
-                    write(dev, &step->fx2, &size);
+                    err = tracker_write_exact(dev, &step->fx2, size);
+                    if (err != ERR_SUCCESS)
+                        return err;
                 }
             }
         }

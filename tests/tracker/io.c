@@ -11,6 +11,7 @@ uint8_t zvb_peri_sound_left_channel, zvb_peri_sound_right_channel;
 static uint8_t data[2048];
 static uint16_t length, position;
 static int opened;
+static int writes, fail_write, short_write;
 static track_t track;
 static pattern_t patterns[NUM_PATTERNS];
 zos_dev_t open(const char* name, uint8_t flags) { position=0; opened++; return 1; }
@@ -22,6 +23,15 @@ zos_err_t read(zos_dev_t dev, void* buf, uint16_t* size)
     position+=*size;
     return ERR_SUCCESS;
 }
+zos_err_t write(zos_dev_t dev, const void* buf, uint16_t* size)
+{
+    writes++;
+    if (writes==fail_write) return ERR_FAILURE;
+    if (writes==short_write) { *size=0; return ERR_SUCCESS; }
+    return ERR_SUCCESS;
+}
+void log_error(const char* message, zos_err_t err) {}
+void tracker_log_open_error(const char* message, const char* name, zos_err_t err) {}
 void tracker_log_io_error(const char* operation,uint8_t step,zos_err_t err) {}
 
 static void fixture(void)
@@ -41,6 +51,26 @@ static void rejected(void)
     assert(zmt_file_load(&track,"test")!=ERR_SUCCESS);
     assert(opened==0);
 }
+static void test_failed_saves(void)
+{
+    fixture();
+    assert(zmt_file_load(&track,"test")==ERR_SUCCESS);
+    step_t* step=&patterns[0].voices[0].steps[0];
+    step->waveform=WAV_SAWTOOTH;step->fx1=FX_COUNT_1;step->fx2=FX_GOTO_0;
+    writes=0;
+    assert(zmt_file_save(&track,"test")==ERR_SUCCESS);
+    int total=writes;
+    for(int i=1;i<=total;i++) {
+        writes=0;fail_write=i;
+        assert(zmt_file_save(&track,"test")!=ERR_SUCCESS);
+        assert(opened==0);
+        fail_write=0;writes=0;short_write=i;
+        assert(zmt_file_save(&track,"test")!=ERR_SUCCESS);
+        assert(opened==0);
+        short_write=0;
+    }
+}
+
 int main(void)
 {
     fixture();
@@ -62,5 +92,6 @@ int main(void)
     fixture();data[33]=2;data[34]=4;rejected();
     fixture();data[34]=NOTE_OFF;assert(zmt_file_load(&track,"test")==ERR_SUCCESS);
     assert(opened==0);
+    test_failed_saves();
     puts("tracker I/O tests passed");
 }
