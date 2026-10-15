@@ -4,7 +4,7 @@
 
 const __sfr __banked __at(0xF0) mmu_page0_ro;
 
-uint8_t zmt_voice_volumes[NUM_VOICES];
+static uint8_t zmt_voice_volumes[NUM_VOICES];
 static uint8_t active_voices;
 
 /* A zero phase increment cannot silence noise: use the voice mute bit. */
@@ -23,6 +23,20 @@ void zmt_voice_active(sound_voice_t voice, uint8_t active)
         active_voices &= ~voice;
         zvb_peri_sound_volume = VOL_0;
     }
+}
+
+void zmt_voice_volume(sound_voice_t voice, sound_volume_t volume)
+{
+    uint8_t selected = zvb_peri_sound_select;
+    for (uint8_t i = 0; i < NUM_VOICES; i++) {
+        if (voice == (1U << i)) {
+            zmt_voice_volumes[i] = volume;
+            SOUND_SELECT(voice);
+            zvb_peri_sound_volume = (active_voices & voice) ? volume : VOL_0;
+            break;
+        }
+    }
+    SOUND_SELECT(selected);
 }
 
 void zmt_sound_off(void)

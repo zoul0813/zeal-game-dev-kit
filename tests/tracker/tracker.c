@@ -71,12 +71,38 @@ static void test_note_mute(void)
     assert(zvb_peri_sound_volume==VOL_75);
 }
 
+static void test_voice_volume(void)
+{
+    step_t step;
+    zmt_step_init(&step,0);
+    zmt_reset(VOL_75);
+    uint8_t master=zvb_peri_sound_master_vol;
+    step.note=NOTE_MIDDLE_C;
+    step.fx1=FX_VOL_50_0;
+    zmt_play_step(&step,VOICE0);
+    assert(zvb_peri_sound_select==VOICE0);
+    assert(zvb_peri_sound_volume==VOL_50);
+    assert(zvb_peri_sound_master_vol==master);
+    step.fx1=FX_OUT_OF_RANGE;
+    zmt_play_step(&step,VOICE1);
+    assert(zvb_peri_sound_volume==VOL_75);
+    step.note=NOTE_OFF;
+    step.fx2=FX_VOL_100;
+    zmt_play_step(&step,VOICE0);
+    assert(zvb_peri_sound_volume==VOL_0);
+    step.note=NOTE_MIDDLE_C;
+    step.fx2=FX_OUT_OF_RANGE;
+    zmt_play_step(&step,VOICE0);
+    assert(zvb_peri_sound_volume==VOL_100);
+}
+
 int main(void)
 {
     init();
     test_reset();
     test_master_volume();
     test_note_mute();
+    test_voice_volume();
     puts("tracker tests passed");
     return 0;
 }

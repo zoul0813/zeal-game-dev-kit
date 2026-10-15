@@ -60,7 +60,6 @@ void zmt_process_arrangement_fx(track_t* track, arrangement_t* arrangement)
 
 void zmt_process_fx(step_t* step, fx_t fx, sound_voice_t voice)
 {
-    (void*) voice; // TODO: per channel effects
     // pattern_t *pattern = active_pattern; // TODO: gonna have more than one pattern soon, lol
 
     if (RANGE(fx, FX_COUNT_0, FX_COUNT_8)) {
@@ -92,35 +91,35 @@ void zmt_process_fx(step_t* step, fx_t fx, sound_voice_t voice)
 
         // TODO: per channel volume control?
         case FX_VOL_00_0: {
-            SOUND_VOL(VOL_0);
+            zmt_voice_volume(voice, VOL_0);
         } break;
         case FX_VOL_12_5: {
             // TODO: 8 step volume control
-            SOUND_VOL(VOL_0);
+            zmt_voice_volume(voice, VOL_0);
         } break;
         case FX_VOL_25_0: {
-            SOUND_VOL(VOL_25);
+            zmt_voice_volume(voice, VOL_25);
         } break;
         case FX_VOL_37_5: {
             // TODO: 8 step volume control
-            SOUND_VOL(VOL_25);
+            zmt_voice_volume(voice, VOL_25);
         } break;
         case FX_VOL_50_0: {
-            SOUND_VOL(VOL_50);
+            zmt_voice_volume(voice, VOL_50);
         } break;
         case FX_VOL_62_5: {
             // TODO: 8 step volume control
-            SOUND_VOL(VOL_50);
+            zmt_voice_volume(voice, VOL_50);
         } break;
         case FX_VOL_75_0: {
-            SOUND_VOL(VOL_75);
+            zmt_voice_volume(voice, VOL_75);
         } break;
         case FX_VOL_87_5: {
             // TODO: 8 step volume control
-            SOUND_VOL(VOL_75);
+            zmt_voice_volume(voice, VOL_75);
         } break;
         case FX_VOL_100: {
-            SOUND_VOL(VOL_100);
+            zmt_voice_volume(voice, VOL_100);
         } break;
     }
 }
