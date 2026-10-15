@@ -35,10 +35,21 @@ static void test_reset(void)
     assert(zvb_config_dev_idx==5);
 }
 
+static void test_master_volume(void)
+{
+    const uint8_t volumes[]={VOL_0,VOL_25,VOL_50,VOL_75,VOL_100};
+    const uint8_t encoded[]={0xC0,0,5,10,15};
+    for (uint8_t i=0;i<5;i++) {
+        zmt_reset(volumes[i]);
+        assert(zvb_peri_sound_master_vol==encoded[i]);
+    }
+}
+
 int main(void)
 {
     init();
     test_reset();
+    test_master_volume();
     puts("tracker tests passed");
     return 0;
 }
