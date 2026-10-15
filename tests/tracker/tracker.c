@@ -173,6 +173,28 @@ static void test_pattern_goto_timing(void)
     }
 }
 
+static void test_countdown_restart(void)
+{
+    init();
+    track.pattern_count=2;
+    step_t* step=&patterns[1].voices[0].steps[0];
+    step->fx1=FX_COUNT_1;
+    step->fx2=FX_VOICE_SAW;
+    zmt_reset(VOL_75);
+    zmt_play_step(step,VOICE0);
+    assert(step->fx1_attr==1);
+    assert(zvb_peri_sound_wave==(WAV_SQUARE | DUTY_CYCLE_50_0));
+    zmt_track_reset(&track,1);
+    assert(step->fx1_attr==0);
+    zmt_play_step(step,VOICE0);
+    assert(step->fx1_attr==1);
+    assert(zvb_peri_sound_wave==(WAV_SQUARE | DUTY_CYCLE_50_0));
+    patterns[0].voices[3].steps[31].fx2_attr=9;
+    zmt_track_reset(&track,0);
+    assert(patterns[0].voices[3].steps[31].fx2_attr==0);
+    assert(step->fx1_attr==0);
+}
+
 int main(void)
 {
     init();
@@ -184,6 +206,7 @@ int main(void)
     test_arrangement_bounds();
     test_arrangement_goto();
     test_pattern_goto_timing();
+    test_countdown_restart();
     puts("tracker tests passed");
     return 0;
 }

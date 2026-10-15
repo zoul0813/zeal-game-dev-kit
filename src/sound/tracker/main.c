@@ -268,7 +268,7 @@ uint8_t zmt_track_reset(track_t* track, uint8_t reset_pattern)
     }
     zmt_ticks          = 0;
     zmt_next_step      = 0;
-    pattern_t* pattern = track->patterns[zmt_current_pattern];
-    zmt_pattern_reset(pattern);
+    for (uint8_t p = 0; p < track->pattern_count; p++)
+        zmt_pattern_reset(track->patterns[p]);
     return zmt_current_pattern;
 }
