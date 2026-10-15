@@ -22,6 +22,8 @@ trap 'rm -f "$binary"' EXIT HUP INT TERM
     "$root/src/sound/tracker/global.c" \
     "$root/src/sound/tracker/sound_control.c" \
     "$root/src/sound/tracker/notes.c" \
+    "$root/src/sound/tracker/read_exact.c" \
+    "$root/src/sound/tracker/write_exact.c" \
     "$root/src/sound/tracker/file_load.c" \
     "$root/src/sound/tracker/arrangement_load.c" \
     "$root/src/sound/tracker/pattern_load.c" \
@@ -30,3 +32,5 @@ trap 'rm -f "$binary"' EXIT HUP INT TERM
     "$root/src/sound/tracker/arrangement_save.c" \
     "$root/src/sound/tracker/copy_title_field.c" -o "$binary"
 "$binary"
+
+python3 "$root/tests/check-tracker-link.py"

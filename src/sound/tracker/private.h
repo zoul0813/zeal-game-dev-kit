@@ -15,21 +15,6 @@ void tracker_copy_title_field(char* dst, const char* src);
 void zmt_voice_active(sound_voice_t voice, uint8_t active);
 void zmt_voice_volume(sound_voice_t voice, sound_volume_t volume);
 
-/* A successful syscall can still return fewer bytes at EOF. */
-static inline zos_err_t tracker_read_exact(zos_dev_t dev, void* buffer, uint16_t length)
-{
-    uint16_t size = length;
-    zos_err_t err = read(dev, buffer, &size);
-    if (err != ERR_SUCCESS)
-        return err;
-    return size == length ? ERR_SUCCESS : ERR_ENTRY_CORRUPTED;
-}
-
-static inline zos_err_t tracker_write_exact(zos_dev_t dev, const void* buffer, uint16_t length)
-{
-    uint16_t size = length;
-    zos_err_t err = write(dev, buffer, &size);
-    if (err != ERR_SUCCESS)
-        return err;
-    return size == length ? ERR_SUCCESS : ERR_FAILURE;
-}
+/* File I/O stays in separate objects so ROM playback does not link it. */
+zos_err_t tracker_read_exact(zos_dev_t dev, void* buffer, uint16_t length);
+zos_err_t tracker_write_exact(zos_dev_t dev, const void* buffer, uint16_t length);
