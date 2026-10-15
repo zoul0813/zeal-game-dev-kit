@@ -351,6 +351,10 @@ static inline void SOUND_VOL(uint8_t vol)
 /* Internal - set volume, hold voices, sound off */
 static inline void SOUND_RESET(uint8_t vol)
 {
+    SOUND_SELECT(VOICEALL);
+    SOUND_WAVE(WAV_SQUARE);
+    zvb_peri_sound_left_channel = VOICEALL;
+    zvb_peri_sound_right_channel = VOICEALL;
     SOUND_VOL(vol);
     zvb_peri_sound_hold &= ~VOICEALL;
     SOUND_OFF();
