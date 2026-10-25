@@ -31,3 +31,7 @@ void ascii_map(uint8_t start, uint8_t length, uint8_t from) {
 //   }
 //   printf("\ntest lib %d %d\n\n", ASCII_MAP[12], ascii_to(','));
 // }
+
+uint8_t ascii_to(uint8_t c) {
+  return ASCII_MAP[c - ASCII_MAP_OFFSET];
+}

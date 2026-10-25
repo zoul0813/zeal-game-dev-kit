@@ -11,7 +11,7 @@ gfx_sprite* sprites_register(gfx_sprite sprite);
 void sprites_deregister(void);
 gfx_error sprites_render(gfx_context* ctx);
 
-inline void sprite_get_point(gfx_sprite *sprite, Point *point);
-inline void sprite_set_point(gfx_sprite *sprite, Point *point);
-inline void sprite_set_xy(gfx_sprite *sprite, uint16_t x, uint16_t y);
+void sprite_get_point(gfx_sprite *sprite, Point *point);
+void sprite_set_point(gfx_sprite *sprite, Point *point);
+void sprite_set_xy(gfx_sprite *sprite, uint16_t x, uint16_t y);
 #endif

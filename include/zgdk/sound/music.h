@@ -47,20 +47,12 @@ uint16_t music_frame(void);
 uint16_t music_length(void);
 uint16_t music_pos(void);
 
-static uint8_t music_get_voice(uint8_t voice_wave) {
-  return (voice_wave & 0xF0) >> 4;
-}
+uint8_t music_get_voice(uint8_t voice_wave);
 
-static uint8_t music_get_wave(uint8_t voice_wave) {
-  return (voice_wave & 0x0F);
-}
+uint8_t music_get_wave(uint8_t voice_wave);
 
-static uint8_t music_set_voice_wave(uint8_t voice, uint8_t wave) {
-  return (voice << 4) | (wave);
-}
+uint8_t music_set_voice_wave(uint8_t voice, uint8_t wave);
 
-static uint8_t music_end(Record *record) {
-  return (record->freq == 0xFF) && (record->voice_wave == 0xFF);
-}
+uint8_t music_end(Record *record);
 
 #endif

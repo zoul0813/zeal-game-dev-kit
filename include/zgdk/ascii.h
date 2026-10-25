@@ -31,8 +31,6 @@ extern uint8_t ASCII_MAP[95];
 void ascii_map(uint8_t start, uint8_t length, uint8_t from);
 void ascii_print(void);
 
-static uint8_t ascii_to(uint8_t c) {
-  return ASCII_MAP[c - ASCII_MAP_OFFSET];
-}
+uint8_t ascii_to(uint8_t c);
 
 #endif
