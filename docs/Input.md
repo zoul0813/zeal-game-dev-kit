@@ -23,7 +23,7 @@ Example
 zos_err_t err = input_init(true);
 ```
 
-To read user input, you can call `input_get()`
+To read user input, call `input_read()` (`input_get()` remains a deprecated alias).
 
 ```C
 /**
@@ -31,7 +31,7 @@ To read user input, you can call `input_get()`
  *
  * @return 16-bit mask of ZGDK Inputs
  */
-uint16_t input_get(void);
+uint16_t input_read(void);
 ```
 
 Example
@@ -39,7 +39,7 @@ Example
 ```C
 uint16_t x, y;
 while (1) {
-  uint16_t input1 = input_get();
+  uint16_t input1 = input_read();
 
   if((input1 & BUTTON_LEFT)) x--;
   if((input1 & BUTTON_RIGHT)) x++;
@@ -71,6 +71,20 @@ if(LEFT1) x--;
 if(RIGHT1) x++;
 ```
 
+### Held buttons and flushing
+
+`input_read()` combines keyboard buttons with a valid SNES pad report from port 1.
+Mice and invalid controller reports are ignored.
+After initialization or an invalid report, pad buttons must be seen released
+before they can activate.
+
+Opposing keyboard directions prefer the most recently pressed key. Releasing it
+restores the other direction if still held.
+
+`input_flush()` drains queued keyboard events and clears keyboard state. It also
+suppresses currently held pad buttons until release, preventing an immediate
+retrigger. This suppression applies to `input_read()`, not raw controller reads.
+
 ### SNES Mouse Sensitivity
 
 Original SNS-016 mice support software-selectable sensitivity:
@@ -96,7 +110,7 @@ Hyperkin-style clone mice may ignore software sensitivity cycling and always rep
 | A      | X        |
 | Y      | A        |
 | X      | S        |
-| Select | R Shift  |
+| Select | R Shift/Quote |
 | Start  | Enter    |
 | L      | Q        |
 | R      | W        |
