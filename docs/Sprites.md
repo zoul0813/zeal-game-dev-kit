@@ -2,7 +2,7 @@
 
 ZGDK provides a Sprite Arena to help with allocating a large number of sprites and rendering them effeciently.
 
-You can create and register a Sprite Arena by defining an array of `gfx_sprite` and calling `sprites_register_arena(sprites, sizeof(sprites));`
+Create a Sprite Arena by defining an array of `gfx_sprite` and calling `sprites_register_arena(sprites, SPRITE_ARENA_SIZE);`. The size is the number of elements, not bytes, and must be 1–128. A null pointer or invalid size returns `GFX_INVALID_ARG`.
 
 ```C
 #define SPRITE_ARENA_SIZE 64
@@ -37,6 +37,8 @@ void init(void) {
 
 Once your arena is defined and registered, you can allocate sprites by calling `sprites_register(sprite);`
 
+Registration returns a pointer into the arena, or `NULL` when the arena is full.
+
 ```C
 zos_err_t player_init(void) {
   gfx_sprite sprite = {
@@ -58,3 +60,7 @@ void draw(void) {
   gfx_wait_end_vblank(&vctx);
 }
 ```
+
+Call `sprites_deregister()` to release all registrations before loading a new scene. Previously returned sprite pointers are no longer valid. Register the new scene's sprites, then call `sprites_render(ctx)` to update the display and remove old sprites. Render even if the new scene has no sprites.
+
+Keep the arena alive until that render succeeds, retrying if needed, before releasing it or replacing it with `sprites_register_arena()`.

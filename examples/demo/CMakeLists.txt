@@ -81,6 +81,7 @@ file(GLOB STATIC_ZOS_ASSETS CONFIGURE_DEPENDS
     "${ASSETS_DIR}/*.zts"
     "${ASSETS_DIR}/*.ztp"
     "${ASSETS_DIR}/*.ztm"
+    "${ASSETS_DIR}/*.zmt"
 )
 set(EMBED_SRCS ${STATIC_ZOS_ASSETS} ${GIF_SRCS} ${TMX_SRCS})
 embed_assets(${target_name} FILES ${EMBED_SRCS})

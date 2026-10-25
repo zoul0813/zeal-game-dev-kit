@@ -16,9 +16,13 @@ typedef struct {
 } Sound;
 
 
+/* Required before playback. Resets shared sound hardware; call before zmt_reset.
+ * Hardware operations preserve the caller's peripheral mapping. */
 zos_err_t sound_init(void);
 zos_err_t sound_deinit(void);
 Sound* sound_play(uint8_t voice, uint16_t freq, uint16_t duration);
+/* voice is an index (0-3), not a VOICE* mask. OR in a DUTY_CYCLE_* value to
+ * select square duty; playback defaults to 50% when no duty bits are set. */
 Sound* sound_set(uint8_t voice, uint16_t waveform);
 void sound_stop(Sound *sound);
 void sound_stop_all(void);

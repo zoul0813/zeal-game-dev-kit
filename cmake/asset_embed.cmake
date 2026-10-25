@@ -3,7 +3,7 @@
 # Supported input extensions:
 # - .gif -> emits <stem>.zts and <stem>.ztp from BUILD_DIR
 # - .tmx -> emits <stem>.ztm from BUILD_DIR
-# - .zts/.ztp/.ztm -> passed through directly
+# - .zts/.ztp/.ztm/.zmt -> passed through directly
 # Arguments:
 # - target: target that receives embedded assets.
 # - asset_file: source asset path.
@@ -12,6 +12,7 @@
 # Example:
 # embed_asset(my_game assets/player.gif BUILD_DIR build/assets)
 # embed_asset(my_game build/assets/level1.ztm)
+# embed_asset(my_game assets/song.zmt)
 function(embed_asset target asset_file)
     if(NOT COMMAND zos_add_assets)
         message(FATAL_ERROR "embed_asset requires zos_add_assets (include zos_init.cmake first).")
@@ -42,13 +43,13 @@ function(embed_asset target asset_file)
         zos_add_assets(${target}
             "${EMBED_ASSET_BUILD_DIR}/${asset_stem}.ztm"
         )
-    elseif(asset_ext STREQUAL ".zts" OR asset_ext STREQUAL ".ztp" OR asset_ext STREQUAL ".ztm")
+    elseif(asset_ext STREQUAL ".zts" OR asset_ext STREQUAL ".ztp" OR asset_ext STREQUAL ".ztm" OR asset_ext STREQUAL ".zmt")
         _zgdk_asset_to_source_relative(asset_rel "${asset_file}")
         zos_add_assets(${target} "${asset_rel}")
     else()
         message(FATAL_ERROR
             "embed_asset: unsupported asset extension '${asset_ext}' for '${asset_file}'. "
-            "Supported: .gif .tmx .zts .ztp .ztm"
+            "Supported: .gif .tmx .zts .ztp .ztm .zmt"
         )
     endif()
 
@@ -69,6 +70,7 @@ endfunction()
 #     FILES
 #         assets/player.gif
 #         assets/level1.tmx
+#         assets/song.zmt
 #         build/assets/ui.zts
 # )
 function(embed_assets target)

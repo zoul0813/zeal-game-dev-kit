@@ -25,6 +25,12 @@ In addition to Vectors, ZGDK defines a simple `Rect` struct that contains a `Poi
 
 The `Rect` can be used as `rect.w` or `rect.size.w`, and allows you to pass either the single value, or a pointer to the `Size` struct.
 
+Rectangle geometry uses `x, y` as the bottom-right edge: the occupied area is `[x - w, x)` horizontally and `[y - h, y)` vertically. For example, `{x=32, y=32, w=16, h=16}` covers pixels 16–31 on each axis. When using `rect_left` or `rect_top`, keep `x >= w` and `y >= h`; these helpers cannot return negative coordinates.
+
+`rect_collide(a, b)` detects overlap, including identical rectangles and containment. Touching edges or corners and rectangles with zero width or height do not collide.
+
+When upgrading from an earlier version, check gameplay collisions involving aligned edges, containment, or rectangles of different sizes.
+
 ```C
 /**
  * 16-bit X,Y,W,H with Point/Size union

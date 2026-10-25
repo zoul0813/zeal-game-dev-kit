@@ -6,8 +6,10 @@
 #ifndef SPRITES_H
 #define SPRITES_H
 
+/* size is an element count from 1 through GFX_SPRITES_COUNT, not bytes. */
 gfx_error sprites_register_arena(gfx_sprite* arena, uint8_t size);
 gfx_sprite* sprites_register(gfx_sprite sprite);
+/* Invalidates registered pointers. Render once to hide old hardware slots. */
 void sprites_deregister(void);
 gfx_error sprites_render(gfx_context* ctx);
 

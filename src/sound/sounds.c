@@ -9,6 +9,7 @@
 static Sound sounds[MAX_VOICES];
 
 zos_err_t sound_init(void) {
+  uint8_t backup_page = zvb_config_dev_idx;
   sounds[0].voice = VOICE0;
   sounds[1].voice = VOICE1;
   sounds[2].voice = VOICE2;
@@ -26,14 +27,17 @@ zos_err_t sound_init(void) {
   zvb_sound_set_hold(VOICEALL, 0);
 
   zvb_sound_set_volume(VOL_75);
+  zvb_map_peripheral(backup_page);
 
   return ERR_SUCCESS;
 }
 
 zos_err_t sound_deinit(void) {
+  uint8_t backup_page = zvb_config_dev_idx;
   zvb_sound_set_voices(VOICEALL, 0, WAV_SQUARE | DUTY_CYCLE_50_0);
   zvb_sound_set_hold(VOICEALL, 1);
   zvb_sound_set_volume(VOL_0);
+  zvb_map_peripheral(backup_page);
   return ERR_SUCCESS;
 }
 
@@ -51,7 +55,12 @@ Sound* sound_play(uint8_t voice, uint16_t freq, uint16_t duration) {
   sound->remaining = duration;
 
   uint16_t note = SOUND_FREQ_TO_DIV(sound->freq);
-  zvb_sound_set_voices(sound->voice, note, sound->waveform | DUTY_CYCLE_50_0);
+  uint16_t waveform = sound->waveform;
+  /* Bits 5-7 select square-wave duty. Keep explicit duty settings intact. */
+  if ((waveform & 0xe0) == 0) waveform |= DUTY_CYCLE_50_0;
+  uint8_t backup_page = zvb_config_dev_idx;
+  zvb_sound_set_voices(sound->voice, note, waveform);
+  zvb_map_peripheral(backup_page);
   return sound;
 }
 
@@ -63,12 +72,16 @@ Sound* sound_set(uint8_t voice, uint16_t waveform) {
 }
 
 void sound_stop(Sound *sound) {
+  uint8_t backup_page = zvb_config_dev_idx;
   sound->remaining = 0;
   zvb_sound_set_voices(sound->voice, 0, WAV_SQUARE | DUTY_CYCLE_50_0);
+  zvb_map_peripheral(backup_page);
 }
 
 void sound_stop_all(void) {
+  uint8_t backup_page = zvb_config_dev_idx;
   zvb_sound_set_voices(VOICEALL, 0, WAV_SQUARE | DUTY_CYCLE_50_0);
+  zvb_map_peripheral(backup_page);
 }
 
 void sound_loop(void) {
