@@ -12,6 +12,8 @@ This is a "simple" framework/library for building games for the [Zeal 8-bit Comp
 - [Sprites](docs/Sprites.md)
 - [Tilemaps](docs/Tilemaps.md)
 - [Compression](docs/Compression.md)
+- [File](docs/File.md)
+- [Tilesets](docs/Tilesets.md)
 
 ## Built with ZGDK
 
