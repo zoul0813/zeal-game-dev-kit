@@ -25,3 +25,15 @@ add_custom_command(TARGET caminit POST_BUILD
     VERBATIM
 )
 zos_add_outputs(caminit)
+
+add_executable(readeronly reader_only.c)
+target_compile_options(readeronly PRIVATE --opt-code-size)
+target_include_directories(readeronly PRIVATE "$ENV{ZVB_SDK_PATH}/include")
+target_link_libraries(readeronly PUBLIC zgdk)
+set_property(TARGET readeronly APPEND PROPERTY LINK_DEPENDS "$ENV{ZGDK_PATH}/lib/zgdk.lib")
+add_custom_command(TARGET readeronly POST_BUILD
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/check_stream_link.py
+        ${CMAKE_CURRENT_BINARY_DIR}/readeronly.map
+    VERBATIM
+)
+zos_add_outputs(readeronly)

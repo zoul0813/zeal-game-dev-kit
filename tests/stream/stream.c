@@ -63,10 +63,21 @@ static uint16_t random16(void) {
     random_state = random_state * 1664525U + 1013904223U;
     return (uint16_t)(random_state >> 16);
 }
+/* On the host, int is 32 bits, so the 16-bit code can't overflow here. Check
+ * instead that every sum it computes would fit int16_t on the Z80 (SDCC int). */
+static void fits16(int64_t v) { assert(v >= INT16_MIN && v <= INT16_MAX); }
+static void follow_sums(const camera_t *c, int64_t tx, int64_t ty, int64_t w, int64_t h) {
+    int64_t right=c->view_w-c->dz_right, bottom=c->view_h-c->dz_bottom;
+    fits16(tx); fits16(ty); fits16(right); fits16(bottom);
+    fits16(c->x+c->dz_left); fits16(tx-c->dz_left); fits16(tx+w); fits16(c->x+right); fits16(tx+w-right);
+    fits16(c->y+c->dz_top); fits16(ty-c->dz_top); fits16(ty+h); fits16(c->y+bottom); fits16(ty+h-bottom);
+    fits16(c->x+c->max_step); fits16(c->x-c->max_step); fits16(c->y+c->max_step); fits16(c->y-c->max_step);
+}
 static void follow_reference(camera_t *c, int16_t tx, int16_t ty,
                              uint16_t w, uint16_t h, int direction) {
     int64_t left=tx, top=ty, x=c->x, y=c->y;
     if(direction>0) left+=c->lead; else if(direction<0) left-=c->lead;
+    follow_sums(c,left,top,w,h);
     if(left<x+c->dz_left) x=left-c->dz_left;
     else if(left+w>x+c->view_w-c->dz_right) x=left+w-c->view_w+c->dz_right;
     if(top<y+c->dz_top) y=top-c->dz_top;
@@ -83,16 +94,20 @@ static void follow_reference(camera_t *c, int16_t tx, int16_t ty,
 }
 static void randomized_follow(void) {
     unsigned i;
-    for(i=0;i<50000;i++) {
+    for(i=0;i<500000;i++) {
         camera_t c, ref;
-        int16_t tx=(int16_t)random16(), ty=(int16_t)random16();
-        uint16_t w=random16(), h=random16();
+        /* Every documented range at once: targets, sizes, views, margins, lead, step. */
+        int16_t tx=(int16_t)(CAMERA_TARGET_MIN+random16()%(CAMERA_MAX_SIZE-CAMERA_TARGET_MIN));
+        int16_t ty=(int16_t)(CAMERA_TARGET_MIN+random16()%(CAMERA_MAX_SIZE-CAMERA_TARGET_MIN));
+        uint16_t w=random16()%(CAMERA_MAX_TARGET+1), h=random16()%(CAMERA_MAX_TARGET+1);
         int direction=(int)(random16()%3)-1;
-        assert(camera_init_view(&c,32767,32767,1+random16()%1265,1+random16()%625)==ERR_SUCCESS);
-        c.x=(int16_t)random16(); c.y=(int16_t)random16();
+        assert(camera_init_view(&c,1+random16()%CAMERA_MAX_SIZE,1+random16()%CAMERA_MAX_SIZE,
+            1+random16()%CAMERA_MAX_SIZE,1+random16()%CAMERA_MAX_SIZE)==ERR_SUCCESS);
+        c.x=c.max_x ? (int16_t)(random16()%(c.max_x+1)) : 0;
+        c.y=c.max_y ? (int16_t)(random16()%(c.max_y+1)) : 0;
         c.lead=(uint8_t)random16(); c.max_step=(uint8_t)random16();
-        c.dz_left=random16()%c.view_w; c.dz_right=random16()%c.view_w;
-        c.dz_top=random16()%c.view_h; c.dz_bottom=random16()%c.view_h;
+        c.dz_left=random16()%(c.view_w+1); c.dz_right=random16()%(c.view_w+1);
+        c.dz_top=random16()%(c.view_h+1); c.dz_bottom=random16()%(c.view_h+1);
         ref=c;
         follow_reference(&ref,tx,ty,w,h,direction);
         camera_follow_target(&c,tx,ty,w,h,direction);
@@ -118,27 +133,37 @@ static void cameras(void) {
     camera_follow_target(&c, 600, 400, 16, 16, 1); assert(c.x == 434);
     camera_set(&c, 400, 300);
     camera_follow_target(&c, 510, 400, 16, 16, -1); assert(c.x == 372);
-    camera_follow_target(&c, INT16_MIN, INT16_MIN, 65535, 65535, -1);
+    /* The ends of the documented target ranges. */
+    camera_follow_target(&c, CAMERA_TARGET_MIN, CAMERA_TARGET_MIN, CAMERA_MAX_TARGET, CAMERA_MAX_TARGET, -1);
     assert(c.x == 0 && c.y == 0);
-    camera_follow_target(&c, INT16_MAX, INT16_MAX, 65535, 65535, 1);
+    camera_follow_target(&c, CAMERA_MAX_SIZE - 1, CAMERA_MAX_SIZE - 1, CAMERA_MAX_TARGET, CAMERA_MAX_TARGET, 1);
     assert(c.x == c.max_x && c.y == c.max_y);
     before = c;
-    assert(camera_init_view(&c,65535,1000,1,240)==ERR_INVALID_PARAMETER);
+    assert(camera_init_view(&c,CAMERA_MAX_SIZE+1,1000,1,240)==ERR_INVALID_PARAMETER);
+    assert(camera_init_view(&c,1000,1000,1,CAMERA_MAX_SIZE+1)==ERR_INVALID_PARAMETER);
+    assert(camera_init_view(&c,65535,65535,65535,65535)==ERR_INVALID_PARAMETER);
     assert(memcmp(&c,&before,sizeof c)==0);
     assert(camera_init_view(&c,100,100,0,240)==ERR_INVALID_PARAMETER);
+    assert(camera_init_view(&c,0,100,320,240)==ERR_INVALID_PARAMETER);
     assert(camera_init_view(&c,100,100,320,240)==ERR_SUCCESS);
     camera_follow_target(&c,300,300,32,32,0); assert(c.x==0 && c.y==0);
-    assert(camera_init_view(&c,65535,65535,32767,32767)==ERR_INVALID_PARAMETER);
-    assert(camera_init_view(&c,65535,65535,65535,65535)==ERR_SUCCESS);
-    assert(c.max_x==0 && c.dz_left==21845 && c.dz_top==24575);
-    assert(camera_init_view(&c,65535,65535,32768,32768)==ERR_SUCCESS && c.max_x==32767);
-    assert(camera_init_view(&c,65534,65534,32767,32767)==ERR_SUCCESS);
-    assert(c.max_x==32767 && c.dz_top==12287);
-    camera_set(&c,32767,32767);
-    c.max_step=255; c.dz_left=0; c.dz_top=0;
-    camera_follow_target(&c,32767,32767,65535,65535,1);
-    assert(c.x==32767 && c.y==32767);
-    /* Cross the largest phase periods repeatedly. Every shift must agree with
+    assert(camera_init_view(&c,CAMERA_MAX_SIZE,CAMERA_MAX_SIZE,CAMERA_MAX_SIZE,CAMERA_MAX_SIZE)==ERR_SUCCESS);
+    assert(c.max_x==0 && c.dz_left==5461 && c.dz_top==6143);
+    assert(camera_init_view(&c,CAMERA_MAX_SIZE,CAMERA_MAX_SIZE,1,1)==ERR_SUCCESS);
+    assert(c.max_x==CAMERA_MAX_SIZE-1 && c.dz_top==0);
+    /* dz_top is floor(3 * vh / 8) for every view height */
+    for(i=1;i<=CAMERA_MAX_SIZE;i++) {
+        assert(camera_init_view(&c,100,100,320,i)==ERR_SUCCESS);
+        assert(c.dz_top==i*3/8 && c.dz_bottom==i*3/8);
+    }
+    assert(camera_init_view(&c,CAMERA_MAX_SIZE,CAMERA_MAX_SIZE,1,1)==ERR_SUCCESS);
+    camera_set(&c,CAMERA_MAX_SIZE,CAMERA_MAX_SIZE);
+    assert(c.x==CAMERA_MAX_SIZE-1 && c.y==CAMERA_MAX_SIZE-1);
+    c.max_step=255; c.dz_left=0; c.dz_top=0; c.lead=255;
+    camera_follow_target(&c,CAMERA_MAX_SIZE-1,CAMERA_MAX_SIZE-1,CAMERA_MAX_TARGET,CAMERA_MAX_TARGET,1);
+    assert(c.x==CAMERA_MAX_SIZE-1 && c.y==CAMERA_MAX_SIZE-1);
+    c.lead=0;
+    /* Cross the largest origin periods repeatedly. Every shift must agree with
      * an unbounded world-coordinate model, including fractional parallax bits. */
     assert(camera_init_view(&c,2000,1000,320,240)==ERR_SUCCESS);
     for(i=0;i<80000;i++) {
@@ -146,40 +171,42 @@ static void cameras(void) {
         total_x += 1000; total_y += 700;
         assert(camera_rebase(&c,1000,700)==ERR_SUCCESS);
         assert(c.x==0 && c.y==0 && c.max_x==1680 && c.max_y==760);
-        assert(c.phase_x < 32768 && c.phase_y < 32768);
-        if(i%137==0 || i==79999) for(shift=0;shift<=15;shift++) {
-            assert(camera_scroll_layer(&c,1,shift,15-shift)==ERR_SUCCESS);
+        assert(c.origin_x < (1280U<<CAMERA_MAX_SHIFT) && c.origin_y < (640U<<CAMERA_MAX_SHIFT));
+        if(i%137==0 || i==79999) for(shift=0;shift<=CAMERA_MAX_SHIFT;shift++) {
+            assert(camera_scroll_layer(&c,1,shift,CAMERA_MAX_SHIFT-shift)==ERR_SUCCESS);
             assert(scroll_x==((total_x>>shift)%1280));
-            assert(scroll_y==((total_y>>(15-shift))%640));
+            assert(scroll_y==((total_y>>(CAMERA_MAX_SHIFT-shift))%640));
         }
     }
+    /* Every local position and shift, from an origin near its limit. */
+    for(i=0;i<=32767;i+=7) for(shift=0;shift<=CAMERA_MAX_SHIFT;shift++) {
+        c.origin_x=(1280U<<CAMERA_MAX_SHIFT)-1; c.origin_y=(640U<<CAMERA_MAX_SHIFT)-1;
+        c.x=(int16_t)i; c.y=(int16_t)i;
+        assert(camera_scroll_layer(&c,0,shift,shift)==ERR_SUCCESS);
+        assert(scroll_x==(((uint32_t)c.origin_x+i)>>shift)%1280);
+        assert(scroll_y==(((uint32_t)c.origin_y+i)>>shift)%640);
+    }
+    /* The local position may not go negative. */
     camera_set(&c,0,0);
-    assert(camera_rebase(&c,1,1)==ERR_SUCCESS);
-    assert(c.x==-1 && c.y==-1);
-    assert(camera_scroll_layer(&c,0,0,0)==ERR_SUCCESS);
-    assert(scroll_x==total_x%1280 && scroll_y==total_y%640);
+    before=c;
+    assert(camera_rebase(&c,1,0)==ERR_INVALID_PARAMETER);
+    assert(camera_rebase(&c,0,1)==ERR_INVALID_PARAMETER);
+    assert(memcmp(&c,&before,sizeof c)==0);
+    assert(camera_rebase(&c,0,0)==ERR_SUCCESS && !memcmp(&c,&before,sizeof c));
+    c.x=INT16_MAX; c.y=INT16_MAX;
     before=c;
     assert(camera_rebase(&c,65535,0)==ERR_INVALID_PARAMETER);
     assert(memcmp(&c,&before,sizeof c)==0);
-    c.x=INT16_MAX; c.y=INT16_MAX;
-    assert(camera_rebase(&c,65535,65535)==ERR_SUCCESS);
-    assert(c.x==INT16_MIN && c.y==INT16_MIN);
-    before=c;
-    assert(camera_rebase(&c,1,0)==ERR_INVALID_PARAMETER);
-    assert(!memcmp(&c,&before,sizeof c));
+    assert(camera_rebase(&c,32767,32767)==ERR_SUCCESS);
+    assert(c.x==0 && c.y==0);
+    assert(c.origin_x < (1280U<<CAMERA_MAX_SHIFT) && c.origin_y < (640U<<CAMERA_MAX_SHIFT));
+    c.x=-1; before=c;
+    assert(camera_rebase(&c,0,0)==ERR_INVALID_PARAMETER && !memcmp(&c,&before,sizeof c));
+    c.x=0;
     i=scrolls;
     assert(camera_scroll_layer(&c,2,0,0)==ERR_INVALID_PARAMETER);
-    assert(camera_scroll_layer(&c,0,16,0)==ERR_INVALID_PARAMETER && scrolls==i);
-    /* A rebase can wrap the phase while making the local position negative. */
-    assert(camera_init_view(&c,2000,1000,320,240)==ERR_SUCCESS);
-    c.phase_x=c.phase_y=32767; c.x=1000; c.y=600;
-    assert(camera_rebase(&c,2000,1000)==ERR_SUCCESS);
-    assert(c.phase_x==0 && c.phase_y==0 && c.x==-1000 && c.y==-400);
-    for(shift=0;shift<=15;shift++) {
-        assert(camera_scroll_layer(&c,0,shift,shift)==ERR_SUCCESS);
-        assert(scroll_x==(((32767UL*1280+1000)>>shift)%1280));
-        assert(scroll_y==(((32767UL*640+600)>>shift)%640));
-    }
+    assert(camera_scroll_layer(&c,0,CAMERA_MAX_SHIFT+1,0)==ERR_INVALID_PARAMETER);
+    assert(camera_scroll_layer(&c,0,0,CAMERA_MAX_SHIFT+1)==ERR_INVALID_PARAMETER && scrolls==i);
     for(i=1;i<=640;i*=2) {
         assert(camera_init_view(&c,2000,1000,i,i/2+1)==ERR_SUCCESS);
         camera_follow_target(&c,-100,320,400,500,0);

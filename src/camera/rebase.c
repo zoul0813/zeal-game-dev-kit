@@ -1,22 +1,12 @@
 #include "zgdk/camera.h"
+#include "wrap.h"
 
-/* Keep the ordinary remainder and count whole hardware periods separately.
- * 32768 periods preserve every supported parallax shift, and all update
- * arithmetic fits 16 bits even when delta is UINT16_MAX. */
-static void rebase_phase(uint16_t *origin, uint32_t *phase, uint16_t delta, uint16_t period) {
-    uint16_t remainder = *origin + delta % period;
-    uint16_t turns = delta / period;
-    if (remainder >= period) { remainder -= period; turns++; }
-    *origin = remainder;
-    *phase = ((uint16_t)*phase + turns) & 32767U;
-}
-
-/* Flipping the sign bit gives the unsigned distance to INT16_MIN. */
+/* The local position stays 0..32767 and origin below 1280 << 4, so the sums fit 16 bits. */
 zos_err_t camera_rebase(camera_t *c, uint16_t dx, uint16_t dy) {
-    if (!c || dx > ((uint16_t)c->x ^ 0x8000U) || dy > ((uint16_t)c->y ^ 0x8000U))
+    if (!c || c->x < 0 || c->y < 0 || dx > (uint16_t)c->x || dy > (uint16_t)c->y)
         return ERR_INVALID_PARAMETER;
     c->x -= dx; c->y -= dy;
-    rebase_phase(&c->origin_x, &c->phase_x, dx, 1280);
-    rebase_phase(&c->origin_y, &c->phase_y, dy, 640);
+    c->origin_x = camera_wrap(c->origin_x + dx, 1280U << CAMERA_MAX_SHIFT);
+    c->origin_y = camera_wrap(c->origin_y + dy, 640U << CAMERA_MAX_SHIFT);
     return ERR_SUCCESS;
 }

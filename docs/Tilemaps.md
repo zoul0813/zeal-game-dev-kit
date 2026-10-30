@@ -16,3 +16,6 @@ Alternatively, you can also call `tilemap_place_xy` to pass `uint8_t x, y;` valu
 populating a background, etc).
 
 `tile_get_at_point` accepts tilemap pixel coordinates; `tile_at` accepts tile indices. Both return tile indices in `Tile.x` and `Tile.y`, and a rectangle in sprite coordinates in `Tile.rect`. The rectangle includes layer-0 scroll only. If your collision map uses independently scrolled layer 1, adjust the returned rectangle for that layer before using it.
+
+For independent cameras, larger maps, procedural readers, and rebasing, see
+[Cameras and tile streaming](camera-stream.md).

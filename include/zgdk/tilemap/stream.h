@@ -25,9 +25,12 @@ typedef struct {
 
 /* Nonzero map dimensions <=32767 tiles. RAM must be a complete, addressable
  * buffer of width*height <=65535 bytes. Caller owns all storage and its lifetime.
- * View coverage is ceil((pixels+15)/16), at most 80 columns and 40 rows.
+ * View sizes: 1..1265 px wide, 1..625 px high. Coverage is ceil((pixels+15)/16),
+ * at most 80 columns and 40 rows. RAM/scratch must remain readable while the
+ * SDK row loader maps VRAM into CPU page 0; do not place them in that page.
  * Pixel coordinates are signed top-left positions; cells outside the map are
- * left untouched. Init draws immediately; rendering failure leaves dirty set. */
+ * left untouched. Invalid init parameters leave the stream unchanged. Init draws
+ * immediately; rendering failure leaves an initialized stream with dirty set. */
 zos_err_t tilemap_stream_init_ram(gfx_context *ctx, tilemap_stream_t *stream,
     uint8_t *tiles, uint16_t width, uint16_t height, uint8_t layer,
     uint16_t view_w, uint16_t view_h, int16_t x, int16_t y);
@@ -36,8 +39,11 @@ zos_err_t tilemap_stream_init_reader(gfx_context *ctx, tilemap_stream_t *stream,
     tilemap_stream_reader_t read, void *source, uint8_t *scratch, uint8_t scratch_size,
     uint16_t width, uint16_t height, uint8_t layer,
     uint16_t view_w, uint16_t view_h, int16_t x, int16_t y);
+/* Same-tile updates do no drawing unless dirty; one-tile moves load exposed
+ * rows/columns. Larger moves or dirty state redraw the entire coverage window. */
 zos_err_t tilemap_stream_update(gfx_context *ctx, tilemap_stream_t *stream, int16_t x, int16_t y);
 zos_err_t tilemap_stream_redraw(gfx_context *ctx, tilemap_stream_t *stream);
+/* RAM is edited before drawing; the edit remains if the VRAM write fails. */
 zos_err_t tilemap_stream_set_tile(gfx_context *ctx, tilemap_stream_t *stream,
     uint16_t tx, uint16_t ty, uint8_t tile);
 /* Positive tile offsets (zero allowed), bounded by map dimensions and by the

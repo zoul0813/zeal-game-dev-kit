@@ -71,33 +71,45 @@ int main(void) {
     check(tiles[0] == 6 && tiles[1] == 7 && tiles[3] == 4 && tiles[12] == 13 && tiles[15] == 16);
     check(tilemap_stream_rebase(&s, 1, 1) == ERR_SUCCESS && s.tx == 0 && s.ty == 0 && s.ring_x == 1 && s.ring_y == 1);
     check(tilemap_stream_update(0, &s, 0, 0) == ERR_SUCCESS && vram[1][1] == tiles[0] && vram[2][2] == tiles[5]);
-    check(camera_init_view(&c, 65535U, 65535U, 32767, 32767) == ERR_INVALID_PARAMETER);
-    check(camera_init_view(&c, 65535U, 65535U, 65535U, 65535U) == ERR_SUCCESS);
-    check(c.max_x == 0 && c.dz_left == 21845 && c.dz_top == 24575);
-    check(camera_init_view(&c, 65535U, 65535U, 32768U, 32768U) == ERR_SUCCESS && c.max_x == 32767);
-    check(camera_init_view(&c, 65534U, 65534U, 32767, 32767) == ERR_SUCCESS);
-    camera_set(&c, 32767, 32767); c.dz_left = c.dz_top = 0; c.max_step = 255;
-    camera_follow_target(&c, 32767, 32767, 65535U, 65535U, 1);
-    check(c.x == 32767 && c.y == 32767);
-    check(camera_rebase(&c, 65535U, 65535U) == ERR_SUCCESS && c.x == -32768 && c.y == -32768);
+    check(camera_init_view(&c, 65535U, 65535U, 65535U, 65535U) == ERR_INVALID_PARAMETER);
+    check(camera_init_view(&c, CAMERA_MAX_SIZE + 1, 100, 320, 240) == ERR_INVALID_PARAMETER);
+    check(camera_init_view(&c, CAMERA_MAX_SIZE, CAMERA_MAX_SIZE, CAMERA_MAX_SIZE, CAMERA_MAX_SIZE) == ERR_SUCCESS);
+    check(c.max_x == 0 && c.dz_left == 5461 && c.dz_top == 6143);
+    /* the ends of the documented ranges, under 16-bit int promotion */
+    check(camera_init_view(&c, CAMERA_MAX_SIZE, CAMERA_MAX_SIZE, 1, 1) == ERR_SUCCESS);
+    camera_set(&c, CAMERA_MAX_SIZE, CAMERA_MAX_SIZE);
+    check(c.x == CAMERA_MAX_SIZE - 1 && c.y == CAMERA_MAX_SIZE - 1);
+    c.dz_left = c.dz_top = 0; c.max_step = 255; c.lead = 255;
+    camera_follow_target(&c, CAMERA_MAX_SIZE - 1, CAMERA_MAX_SIZE - 1, CAMERA_MAX_TARGET, CAMERA_MAX_TARGET, 1);
+    check(c.x == CAMERA_MAX_SIZE - 1 && c.y == CAMERA_MAX_SIZE - 1);
+    check(camera_init_view(&c, CAMERA_MAX_SIZE, CAMERA_MAX_SIZE, CAMERA_MAX_SIZE / 2, CAMERA_MAX_SIZE / 2) == ERR_SUCCESS);
+    c.lead = 255; c.max_step = 0;
+    camera_set(&c, 4000, 4000);
+    camera_follow_target(&c, CAMERA_TARGET_MIN, CAMERA_TARGET_MIN, CAMERA_MAX_TARGET, CAMERA_MAX_TARGET, -1);
+    check(c.x == 0 && c.y == 0);
+    camera_follow_target(&c, CAMERA_MAX_SIZE - 1, CAMERA_MAX_SIZE - 1, CAMERA_MAX_TARGET, CAMERA_MAX_TARGET, 1);
+    check(c.x == c.max_x && c.y == c.max_y);
+    c.x = c.y = 32767;
+    check(camera_rebase(&c, 65535U, 65535U) == ERR_INVALID_PARAMETER);
+    check(camera_rebase(&c, 32767, 32767) == ERR_SUCCESS && c.x == 0 && c.y == 0);
     check(camera_rebase(&c, 1, 0) == ERR_INVALID_PARAMETER);
     check(camera_init_view(&c, 2000, 1000, 320, 240) == ERR_SUCCESS);
-    c.phase_x = c.phase_y = 32767; c.x = 1000; c.y = 600;
-    check(camera_rebase(&c, 2000, 1000) == ERR_SUCCESS && c.phase_x == 0 && c.phase_y == 0);
-    for (shift = 0; shift <= 15; shift++) {
+    c.origin_x = (1280U << CAMERA_MAX_SHIFT) - 1; c.origin_y = (640U << CAMERA_MAX_SHIFT) - 1;
+    c.x = 32767; c.y = 32767;
+    for (shift = 0; shift <= CAMERA_MAX_SHIFT; shift++) {
         check(camera_scroll_layer(&c, 0, shift, shift) == ERR_SUCCESS);
-        check(scroll_x == (((32767UL * 1280 + 1000) >> shift) % 1280));
-        check(scroll_y == (((32767UL * 640 + 600) >> shift) % 640));
+        check(scroll_x == ((((1280UL << CAMERA_MAX_SHIFT) - 1 + 32767) >> shift) % 1280));
+        check(scroll_y == ((((640UL << CAMERA_MAX_SHIFT) - 1 + 32767) >> shift) % 640));
     }
     check(camera_init_view(&c, 2000, 1000, 320, 240) == ERR_SUCCESS);
     for (i = 0; i < 43000U; i++) {
         camera_set(&c, 1000, 600);
         absolute_x += 1000; absolute_y += 600;
         check(camera_rebase(&c, 1000, 600) == ERR_SUCCESS);
-        if (i % 97 == 0) for (shift = 0; shift <= 15; shift++) {
-            check(camera_scroll_layer(&c, 0, shift, 15 - shift) == ERR_SUCCESS);
+        if (i % 97 == 0) for (shift = 0; shift <= CAMERA_MAX_SHIFT; shift++) {
+            check(camera_scroll_layer(&c, 0, shift, CAMERA_MAX_SHIFT - shift) == ERR_SUCCESS);
             check(scroll_x == ((absolute_x >> shift) % 1280));
-            check(scroll_y == ((absolute_y >> (15 - shift)) % 640));
+            check(scroll_y == ((absolute_y >> (CAMERA_MAX_SHIFT - shift)) % 640));
         }
     }
     test_result = test_failure ? 2 : 1;
