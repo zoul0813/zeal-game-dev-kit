@@ -13,3 +13,5 @@
 #include "zgdk/tileset.h"
 #include "zgdk/hiscore.h"
 #include "zgdk/file.h"
+#include "zgdk/camera.h"
+#include "zgdk/tilemap/stream.h"

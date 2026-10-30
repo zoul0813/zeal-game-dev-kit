@@ -11,6 +11,7 @@ This is a "simple" framework/library for building games for the [Zeal 8-bit Comp
 - [Sound](docs/Sound.md)
 - [Sprites](docs/Sprites.md)
 - [Tilemaps](docs/Tilemaps.md)
+- [Camera and tilemap streaming](docs/camera-stream.md)
 - [Compression](docs/Compression.md)
 - [File](docs/File.md)
 - [Tilesets](docs/Tilesets.md)

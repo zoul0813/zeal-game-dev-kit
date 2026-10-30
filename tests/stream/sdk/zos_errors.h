@@ -1,0 +1,5 @@
+#ifndef TEST_ZOS_ERRORS_H
+#define TEST_ZOS_ERRORS_H
+typedef enum { ERR_SUCCESS=0, ERR_FAILURE=1, ERR_NOT_SUPPORTED=3,
+               ERR_INVALID_PARAMETER=6, ERR_INVALID_OFFSET=9 } zos_err_t;
+#endif

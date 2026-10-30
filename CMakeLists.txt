@@ -32,3 +32,13 @@ set_target_properties(zgdk PROPERTIES
     OUTPUT_NAME zgdk
     ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib
 )
+
+# Cameras/streaming are used by RAM-constrained games. Keep their objects small;
+# each public camera function has its own archive member.
+set_source_files_properties(
+    src/camera/init_view.c src/camera/set.c src/camera/follow_target.c
+    src/camera/scroll_layer.c src/camera/rebase.c
+    src/tilemap/stream.c src/tilemap/stream_reader.c
+    src/tilemap/stream_edit.c src/tilemap/stream_buffer.c
+    PROPERTIES COMPILE_OPTIONS "--opt-code-size"
+)
