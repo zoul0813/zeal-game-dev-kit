@@ -43,3 +43,7 @@ set_source_files_properties(
     src/tilemap/stream_edit.c src/tilemap/stream_buffer.c src/tilemap/stream_rebase.c
     PROPERTIES COMPILE_OPTIONS "--opt-code-size"
 )
+
+# Preserve the compact sequencer implementation used by RAM-constrained games.
+set_source_files_properties(src/sound/sfx.c src/sound/hardware.c
+    PROPERTIES COMPILE_OPTIONS "--opt-code-size")

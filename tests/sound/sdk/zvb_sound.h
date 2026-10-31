@@ -13,3 +13,5 @@ void zvb_sound_initialize(uint8_t);
 void zvb_sound_set_voices(sound_voice_t, uint16_t, sound_waveform_t);
 void zvb_sound_set_hold(sound_voice_t, uint8_t);
 void zvb_sound_set_volume(sound_volume_t);
+
+void zvb_sound_set_voices_vol(sound_voice_t, sound_volume_t);

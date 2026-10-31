@@ -16,7 +16,11 @@ typedef struct {
 } Sound;
 
 
-/* Required before playback. Resets shared sound hardware; call before zmt_reset.
+/* Tracker/SFX-only startup: resets hardware without linking the tone-player
+ * state. Call before zmt_reset and sfx_init. Preserves peripheral mapping. */
+zos_err_t sound_init_hardware(void);
+
+/* Required before simple tone playback. Resets shared sound hardware; call before zmt_reset.
  * Hardware operations preserve the caller's peripheral mapping. */
 zos_err_t sound_init(void);
 zos_err_t sound_deinit(void);

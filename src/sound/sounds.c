@@ -9,7 +9,6 @@
 static Sound sounds[MAX_VOICES];
 
 zos_err_t sound_init(void) {
-  uint8_t backup_page = zvb_config_dev_idx;
   sounds[0].voice = VOICE0;
   sounds[1].voice = VOICE1;
   sounds[2].voice = VOICE2;
@@ -21,24 +20,7 @@ zos_err_t sound_init(void) {
     sounds[i].remaining = 0;
   }
 
-  zvb_sound_initialize(1);
-
-  zvb_sound_set_voices(VOICEALL, 0, WAV_SQUARE | DUTY_CYCLE_50_0);
-  zvb_sound_set_hold(VOICEALL, 0);
-
-  zvb_sound_set_volume(VOL_75);
-  zvb_map_peripheral(backup_page);
-
-  return ERR_SUCCESS;
-}
-
-zos_err_t sound_deinit(void) {
-  uint8_t backup_page = zvb_config_dev_idx;
-  zvb_sound_set_voices(VOICEALL, 0, WAV_SQUARE | DUTY_CYCLE_50_0);
-  zvb_sound_set_hold(VOICEALL, 1);
-  zvb_sound_set_volume(VOL_0);
-  zvb_map_peripheral(backup_page);
-  return ERR_SUCCESS;
+  return sound_init_hardware();
 }
 
 Sound* sound_get(uint8_t voice) {
