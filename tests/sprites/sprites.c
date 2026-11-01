@@ -29,6 +29,17 @@ int main(void) {
     gfx_sprite arena[GFX_SPRITES_COUNT];
     gfx_sprite sprite = {.x=40, .y=40, .tile=7, .flags=1, .options=2};
 
+    Point point;
+    sprite_get_point(&sprite, &point);
+    assert(point.x == 40 && point.y == 40);
+    point.x = 300;
+    point.y = 511;
+    sprite_set_point(&sprite, &point);
+    assert(sprite.x == 300 && sprite.y == 511);
+    sprite_set_xy(&sprite, 40, 40);
+    assert(sprite.x == 40 && sprite.y == 40);
+    assert(sprite.tile == 7 && sprite.flags == 1 && sprite.options == 2);
+
     assert(sprites_register(sprite) == NULL);
     sprites_deregister();
     assert(sprites_render(&ctx) == GFX_INVALID_ARG);
