@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include "zgdk/inline.h"
 #include "zgdk/types.h"
 #include "zgdk/input.h"
 #include "zgdk/sound.h"

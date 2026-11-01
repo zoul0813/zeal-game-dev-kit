@@ -1,6 +1,7 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#include "zgdk/utils/grid_rows.h"
 #include "zgdk/utils/print.h"
 // #include "zgdk/utils/string.h" /* include manually */
 #include "zgdk/utils/rand.h"
