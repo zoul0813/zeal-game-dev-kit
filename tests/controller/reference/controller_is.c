@@ -1,5 +1,5 @@
 #include <stdint.h>
-#include "zgdk/input/controller.h"
+#include "reference.h"
 
 uint8_t controller_is(uint8_t port, ControllerType type)
 {

@@ -28,11 +28,6 @@ zos_err_t input_init(uint8_t use_controller)
         return ERR_BAD_MODE;
     }
 
-    err = controller_flush();
-    if (err != ERR_SUCCESS) {
-        return ERR_ENTRY_CORRUPTED;
-    }
-
     /* Require a release before accepting buttons held at startup. */
     controller_suppressed = PAD_BUTTONS;
     controller_mode = 1;
@@ -67,6 +62,5 @@ void input_flush(void)
         } else {
             controller_suppressed = PAD_BUTTONS;
         }
-        controller_flush();
     }
 }

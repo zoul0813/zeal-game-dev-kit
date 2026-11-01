@@ -1,6 +1,6 @@
 #include <stdint.h>
 #include "zgdk/input/button_map.h"
-#include "zgdk/input/controller.h"
+#include "reference.h"
 #include "pio.h"
 
 #define MOUSE_SENSITIVITY_ERROR 0xFF

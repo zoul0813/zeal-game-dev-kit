@@ -4,49 +4,35 @@
  * SPDX-License-Identifier: CC0-1.0
  */
 #pragma once
-
 #include <stdint.h>
 #include <zos_errors.h>
 #include <zgdk/input/button_map.h>
 
 #define SNES_PORT1 0
 #define SNES_PORT2 1
+#define MOUSE_ERROR 0xFF
 
-typedef enum {
-    SNES_PAD   = 0,
-    SNES_MOUSE = 1,
-} ControllerType;
+typedef enum { MOUSE_LOW = 0, MOUSE_MEDIUM = 1, MOUSE_HIGH = 2 } MouseSensitivity;
+typedef struct { uint16_t port1, port2; } ControllerPads;
+typedef struct { uint16_t bits; int8_t x, y; } ControllerMouse;
 
-typedef enum {
-    MOUSE_LOW    = 0,
-    MOUSE_MEDIUM = 1,
-    MOUSE_HIGH   = 2,
-} MouseSensitivity;
-
-extern uint16_t PORT1_bits;
-extern uint16_t PORT2_bits;
-extern int8_t MOUSE_y;
-extern int8_t MOUSE_x;
-
+/* Configure PIO A; no report storage, mouse state, or polling code is linked. */
 zos_err_t controller_init(void);
-zos_err_t controller_flush(void);
-
-#define controller_read() controller_read_port(SNES_PORT1)
-uint16_t controller_read_port(uint8_t port);
-uint16_t controller_get(uint8_t port);
-
-uint8_t controller_read_mouse(uint8_t port);
+/* Raw 16-bit report, including device ID. Invalid port: 0xFFFF, no I/O.
+ * Single-port reads sample only that data line. CLOCK/LATCH are shared wires. */
+uint16_t controller_read_pad(uint8_t port);
+#define controller_read() controller_read_pad(SNES_PORT1)
+/* One latch/clock transaction for both pads. NULL: no I/O. */
+void controller_read_pads(ControllerPads *reports);
+/* Complete 32-bit report. Movement flags: Y=1, X=2; MOUSE_ERROR on invalid
+ * port, NULL output, or invalid signature. Invalid reports clear the output.
+ * Axis sign-magnitude is decoded to signed -127..127, including negative zero. */
+uint8_t controller_read_mouse(uint8_t port, ControllerMouse *report);
+/* Detection consumes a report; mouse detection also drains the extra 16 bits
+ * used by the original SNS-016/Hyperkin detection sequence. */
+uint8_t controller_is_pad(uint8_t port);
+uint8_t controller_is_mouse(uint8_t port);
+/* Return the achieved sensitivity, or MOUSE_ERROR. First set on each port
+ * cycles at least once; at most three cycles, including on fixed-speed clones. */
 MouseSensitivity controller_get_mouse_sensitivity(uint8_t port);
-uint8_t controller_set_mouse_sensitivity(uint8_t port, MouseSensitivity s);
-int8_t controller_get_mousey(void);
-int8_t controller_get_mousex(void);
-
-uint8_t controller_is(uint8_t port, ControllerType type);
-
-#define controller_pressed_port1(button) (PORT1_bits & button)
-#define controller_pressed_port2(button) (PORT2_bits & button)
-#define controller_pressed(button) controller_pressed_port1(button)
-#define controller_get_port1() (PORT1_bits)
-#define controller_get_port2() (PORT2_bits)
-#define controller_get_mousey() (MOUSE_y)
-#define controller_get_mousex() (MOUSE_x)
+uint8_t controller_set_mouse_sensitivity(uint8_t port, MouseSensitivity sensitivity);

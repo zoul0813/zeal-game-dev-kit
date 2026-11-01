@@ -8,10 +8,8 @@
 static uint8_t fifo[256];
 static uint16_t available, position, chunk_size;
 static unsigned read_calls, pad_reads, logs;
-static zos_err_t read_error, mode_error, pad_error, flush_error;
+static zos_err_t read_error, mode_error, pad_error;
 static uint16_t pad_report;
-uint16_t PORT1_bits, PORT2_bits;
-int8_t MOUSE_x, MOUSE_y;
 
 static void feed(const uint8_t* bytes, uint16_t size, uint16_t chunk)
 {
@@ -66,23 +64,16 @@ zos_err_t controller_init(void)
     return pad_error;
 }
 
-zos_err_t controller_flush(void)
-{
-    PORT1_bits = PORT2_bits = 0;
-    MOUSE_x = MOUSE_y = 0;
-    return flush_error;
-}
-
-uint16_t controller_read_port(uint8_t port)
+uint16_t controller_read_pad(uint8_t port)
 {
     assert(port == SNES_PORT1);
     pad_reads++;
-    return PORT1_bits = pad_report;
+    return pad_report;
 }
 
 static void reset(void)
 {
-    read_error = mode_error = pad_error = flush_error = 0;
+    read_error = mode_error = pad_error = 0;
     pad_report = 0;
     pad_reads = logs = 0;
     feed(NULL, 0, 32);
@@ -257,7 +248,7 @@ static void check_pads(void)
     reset();
     pad_report = BUTTON_START;
     input_flush();
-    assert(PORT1_bits == 0 && input_read() == 0);
+    assert(input_read() == 0);
     assert(input_read() == 0);
     assert(controller_read() == BUTTON_START);
     assert(input_read() == 0);
@@ -395,10 +386,7 @@ static void check_errors(void)
     assert(input_init(1) == ERR_BAD_MODE);
     pad_report = BUTTON_START;
     assert(input_read() == 0 && pad_reads == 0);
-    reset();
-    flush_error = ERR_FAILURE;
-    assert(input_init(1) == ERR_ENTRY_CORRUPTED);
-    assert(input_read() == 0 && pad_reads == 0);
+
 }
 
 int main(void)
