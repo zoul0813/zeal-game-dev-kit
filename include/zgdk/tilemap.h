@@ -13,6 +13,17 @@ typedef struct {
 
 extern Tilemap *_TILEMAP;
 
+/* Draw a tightly packed width*height byte buffer at tile coordinates x,y.
+ * Nonzero dimensions must fit one 80x40 hardware layer (layer 0 or 1), without
+ * wrapping. On success, populate rect={x,y,width,height}, retain tiles (no copy),
+ * and register tilemap. Caller owns the buffer and Tilemap and must keep them
+ * valid. The width*height-byte buffer must stay readable while VRAM maps page 0.
+ * Invalid parameters return ERR_INVALID_PARAMETER before drawing. An upload
+ * failure returns ERR_FAILURE, leaving tilemap and registration unchanged;
+ * rows already written to VRAM are not rolled back. No collision cache refresh. */
+zos_err_t tilemap_load(gfx_context *ctx, Tilemap *tilemap, uint8_t *tiles,
+    uint8_t width, uint8_t height, uint8_t layer, uint8_t x, uint8_t y);
+
 zos_err_t tilemap_register(Tilemap *tilemap, uint8_t *tiles);
 
 int16_t tilemap_get(Point *point);
