@@ -1,5 +1,5 @@
     .module controller_mouse_transport
-    .globl _ctrl_mouse_byte, _ctrl_mouse_gap, _ctrl_mouse_start, _ctrl_wait, _ctrl_clock
+    .globl _ctrl_mouse_byte, _ctrl_mouse_gap, _ctrl_mouse_start, _ctrl_mouse_header_clock, _ctrl_wait, _ctrl_mouse_clock
     .area _TEXT
 ; C=DATA mask, A=raw MSB-first mouse byte. Preserves C/DE/HL; clobbers AF/B.
 ; CLOCK rise->sample >=482 T. Inter-bit high phase preserves old C minimum.
@@ -9,7 +9,7 @@ _ctrl_mouse_byte::
     ld d,#8
 mouse_byte_next_bit:
     nop
-    call _ctrl_clock
+    call _ctrl_mouse_clock
     ld a,#31
     call _ctrl_wait
     nop
@@ -35,3 +35,18 @@ _ctrl_mouse_gap::
 _ctrl_mouse_start::
     ld a,#182
     jp _ctrl_wait
+; Header timing remains separate from the pad's shorter bit loop. The
+; shared shifter no longer pads every device with these legacy mouse holds.
+; D=first hold count, E=subsequent hold count; C and E preserved.
+_ctrl_mouse_header_clock::
+    ld a,d
+    ld d,e
+    nop
+    nop
+    call _ctrl_wait
+    call _ctrl_mouse_clock
+    ex (sp),hl
+    ex (sp),hl
+    ex (sp),hl
+    ex (sp),hl
+    ret

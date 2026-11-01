@@ -102,7 +102,7 @@ int8_t hiscore_add(uint16_t score) {
         _frames++;
         gfx_wait_end_vblank(hiscore_config->context);
 
-        uint16_t input1 = input_get();
+        uint16_t input1 = input_read();
 
         if(input1 != last_input) {
             if(LEFT1 || RIGHT1) {

@@ -1,5 +1,5 @@
     .module controller_read_mouse
-    .globl _controller_read_mouse, _ctrl_latch, _ctrl_read16, _ctrl_clock
+    .globl _controller_read_mouse, _ctrl_latch, _ctrl_read16, _ctrl_mouse_header_clock
     .globl _ctrl_mouse_byte, _ctrl_mouse_gap, _ctrl_mouse_start
     .area _TEXT
 ; SDCC: A=port, DE=ControllerMouse*. A=movement flags or 0xFF.
@@ -17,8 +17,8 @@ _controller_read_mouse::
     pop ix
     call _ctrl_latch
     push ix
-    ld ix,#_ctrl_clock
-    ld de,#0x0709
+    ld ix,#_ctrl_mouse_header_clock
+    ld de,#0x0507
     call _ctrl_read16
     pop ix
     ld 0(ix),l

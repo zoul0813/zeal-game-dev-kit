@@ -250,7 +250,7 @@ static void check_pads(void)
     input_flush();
     assert(input_read() == 0);
     assert(input_read() == 0);
-    assert(controller_read() == BUTTON_START);
+    assert(controller_read_pad(SNES_PORT1) == BUTTON_START);
     assert(input_read() == 0);
     pad_report |= BUTTON_A;
     assert(input_read() == BUTTON_A);
@@ -278,7 +278,7 @@ static void check_pads(void)
     pad_report = BUTTON_A;
     assert(input_read() == BUTTON_A);
     /* Low-level reads remain raw and bypass high-level suppression. */
-    assert(controller_read() == BUTTON_A);
+    assert(controller_read_pad(SNES_PORT1) == BUTTON_A);
     assert(input_read() == BUTTON_A);
 
     reset();
@@ -306,7 +306,7 @@ static void check_startup(void)
         pad_report = button;
         assert(input_read() == 0);
         assert(input_read() == 0);
-        assert(controller_read() == button);
+        assert(controller_read_pad(SNES_PORT1) == button);
         pad_report = 0;
         assert(input_read() == 0);
         pad_report = button;

@@ -198,6 +198,34 @@ static void print_timing(const char *label, struct timing m) {
         if(values[i]!=ULONG_MAX)printf(" %s=%lu",names[i],values[i]);
     puts("");
 }
+/* Independent protocol bounds at 10 MHz, not old C instruction counts.
+ * Jim Christy: 12 us latch, 6 us phases/settling.
+ * NESdev Mouse: 170/336 SNES master clocks => round up to 8/16 us.
+ */
+static void check_pad_timing(void) {
+    struct timing need; memset(&need,0xff,sizeof(need));
+    need.latch=120; need.first=60; need.header_low=60;
+    need.header_first_high=60; need.header_high=60; need.header_settle=60;
+    struct timing got=minima(); compare("pad protocol",got,need);
+    /* Guard against accidentally reinstating the old mouse-only padding. */
+    assert(got.latch<=140 && got.first<=120 && got.header_low<=80);
+    assert(got.header_first_high<=200 && got.header_high<=200 && got.header_settle<=80);
+}
+static void check_hyperkin_timing(void) {
+    unsigned long previous=0; unsigned previous_bit=0;
+    for(unsigned i=0;i<nevents;i++) if(events[i].kind=='R') {
+        if(previous) {
+            assert(events[i].index==previous_bit+1);
+            unsigned long required=events[i].index==16 ? 160 : 80;
+            if(events[i].t-previous<required) {
+                fprintf(stderr,"Hyperkin bit %u: %lu T between reads, need %lu T\n",
+                    events[i].index,events[i].t-previous,required);
+                abort();
+            }
+        }
+        previous=events[i].t;previous_bit=events[i].index;
+    }
+}
 static int axis(unsigned raw) { int mag=raw&127; return raw&128 ? -mag:mag; }
 static void unchanged_interrupts(unsigned iff) {
     assert(cpu.iy==0x5678 && cpu.iff1==!!iff && cpu.iff2==!!iff);
@@ -223,7 +251,7 @@ static void check_current(const char *map, struct timing pad[2],struct timing mo
             tpad=call(one,p,0,0);ipad=steps;
             if(p==0 && v==0)print_timing("ASM pad",minima());
             assert((cpu.d<<8|cpu.e)==v && samples==16 && latches==1 && index_bit==15 && pins==8);
-            compare("single pad",minima(),pad[p]); unchanged_interrupts(v&1);
+            check_pad_timing(); unchanged_interrupts(v&1);
         }
     }
     for(unsigned v=0;v<65536;v+=257) {
@@ -231,7 +259,7 @@ static void check_current(const char *map, struct timing pad[2],struct timing mo
         call(two,0,0x9000,0);
         if(word(0x9000)!=v || word(0x9002)!=(v^0x96a5)) { fprintf(stderr,"dual: v=%04x got %04x/%04x expected %04x/%04x\n",v,word(0x9000),word(0x9002),v,v^0x96a5); abort(); }
         assert(samples==16 && latches==1 && index_bit==15);
-        compare("dual pads",minima(),pad[1]);unchanged_interrupts(0);
+        check_pad_timing();unchanged_interrupts(0);
     }
     for(unsigned bit=0;bit<16;bit++) {
         setup();headers[0]=1u<<bit;headers[1]=1u<<((bit+7)&15);
@@ -253,17 +281,17 @@ static void check_current(const char *map, struct timing pad[2],struct timing mo
         want.mouse_settle=movement[p].mouse_settle;want.byte_gap=movement[p].byte_gap;
         /* Includes old header function's return path before movement entry. */
         want.initial_gap=movement[p].initial_gap;
-        compare("mouse",minima(),want); unchanged_interrupts(raw&1);
+        compare("mouse",minima(),want); check_hyperkin_timing(); unchanged_interrupts(raw&1);
     }
     for(unsigned p=0;p<2;p++) for(unsigned h=0;h<16;h++) {
         setup(); headers[p]=(h<<12)|0x300;
-        call(ispad,p,0,0);assert(cpu.a==(h==0));assert(samples==16);
+        call(ispad,p,0,0);assert(cpu.a==(h==0));assert(samples==16);check_pad_timing();
         setup(); headers[p]=(h<<12)|0x300; memset(memory+0x9000,0xff,4);
         call(mouse,p,0,0x9000);
         assert(cpu.a==(h==8?0:255)); if(h!=8)assert(word(0x9000)==0 && word(0x9002)==0);
         setup();headers[p]=(h<<12)|0x300;
         call(ismouse,p,0,0);assert(cpu.a==(h==8));assert(samples==48 && index_bit==47);
-        compare("mouse detection",minima(),detect[p]);
+        compare("mouse detection",minima(),detect[p]); check_hyperkin_timing();
     }
     /* Calls emitted by SDCC verify actual register arguments and returns. */
     setup();headers[0]=0x1234;call(symbol(map,"_test_pad1"),0,0,0);assert((cpu.d<<8|cpu.e)==0x1234);
@@ -292,7 +320,7 @@ static void check_current(const char *map, struct timing pad[2],struct timing mo
     call(mouse,0,0,0);assert(cpu.a==255 && nevents==0);
     for(unsigned p=0;p<2;p++)for(unsigned level=0;level<3;level++) {
         setup();sensitivity=1;headers[p]=0x8000;speeds[p]=level;
-        call(get,p,0,0);assert(cpu.a==level);compare("sensitivity",minima(),speed[p]);
+        call(get,p,0,0);assert(cpu.a==level);compare("sensitivity",minima(),speed[p]);check_hyperkin_timing();
         for(unsigned target=0;target<3;target++) {
             setup();sensitivity=1;headers[p]=0x8000;speeds[p]=level;
             call(set,p,target,0);assert(cpu.a==target && speeds[p]==target);

@@ -10,16 +10,16 @@ build = Path(sys.argv[1] if len(sys.argv)>1 else 'build-controller') / 'links'
 build.mkdir(parents=True, exist_ok=True)
 library=Path(sys.argv[2] if len(sys.argv)>2 else 'lib/zgdk.lib')
 base = {'_controller_init'}
-scalar = {'_ctrl_latch','_ctrl_clock','_ctrl_wait','_ctrl_read16'}
-pad = {'_controller_read_pad'} | scalar
-mouse = {'_controller_read_mouse','_ctrl_mouse_byte','_ctrl_mouse_gap','_ctrl_mouse_start'} | scalar
+scalar = {'_ctrl_latch','_ctrl_wait','_ctrl_read16'}
+pad = {'_controller_read_pad','_ctrl_pad_clock'} | scalar
+mouse = {'_controller_read_mouse','_ctrl_mouse_byte','_ctrl_mouse_gap','_ctrl_mouse_start','_ctrl_mouse_header_clock','_ctrl_mouse_clock'} | scalar
 speed = {'_controller_get_mouse_sensitivity','_ctrl_sensitivity_header','_ctrl_wait','_ctrl_read16'}
 setter = speed | {'_controller_set_mouse_sensitivity'}
 cases = {
     'init': ('',set()),
     'pad1': ('controller_read_pad(SNES_PORT1);',pad),
     'pad2': ('controller_read_pad(SNES_PORT2);',pad),
-    'pads': ('ControllerPads p; controller_read_pads(&p);', {'_controller_read_pads','_ctrl_latch','_ctrl_clock','_ctrl_wait'}),
+    'pads': ('ControllerPads p; controller_read_pads(&p);', {'_controller_read_pads','_ctrl_latch','_ctrl_pad_clock','_ctrl_wait'}),
     'mouse1': ('ControllerMouse m; controller_read_mouse(SNES_PORT1,&m);',mouse),
     'mouse2': ('ControllerMouse m; controller_read_mouse(SNES_PORT2,&m);',mouse),
     'is_pad': ('controller_is_pad(SNES_PORT1);',pad|{'_controller_is_pad'}),

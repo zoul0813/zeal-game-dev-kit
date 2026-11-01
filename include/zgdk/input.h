@@ -1,3 +1,5 @@
+#pragma once
+
 #include <zos_errors.h>
 #include "zgdk/input/button_map.h"
 #include "zgdk/input/controller.h"
@@ -19,9 +21,6 @@ zos_err_t input_init(uint8_t use_controller);
  */
 uint16_t input_read(void);
 
-/** @deprecated */
-#define input_get() input_read()
-
 /**
  * @brief Drain and clear keyboard input; suppress held pad buttons until release.
  *
@@ -29,3 +28,5 @@ uint16_t input_read(void);
  * button becomes available again after a valid report shows it released.
  */
 void input_flush(void);
+
+#include "zgdk/input/deprecated.h"

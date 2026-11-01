@@ -21,10 +21,19 @@ _ctrl_sensitivity_header::
     ret
 ; The slow clock belongs only to sensitivity support; polling cannot link it.
 sensitivity_clock:
+    ld a,d
+    ld d,e
+    nop
+    nop
+    call _ctrl_wait
     xor a
     out (0xd0),a
     ld a,#1
     call _ctrl_wait
     ld a,#8
     out (0xd0),a
+    ex (sp),hl
+    ex (sp),hl
+    ex (sp),hl
+    ex (sp),hl
     ret

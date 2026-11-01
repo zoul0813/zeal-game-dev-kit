@@ -23,7 +23,8 @@ Example
 zos_err_t err = input_init(true);
 ```
 
-To read user input, call `input_read()` (`input_get()` remains a deprecated alias).
+To read user input, call `input_read()`. The old `input_get()` alias remains
+available automatically and emits a deprecation warning when used.
 
 ```C
 /**
@@ -98,8 +99,7 @@ uint16_t buttons = controller_read_pad(SNES_PORT1);
 if (buttons & BUTTON_A) jump();
 ```
 
-`controller_read()` remains an alias for the port-1 call above. Reports retain
-all 16 raw bits; `(buttons & 0xF000) == 0` identifies a valid pad report.
+Reports retain all 16 raw bits; `(buttons & 0xF000) == 0` identifies a valid pad report.
 An invalid port returns `0xFFFF` without accessing the PIO.
 
 For two pads, use a single latch/clock transaction:
@@ -138,6 +138,42 @@ Pad-only, mouse-only, and dual-port readers are separate archive members;
 shared transport and timing helpers are linked once. Sensitivity support is
 linked only when requested, and only its setter owns persistent state (one byte).
 
+### Deprecated aliases
+
+Existing aliases remain available through the normal namespace headers; games
+need no extra includes to keep calling them:
+
+```c
+#include <zgdk/input.h>
+
+uint16_t input = input_get();       /* Deprecated: use input_read(). */
+uint16_t pad = controller_read();   /* Deprecated: use controller_read_pad(SNES_PORT1). */
+```
+
+Each namespace keeps its deprecated declarations separate and includes them
+automatically after its canonical declarations:
+
+| Namespace header | Included deprecated header | Alias |
+| --- | --- | --- |
+| `zgdk/input.h` | `zgdk/input/deprecated.h` | `input_get()` |
+| `zgdk/input/controller.h` | `zgdk/input/controller/deprecated.h` | `controller_read()` |
+
+The umbrella `zgdk.h` also exposes these aliases through its normal includes.
+Including a namespace header alone emits no warning; each use of a deprecated
+alias emits a compiler warning naming its replacement. Aliases remain macros
+and add no wrapper code or persistent state.
+
+SDCC 4.4's bundled **sdcpp** preprocessor supports the `GCC warning` pragma used
+for these use-site diagnostics. Despite the directive's name, it does not
+require compiling with GCC or using unsupported GCC function attributes. The
+shared warning helper is in `zgdk/deprecation.h`; GCC and Clang host checks
+also verify its behavior.
+
+This organization does **not** restore the old controller API. In particular,
+`controller_read()` reads only port 1 and does not update global snapshots or
+poll port 2. The removed getters, detection API, and split mouse API still need
+the migrations below.
+
 ### Migrating low-level controller callers
 
 The controller API intentionally breaks compatibility with the old global-state
@@ -160,13 +196,21 @@ unchanged.
 
 ### Controller timing and verification
 
-The assembly preserves the minimum electrical intervals measured from the
-previous SDCC 4.4.0 implementation, including loop/call overhead in its waits.
-Ordinary reads and sensitivity reports retain distinct timing profiles.
-No polling routine changes the CPU interrupt-enable state.
+Pad polling follows [Jim Christy's measured SNES waveform](https://www.lasersam.org/REPAIR/F_SNES.html#5):
+a latch of at least 12 µs and clock phases/settling of at least 6 µs. These are
+10 MHz CPU timing targets; loop overhead can make a phase longer. Pad reads
+no longer carry the old C implementation's extra per-bit padding.
+
+Mouse polling keeps its longer legacy waits. It also enforces the
+[SNESdev Hyperkin bounds](https://snes.nesdev.org/wiki/Mouse#Hyperkin_Mouse):
+at least 170 SNES master clocks between bit reads and 336 between bits 16 and 17.
+The tests conservatively round these to 8 µs and 16 µs (80 and 160 Z80 T-states
+at 10 MHz). SNES master clocks are not Z80 or NES CPU cycles. Sensitivity
+reports retain their separate timing profile. No polling routine changes the
+CPU interrupt-enable state.
 
 The instruction-level test executes linked Z80 code against scripted PIO input,
-using the unmodified Zeal-NativeEmulator CPU. It checks timing separately for
+using the unmodified Zeal-NativeEmulator CPU. It checks pad protocol bounds and mouse timing separately for
 each port, including mouse start/inter-byte/detection gaps and sensitivity
 recovery. Separate native link tests verify exactly which archive members each
 API pulls in. See [controller test instructions](../tests/controller/README.md)

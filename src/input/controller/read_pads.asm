@@ -1,5 +1,5 @@
     .module controller_read_pads
-    .globl _controller_read_pads, _ctrl_latch, _ctrl_wait, _ctrl_clock
+    .globl _controller_read_pads, _ctrl_latch, _ctrl_pad_clock
     .area _TEXT
 ; SDCC: HL=output {port1,port2}. NULL performs no I/O.
 ; Clobbers AF/BC/DE/HL; IX saved. One IN per bit captures both DATA lines.
@@ -10,16 +10,13 @@ _controller_read_pads::
     push ix
     push hl
     pop ix
-    xor a
     call _ctrl_latch
     ld hl,#0
     ld de,#0
     ld b,#16
+    ; 12 T plus setup/IN gives 60 T after the latch falls.
+    jr pads_sample
 pads_sample:
-    ex (sp),hl
-    ex (sp),hl
-    ex (sp),hl
-    ex (sp),hl
     in a,(0xd0)
     cpl
     rra
@@ -36,7 +33,5 @@ pads_sample:
     pop ix
     ret
 pads_next_bit:
-    ld a,#9
-    call _ctrl_wait
-    call _ctrl_clock
+    call _ctrl_pad_clock
     jr pads_sample

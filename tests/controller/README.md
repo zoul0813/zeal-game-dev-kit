@@ -4,7 +4,9 @@
 Only its controller-header include was redirected to the frozen `reference.h`;
 `pio.h` and the timing-sensitive C are otherwise unchanged. These fixtures are
 compiled as test references, never into the library. Keep them unchanged when
-refactoring production code: they establish the pre-rewrite electrical baseline.
+refactoring production code: they establish the mouse timing regression baseline
+and reproduce the old code's footprints and benchmarks. Pad timing is checked
+against independent protocol bounds rather than that old implementation.
 
 Run from the repository root inside the Zeal development environment with
 `ZOS_PATH`, `ZVB_SDK_PATH`, and `COREUTILS_PATH` set:
@@ -40,8 +42,12 @@ input, and timestamped latch/clock/read traces. It checks:
   matrix, buttons, invalid signatures, movement flags, and 48-bit detection.
 - Sensitivity getter codes, every initial/target combination, per-port first-use
   state, three-cycle limits, clones ignoring software cycling, and invalid input.
-- Each port's original minimum phase/settling intervals, start and byte gaps,
-  detection continuation, and report/cycle recovery.
+- Independent pad bounds: 12 µs latch and 6 µs clock phases/settling, with a
+  performance budget that rejects accidentally linking the old mouse padding.
+- Each port's original mouse phase/settling intervals, start and byte gaps,
+  detection continuation, and report/cycle recovery; independent Hyperkin checks
+  require 8 µs between reads and 16 µs between bits 16 and 17, including detection
+  and sensitivity headers.
 - Stack balance, IX/IY and alternate-register preservation, enabled/disabled
   interrupt state, and calls emitted by SDCC for the public C interface.
 
@@ -72,8 +78,8 @@ the runtime harness; these are not empty-call timings.
 | Minimal application | Previous C | Assembly |
 | --- | ---: | ---: |
 | Initialization only | 436 code bytes | 20 code bytes |
-| Single pad, port 2 | 441 code bytes | 114 code bytes |
-| Full mouse, port 2 | 446 code bytes | 258 code bytes |
+| Single pad, port 2 | 441 code bytes | 110 code bytes |
+| Full mouse, port 2 | 446 code bytes | 265 code bytes |
 
 Single-pad polling has no persistent report storage. Only games calling the
 explicit two-pad API supply a four-byte `ControllerPads`; a one-pad result is
@@ -81,26 +87,39 @@ returned in the normal 16-bit C return registers.
 
 | Routine body benchmark | Previous C | Assembly |
 | --- | ---: | ---: |
-| Pad, port 2, both lines `0xFFFF` | 6,160 T / 598 instructions | 6,033 T / 565 instructions |
-| Mouse, port 2, header `0x8300`, raw Y `0xFF`, X `0xAA` | 22,726 T / 2,871 instructions | 22,717 T / 2,009 instructions |
+| Pad, port 2, both lines `0xFFFF` | 6,160 T / 598 instructions | 3,353 T / 335 instructions |
+| Mouse, port 2, header `0x8300`, raw Y `0xFF`, X `0xAA` | 22,726 T / 2,871 instructions | 22,826 T / 2,018 instructions |
 
 The previous full mouse benchmark combines its header and continuation routines.
 Counts include their return instructions, without external C call-site overhead.
 The assembly mouse routine completes the whole transaction in one call.
-Runtime improvements are intentionally modest: preserving the old electrical
-intervals retains nearly all bus time, even where fewer instructions suffice.
+Pad reads now omit the old C/mouse timing padding. Mouse polling deliberately
+keeps the old longer waits; its slightly higher latency also includes the fixed
+12 µs latch target, replacing the old 1.8 µs latch. The reduced mouse instruction
+count does not imply shorter electrical waits.
 
 Selected interval minima, in T-states:
 
 | Interval | Previous minimum | Assembly minimum |
 | --- | ---: | ---: |
-| Normal latch high / clock low | 18 / 18 | 18 / 18 |
-| Repeated header clock high | 367 | 369 |
+| Pad latch high / clock low | 18 / 18 | 124 / 60 |
+| Pad repeated clock high | 367 | 141 |
+| Pad repeated clock rise to sample | 11 (port 1), 90 (port 2) | 61 |
+| Mouse repeated header clock high | 367 | 370 |
 | Mouse clock rise to sample | 482 | 482 |
 | Mouse repeated clock high | 806 | 809 |
 | Mouse Y-to-X gap, port 2 | 1,223 | 1,226 |
 
-The full test compares additional intervals separately for each port. At 10 MHz,
+The pad profile follows [Jim Christy's console measurements](https://www.lasersam.org/REPAIR/F_SNES.html#5).
+Clock high phases include decoding/call overhead, so they exceed the 6 µs
+minimum. The mouse profile retains the original longer margins and independently
+checks [SNESdev's Hyperkin speed limits](https://snes.nesdev.org/wiki/Mouse#Hyperkin_Mouse),
+which describe 170 and 336 **SNES master clocks**, respectively. At the NTSC
+master rate these are approximately 7.92 µs and 15.64 µs; we conservatively use
+8 µs and 16 µs at the 10 MHz Z80 rate. These limits are read-to-read intervals,
+not mandatory lengths for every individual mouse clock-low pulse.
+
+The full test compares additional mouse intervals separately for each port. At 10 MHz,
 10 T-states equal one microsecond. These are CPU-visible lower bounds with the
 existing interrupt policy, not a promise of uninterrupted wall-clock timing.
 

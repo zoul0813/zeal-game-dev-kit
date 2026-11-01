@@ -1,22 +1,13 @@
     .module controller_read16
-    .globl _ctrl_read16, _ctrl_wait
+    .globl _ctrl_read16
     .area _TEXT
-; Shared single-DATA-line transport. No IX/IY or interrupt changes.
-; C=data mask, IX=clock routine, D=first high hold count, E=subsequent high hold count.
-; Reads first bit without CLOCK, then 15 clocks. HL=active-low inverted report.
-; B/D/AF clobbered; C/E preserved. Initial/sample settling is shared by both
-; profiles; sensitivity adds its initial wait before entry.
+; Shared single-DATA-line shifter; the caller chooses its timed clock routine.
+; C=data mask, IX=clock+settling callback. Mouse callbacks also use D/E.
+; HL=active-low inverted report, BC/AF clobbered (C preserved).
+; First bit is available after LATCH; only the remaining 15 bits need CLOCK.
 _ctrl_read16::
     ld hl,#0
     ld b,#16
-    jr read16_sample
-read16_settle:
-    ; Four stack exchanges restore HL/SP contents and spend 76 T in four
-    ; instructions. Includes neither register spills nor a counted delay loop.
-    ex (sp),hl
-    ex (sp),hl
-    ex (sp),hl
-    ex (sp),hl
 read16_sample:
     in a,(0xd0)
     and c
@@ -26,12 +17,7 @@ read16_sample:
     djnz read16_next_bit
     ret
 read16_next_bit:
-    ld a,d
-    ld d,e
-    nop
-    nop
-    call _ctrl_wait
     call read16_clock
-    jr read16_settle
+    jr read16_sample
 read16_clock:
     jp (ix)
