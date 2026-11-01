@@ -40,7 +40,7 @@ uint16_t input_read(void)
     uint16_t i = keyboard_read();
     if (controller_mode) {
         uint16_t pad = controller_read_pad(SNES_PORT1);
-        if ((pad & 0xF000) == 0) {
+        if (controller_pad_valid(pad)) {
             /* Only a valid pad report can release suppressed buttons. */
             controller_suppressed &= pad;
             i |= pad & ~controller_suppressed;
@@ -57,7 +57,7 @@ void input_flush(void)
     keyboard_flush();
     if (controller_mode) {
         uint16_t pad = controller_read_pad(SNES_PORT1);
-        if ((pad & 0xF000) == 0) {
+        if (controller_pad_valid(pad)) {
             controller_suppressed = pad;
         } else {
             controller_suppressed = PAD_BUTTONS;

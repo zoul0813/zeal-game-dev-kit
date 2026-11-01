@@ -1,5 +1,8 @@
 # ZGDK: Input
 
+Porting an existing game? Start with the [Controller API migration guide](controller-migration.md)
+for before-and-after examples, including pads, mice, and mixed setups.
+
 ZGDK supports both Keyboard and SNES controller input. By default, ZGDK maps the users keyboard
 to look like a SNES controller to help simplify supporting both devices.
 
@@ -96,10 +99,24 @@ A single pad needs only its returned 16-bit value. It does not allocate a
 
 ```c
 uint16_t buttons = controller_read_pad(SNES_PORT1);
-if (buttons & BUTTON_A) jump();
+if (controller_pressed(buttons, BUTTON_A)) jump();
 ```
 
-Reports retain all 16 raw bits; `(buttons & 0xF000) == 0` identifies a valid pad report.
+`controller_read()` is a supported convenience alias for
+`controller_read_pad(SNES_PORT1)`. Both return only the port-1 report; neither
+updates global snapshots or polls port 2. You can use the short name without
+changing includes or receiving a deprecation warning.
+
+`controller_pressed(buttons, mask)` tests a saved report without polling. It
+returns the matching bits, so `controller_pressed(buttons, BUTTON_A | BUTTON_Y)`
+is nonzero when either button is held. It evaluates each argument once and
+tests held state, not a new press. Unlike the old one-argument macro, the report
+is supplied explicitly.
+
+Reports retain all 16 raw bits; `controller_pad_valid(buttons)` checks whether
+a saved report has the standard pad signature, without another hardware read.
+It does not suppress held buttons or track state. Raw polling callers manage
+their own release-before-accepting behavior when needed.
 An invalid port returns `0xFFFF` without accessing the PIO.
 
 For two pads, use a single latch/clock transaction:
@@ -140,14 +157,14 @@ linked only when requested, and only its setter owns persistent state (one byte)
 
 ### Deprecated aliases
 
-Existing aliases remain available through the normal namespace headers; games
-need no extra includes to keep calling them:
+The deprecated `input_get()` alias remains available through the normal input
+header; games need no extra include to keep calling it:
 
 ```c
 #include <zgdk/input.h>
 
 uint16_t input = input_get();       /* Deprecated: use input_read(). */
-uint16_t pad = controller_read();   /* Deprecated: use controller_read_pad(SNES_PORT1). */
+uint16_t pad = controller_read();   /* Supported convenience alias for port 1. */
 ```
 
 Each namespace keeps its deprecated declarations separate and includes them
@@ -156,7 +173,6 @@ automatically after its canonical declarations:
 | Namespace header | Included deprecated header | Alias |
 | --- | --- | --- |
 | `zgdk/input.h` | `zgdk/input/deprecated.h` | `input_get()` |
-| `zgdk/input/controller.h` | `zgdk/input/controller/deprecated.h` | `controller_read()` |
 
 The umbrella `zgdk.h` also exposes these aliases through its normal includes.
 Including a namespace header alone emits no warning; each use of a deprecated
@@ -169,30 +185,21 @@ require compiling with GCC or using unsupported GCC function attributes. The
 shared warning helper is in `zgdk/deprecation.h`; GCC and Clang host checks
 also verify its behavior.
 
-This organization does **not** restore the old controller API. In particular,
-`controller_read()` reads only port 1 and does not update global snapshots or
-poll port 2. The removed getters, detection API, and split mouse API still need
-the migrations below.
+Deprecated aliases do **not** restore the old controller API. The removed
+getters, detection API, and split mouse API still need the migrations below.
+The supported `controller_read()` convenience alias is declared directly in
+`zgdk/input/controller.h`, outside the deprecated header.
 
 ### Migrating low-level controller callers
 
-The controller API intentionally breaks compatibility with the old global-state
-interface. Recompile games against the matching header and library.
-
-| Old usage | Replacement |
-| --- | --- |
-| `controller_read_port(port)` | `controller_read_pad(port)`, sampling only that port |
-| A read implicitly refreshing both ports | `controller_read_pads(&pads)` |
-| `PORT1_bits`, `PORT2_bits`, getter/pressed macros | Store the returned report; test its button bits |
-| Header read followed by `controller_read_mouse(port)` | `controller_read_mouse(port, &mouse)` reads the whole report |
-| `MOUSE_x`, `MOUSE_y`, axis getters | Caller-owned `mouse.x`, `mouse.y` |
-| `controller_is(port, type)` and `ControllerType` | Separate `controller_is_pad(port)` / `controller_is_mouse(port)` |
-| `controller_flush()` | Clear the game's own saved reports |
+Follow the [Controller API migration guide](controller-migration.md) for the
+complete replacement table, before-and-after examples, and a pad-and-mouse
+polling loop. It also covers game-owned edge state, flushing, sensitivity,
+deprecated aliases, and test updates.
 
 `input_init()`, `input_read()`, and `input_flush()` retain their public interfaces
-and held-button suppression behavior. Their controller path now links only
-single-port pad polling. Sensitivity function signatures and button masks are
-unchanged.
+and held-button suppression behavior. Raw polling no longer updates SDK global
+snapshots. Recompile games against the matching headers and library.
 
 ### Controller timing and verification
 

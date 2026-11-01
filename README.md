@@ -8,6 +8,7 @@ This is a "simple" framework/library for building games for the [Zeal 8-bit Comp
 
 - [Types](docs/Types.md)
 - [Input](docs/Input.md)
+- [Controller API migration](docs/controller-migration.md)
 - [Sound](docs/Sound.md)
 - [Sprites](docs/Sprites.md)
 - [Tilemaps](docs/Tilemaps.md)
