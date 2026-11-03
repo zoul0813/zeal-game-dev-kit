@@ -7,7 +7,10 @@ Tilemap *_TILEMAP;
 int main(void) {
     uint8_t tiles[8] = {0,1,2,3, 1,2,3,0};
     uint8_t flags[256] = {0};
-    Tilemap map = { .tiles = tiles, .rect = { .w = 4, .h = 2 } };
+    Tilemap map = {0};
+    map.tiles = tiles;
+    map.rect.w = 4;
+    map.rect.h = 2;
     /* Lookup tables carry arbitrary game classifications, not platformer enums. */
     flags[1] = 0x20; flags[2] = 0x40; flags[3] = 0x80;
     _TILEMAP = &map;

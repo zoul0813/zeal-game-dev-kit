@@ -8,10 +8,5 @@ trap 'rm -rf "$out"' EXIT HUP INT TERM
     -I"$root/include" "$root/tests/physics/free.c" "$root/src/physics/body.c" \
     "$root/src/physics/overlap.c" -o "$out/free"
 "$out/free"
-for test in platformer tileflags; do
-    "${CC:-cc}" -std=c11 -O1 -g -Wall -Wextra -Werror -fsanitize=address,undefined \
-        -I"$root/tests/stream/sdk" -I"$root/include" \
-        "$root/tests/physics/$test.c" "$root/src/physics/"*.c "$root/src/physics/platformer/"*.c \
-        -o "$out/$test"
-    "$out/$test"
-done
+# Collision behavior runs on Z80 now that the probes have a single assembly implementation.
+sh "$root/tests/run-physics-z80.sh"

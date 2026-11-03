@@ -152,13 +152,17 @@ checkpoints, room transitions and rendering remain game-owned.
 
 ## Validation
 
-Run `sh tests/run-physics.sh` for sanitizer-enabled free-body, custom tile-flag
-and platformer behavior tests. The free-body test links without a tilemap,
-cache definition or platformer implementation, verifying that those are optional.
-The Z80 fixture also compares optimized probes/movement against the C reference.
+Run `sh tests/run-physics.sh` for sanitizer-enabled free-body tests followed by
+Z80 collision and platformer behavior tests. The free-body test links without a
+tilemap, cache definition or platformer implementation, verifying that those are
+optional. Tilemap collision functions live in `src/physics/tilemap/`.
+Probes and edge calculations use only the assembly implementation in `body_probe_row.asm`,
+`body_probe_column.asm` and `body_edges.asm`;
+there is no C fallback.
 
 Target checks (after building the library, with SDCC/makebin and SDK environment
 variables available): `sh tests/run-physics-target.sh`. Run
-`sh tests/run-physics-z80.sh` with Python `z80` installed for the assembly/C
-comparison. `PYTHON`, `SDCC`, `MAKEBIN` and `ZGDK_LIB` can select installed tools
+`sh tests/run-physics-z80.sh` with Python `z80` installed for randomized probes
+against a Python reference, fixed-point edges, and collision/platformer scenarios.
+`PYTHON`, `SDCC`, `AS`, `MAKEBIN` and `ZGDK_LIB` can select installed tools
 or the library directory for those checks.
