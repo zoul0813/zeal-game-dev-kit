@@ -49,3 +49,7 @@ set_source_files_properties(
 # Preserve the compact sequencer implementation used by RAM-constrained games.
 set_source_files_properties(src/sound/sfx.c src/sound/hardware.c
     PROPERTIES COMPILE_OPTIONS "--opt-code-size")
+
+# Physics preserves the compact game implementation and separate archive members.
+file(GLOB_RECURSE ZGDK_PHYSICS_SRCS CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/physics/*.c")
+set_source_files_properties(${ZGDK_PHYSICS_SRCS} PROPERTIES COMPILE_OPTIONS "--opt-code-size")
