@@ -59,3 +59,7 @@ set_source_files_properties(${ZGDK_PHYSICS_SRCS} ${ZGDK_TILEFLAGS_SRCS}
 # Independent pool capabilities are extracted only when used.
 file(GLOB ZGDK_ENTITY_SRCS CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/entities/*.c")
 set_source_files_properties(${ZGDK_ENTITY_SRCS} PROPERTIES COMPILE_OPTIONS "--opt-code-size")
+
+# Preserve the compact game animation sequencer, one capability per member.
+set_source_files_properties(src/anims/play.c src/anims/restart.c src/anims/tick.c
+    PROPERTIES COMPILE_OPTIONS "--opt-code-size")

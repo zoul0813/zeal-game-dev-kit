@@ -18,3 +18,4 @@
 #include "zgdk/tilemap/stream.h"
 #include "zgdk/physics.h"
 #include "zgdk/entities.h"
+#include "zgdk/anims.h"

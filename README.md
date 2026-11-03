@@ -8,6 +8,7 @@ This is a "simple" framework/library for building games for the [Zeal 8-bit Comp
 
 - [Types](docs/Types.md)
 - [Utilities](docs/Utils.md)
+- [Animations](docs/Anims.md)
 - [Entity pools](docs/Entities.md)
 - [Physics](docs/Physics.md)
 - [Input](docs/Input.md)
