@@ -17,3 +17,4 @@
 #include "zgdk/camera.h"
 #include "zgdk/tilemap/stream.h"
 #include "zgdk/physics.h"
+#include "zgdk/entities.h"

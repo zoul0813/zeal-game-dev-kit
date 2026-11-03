@@ -55,3 +55,7 @@ file(GLOB_RECURSE ZGDK_PHYSICS_SRCS CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/p
 file(GLOB ZGDK_TILEFLAGS_SRCS CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/tilemap/flags/*.c")
 set_source_files_properties(${ZGDK_PHYSICS_SRCS} ${ZGDK_TILEFLAGS_SRCS}
     PROPERTIES COMPILE_OPTIONS "--opt-code-size")
+
+# Independent pool capabilities are extracted only when used.
+file(GLOB ZGDK_ENTITY_SRCS CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/entities/*.c")
+set_source_files_properties(${ZGDK_ENTITY_SRCS} PROPERTIES COMPILE_OPTIONS "--opt-code-size")
