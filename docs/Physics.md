@@ -42,41 +42,15 @@ collision state. `body_overlap` tests rectangular overlap. `body_set_pos`
 teleports in integer pixels, preserving velocity and clearing collision/policy
 state. Bodies contain no mass, animation, sprite, health or jump timers.
 
-## Tile flags and row storage
+## Tile flags
 
-The caller owns a 256-byte table mapping tile IDs to byte flags. Flags classify
-tile IDs, not individual map cells. The registered ZGDK Tilemap supplies each
-cell's tile ID. There is no second map-sized collision buffer.
-
-Define the row cache in exactly one C file:
-
-```c
-#include <zgdk/physics/tilemap.h>
-TILEFLAGS_DEFINE_CACHE(15);   /* tallest logical map used by this application */
-```
-
-Logical map widths must fit a byte (1..255 tiles).
-
-The macro defines `tileflags_rows` and `tileflags_row_capacity`. On Z80 the
-row pointers cost two bytes per row (30 bytes for 15 rows), plus one byte for
-the capacity constant. Caller-owned storage preserves compact 15-row games and
-also permits tall logical maps, without rebuilding `zgdk.lib`. The fixed symbol
-allows direct row indexing in the optimized Z80 probes, without another pointer
-indirection. Cache capacity must be 1..255; rows beyond capacity are outside.
-
-Register the game's table with `tileflags_register(flags)`. After successfully
-loading/registering a map, call `tileflags_refresh()` before fast lookups.
-Safe lookups automatically refresh when the registered map or tile buffer
-changes. If dimensions change in place, refresh explicitly. The map, tile
-buffer and flag table must remain alive while used.
-
-* `tileflags_at(px, py)` and `tileflags_at_tile(tx, ty)` check boundaries.
-* `tileflags_set_outside(flags)` sets the outside classification (default solid).
-* `tileflags_fast(px, py)` is an unchecked inline lookup: use only in-range
-  coordinates after refreshing the cache and registering a valid table.
+Tile flags are a general tilemap service, exposed through `<zgdk/tilemap/flags.h>`.
+See [Tile flags and row storage](Tilemaps.md#tile-flags-and-row-storage) for
+registration, caller-owned cache storage, and lookups. Physics consumes that
+same table and cache.
 
 A lookup returns all eight game-provided bits. Collision interprets `TF_SOLID`
-(bit 0) and `TF_ONEWAY` (bit 1). `TF_LADDER` (bit 2) and `TF_HAZARD` (bit 3)
+(bit 0) and `TF_ONEWAY` (bit 1). `TF_LADDER` (bit 2) and `TF_TRIGGER` (bit 3)
 are conventions used by controller/contact helpers; `TF_USER1..4` are game
 flags. A pure classification table can use its own eight bits. With collision,
 preserve solid/one-way meanings; other contact flags need not imply a platformer.
@@ -94,18 +68,21 @@ result bits are rebuilt each step:
 * `BODY_ON_GROUND`: supported from below (positive Y).
 * `BODY_HIT_WALL`: blocked horizontally.
 * `BODY_HIT_CEIL`: blocked above (negative Y).
-* `BODY_IN_HAZARD`, `BODY_ON_LADDER`: standard contact conveniences.
+* `BODY_TOUCHING_TRIGGER`: contact with a `TF_TRIGGER` tile; the game decides
+  the response (checkpoints, pickups, exits, damage, or other interactions).
+* `BODY_ON_LADDER`: center contact with a `TF_LADDER` tile.
 
-`touched` reports the masked OR of sampled contact flags. Hazard sampling is
-slightly inset, preserving the original forgiving spike corners. Ladder contact
-uses the center sample. `body_set_touch_mask(0)` skips contact probes entirely;
+`touched` reports the masked OR of sampled contact flags. Trigger sampling is
+slightly inset to avoid reporting grazed tile corners. Trigger contact is
+recomputed each step; the game controls whether an interaction happens once or
+continuously. Ladder contact uses the center sample. `body_set_touch_mask(0)` skips contact probes entirely;
 solid/one-way collision still works. The default mask is `0xff`.
 
 This is discrete tile collision, not swept collision. Use at most 16 pixels per
 axis per step, or substep faster bodies to prevent tunneling. Physics uses the
 single registered ZGDK Tilemap and shared probe scratch: it is not reentrant.
 Coordinates are room/world-local pixels, independent of camera/VRAM offsets.
-The Z80 probes remain hand-written assembly; host builds use the C reference.
+The Z80 probes remain hand-written assembly; collision tests run in a Z80 emulator.
 
 ## Optional platformer controller
 
@@ -155,7 +132,9 @@ checkpoints, room transitions and rendering remain game-owned.
 Run `sh tests/run-physics.sh` for sanitizer-enabled free-body tests followed by
 Z80 collision and platformer behavior tests. The free-body test links without a
 tilemap, cache definition or platformer implementation, verifying that those are
-optional. Tilemap collision functions live in `src/physics/tilemap/`.
+optional. Physics functions are split by family under `src/physics/body/`,
+`tilemap/` and `platformer/`, with one function per source file. General tile-flag
+lookups live in `src/tilemap/flags/`.
 Probes and edge calculations use only the assembly implementation in `body_probe_row.asm`,
 `body_probe_column.asm` and `body_edges.asm`;
 there is no C fallback.

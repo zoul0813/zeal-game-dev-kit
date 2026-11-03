@@ -11,11 +11,11 @@
 #define PHYSICS_FP_INT(v) ((int16_t)(v) >> PHYSICS_FP_SHIFT)
 
 /* Collision results: ground/ceiling mean positive/negative Y contact.
- * Hazard and ladder are convenience results for standard tile flags. */
+ * Trigger and ladder are convenience results for standard tile flags. */
 #define BODY_ON_GROUND 0x01
 #define BODY_HIT_WALL 0x02
 #define BODY_HIT_CEIL 0x04
-#define BODY_IN_HAZARD 0x08
+#define BODY_TOUCHING_TRIGGER 0x08
 #define BODY_ON_LADDER 0x10
 /* Persistent collision policy. Platformer ladders set this while climbing. */
 #define BODY_PASS_ONEWAY 0x80

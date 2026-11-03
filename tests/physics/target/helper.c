@@ -1,7 +1,7 @@
 /* Each private assembly helper must be extractable without the collision step. */
 #include "physics/tilemap/internal.h"
 #include <zgdk/tilemap.h>
-#include <zgdk/physics/tileflags.h>
+#include <zgdk/tilemap/flags.h>
 
 TILEFLAGS_DEFINE_CACHE(1);
 Tilemap *_TILEMAP;

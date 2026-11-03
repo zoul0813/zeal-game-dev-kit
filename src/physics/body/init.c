@@ -8,10 +8,3 @@ void body_init(body_t *body, int16_t px, int16_t py, uint8_t w, uint8_t h) {
     body->state = 0;
     body_set_pos(body, px, py);
 }
-
-void body_set_pos(body_t *body, int16_t px, int16_t py) {
-    body->x = PHYSICS_FP(px);
-    body->y = PHYSICS_FP(py);
-    body->state = 0;
-    body->touched = 0;
-}

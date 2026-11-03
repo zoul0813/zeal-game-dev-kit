@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
-#include <zgdk/physics/tileflags.h>
+#include <zgdk/tilemap/flags.h>
 #include <zgdk/physics/body.h>
 
 static const char *MAP[15] = {

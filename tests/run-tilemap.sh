@@ -9,3 +9,7 @@ trap 'rm -f "$binary"' EXIT HUP INT TERM
     "$root/src/tilemap/register.c" "$root/src/tilemap/get.c" \
     "$root/src/tilemap/get_xy.c" -o "$binary"
 "$binary"
+"${CC:-cc}" -std=c11 -O1 -g -Wall -Wextra -Werror -fsanitize=address,undefined \
+    -I"$root/tests/stream/sdk" -I"$root/include" \
+    "$root/tests/tilemap/flags.c" "$root/src/tilemap/flags/"*.c -o "$binary"
+"$binary"

@@ -50,6 +50,8 @@ set_source_files_properties(
 set_source_files_properties(src/sound/sfx.c src/sound/hardware.c
     PROPERTIES COMPILE_OPTIONS "--opt-code-size")
 
-# Physics preserves the compact game implementation and separate archive members.
+# Keep physics and general tile-flag lookups compact, with separate archive members.
 file(GLOB_RECURSE ZGDK_PHYSICS_SRCS CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/physics/*.c")
-set_source_files_properties(${ZGDK_PHYSICS_SRCS} PROPERTIES COMPILE_OPTIONS "--opt-code-size")
+file(GLOB ZGDK_TILEFLAGS_SRCS CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/tilemap/flags/*.c")
+set_source_files_properties(${ZGDK_PHYSICS_SRCS} ${ZGDK_TILEFLAGS_SRCS}
+    PROPERTIES COMPILE_OPTIONS "--opt-code-size")

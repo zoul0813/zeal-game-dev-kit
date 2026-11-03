@@ -1,10 +1,10 @@
-/* Private to the core: tile cache shared by tileflags.c and body.c */
+/* Private tile-flag cache shared by lookups and tilemap collision. */
 #include <stdint.h>
 #include "zgdk/tilemap.h"
 #include <zgdk/inline.h>
 
-#ifndef ZGDK_PHYSICS_TILEFLAGS_CACHE_H
-#define ZGDK_PHYSICS_TILEFLAGS_CACHE_H
+#ifndef ZGDK_TILEMAP_FLAGS_CACHE_H
+#define ZGDK_TILEMAP_FLAGS_CACHE_H
 
 extern const uint8_t *_tf_flags;
 extern const uint8_t *_tf_tiles;

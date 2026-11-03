@@ -2,18 +2,19 @@
 #include <stddef.h>
 #include <zgdk/inline.h>
 
-#ifndef ZGDK_PHYSICS_TILEFLAGS_H
-#define ZGDK_PHYSICS_TILEFLAGS_H
+#ifndef ZGDK_TILEMAP_FLAGS_H
+#define ZGDK_TILEMAP_FLAGS_H
 
 /**
  * Per-tile behaviour flags, looked up by tile index in a 256-entry table.
- * Collision reads the tile index from the registered ZGDK Tilemap.
+ * Reads tile indices from the registered ZGDK Tilemap; no physics dependency.
+ * The predefined flags are conventions; generic lookups accept any byte flags.
  */
 #define TF_NONE    0x00
 #define TF_SOLID   0x01  // blocks from every side
 #define TF_ONEWAY  0x02  // blocks only when landing on it from above
 #define TF_LADDER  0x04  // climbable
-#define TF_HAZARD  0x08  // hurts on touch
+#define TF_TRIGGER 0x08  // reports contact; the game decides its meaning
 #define TF_USER1   0x10  // free for the game (sockets, doors, ...)
 #define TF_USER2   0x20
 #define TF_USER3   0x40

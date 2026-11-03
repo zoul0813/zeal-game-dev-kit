@@ -19,4 +19,17 @@ for helper in EDGES ROW COLUMN; do
         -o "$out/helper_$helper.ihx" "$root/tests/physics/target/helper.c" \
         -L"${ZGDK_LIB:-$root/lib}" -l zgdk
 done
+for family in body tileflags; do
+    case "$family" in
+        body) entries="INIT SET_POS OVERLAP"; source="$root/tests/physics/target/body.c" ;;
+        tileflags) entries="REGISTER SET_OUTSIDE REFRESH AT AT_TILE"; source="$root/tests/tilemap/target/flags.c" ;;
+    esac
+    for entry in $entries; do
+        "${SDCC:-sdcc}" -mz80 --opt-code-size -I"$root/include" \
+            -I"$ZVB_SDK_PATH/include" -I"$ZOS_PATH/sdk/sdcc/include" \
+            -DTEST_$entry --no-std-crt0 --code-loc 0x0100 --data-loc 0xc000 \
+            -o "$out/${family}_$entry.ihx" "$source" \
+            -L"${ZGDK_LIB:-$root/lib}" -l zgdk
+    done
+done
 "${PYTHON:-python3}" "$root/tests/physics/target/check.py" "$out"

@@ -1,5 +1,5 @@
 #include "zgdk/physics/platformer.h"
-#include "zgdk/physics/tileflags.h"
+#include "zgdk/tilemap/flags.h"
 
 uint8_t platformer_ladder(body_t *body, uint8_t up, uint8_t down, int8_t dir_x, int16_t climb_speed) {
     int16_t cx = PHYSICS_FP_INT(body->x) + (body->w >> 1);

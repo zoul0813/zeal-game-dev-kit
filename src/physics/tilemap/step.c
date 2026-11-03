@@ -1,5 +1,5 @@
 #include "internal.h"
-#include "../tileflags_cache.h"
+#include "../../tilemap/flags/cache.h"
 
 void body_step(body_t *body) {
     body->state &= BODY_PASS_ONEWAY;

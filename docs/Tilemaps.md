@@ -65,3 +65,45 @@ populating a background, etc).
 
 For independent cameras, larger maps, procedural readers, and rebasing, see
 [Cameras and tile streaming](camera-stream.md).
+
+## Tile flags and row storage
+
+The caller owns a 256-byte table mapping tile IDs to byte flags. Flags classify
+tile IDs, not individual map cells. The registered ZGDK Tilemap supplies each
+cell's tile ID. There is no second map-sized collision buffer.
+
+Define the row cache in exactly one C file:
+
+```c
+#include <zgdk/tilemap/flags.h>
+TILEFLAGS_DEFINE_CACHE(15);   /* tallest logical map used by this application */
+```
+
+Logical map widths must fit a byte (1..255 tiles).
+
+The macro defines `tileflags_rows` and `tileflags_row_capacity`. On Z80 the
+row pointers cost two bytes per row (30 bytes for 15 rows), plus one byte for
+the capacity constant. Caller-owned storage preserves compact 15-row games and
+also permits tall logical maps, without rebuilding `zgdk.lib`. The fixed symbol
+allows direct row indexing in the optimized Z80 probes, without another pointer
+indirection. Cache capacity must be 1..255; rows beyond capacity are outside.
+
+Register the game's table with `tileflags_register(flags)`. After successfully
+loading/registering a map, call `tileflags_refresh()` before fast lookups.
+Safe lookups automatically refresh when the registered map or tile buffer
+changes. If dimensions change in place, refresh explicitly. The map, tile
+buffer and flag table must remain alive while used.
+
+* `tileflags_at(px, py)` and `tileflags_at_tile(tx, ty)` check boundaries.
+* `tileflags_set_outside(flags)` sets the outside classification (default solid).
+* `tileflags_fast(px, py)` is an unchecked inline lookup: use only in-range
+  coordinates after refreshing the cache and registering a valid table.
+
+A lookup returns all eight game-provided bits. AI, terrain interactions, spawning
+rules, and physics can consume the same classification table. `TF_SOLID`,
+`TF_ONEWAY`, `TF_LADDER`, and `TF_TRIGGER` are conventions interpreted by the
+[physics helpers](Physics.md#tile-flags); generic consumers can use all eight
+bits for their own meanings.
+
+Run `sh tests/run-tilemap.sh` for sanitizer-enabled tile-flag lookups without
+linking any physics implementation, along with the tilemap loader tests.
