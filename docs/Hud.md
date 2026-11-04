@@ -132,3 +132,8 @@ the SDK ASCII table.
 After rebuilding the library, run `python3 tests/check-hud-sprite-link.py` with
 SDCC and `ZOS_PATH` / `ZVB_SDK_PATH` set. It checks the four-byte Z80 view, mixed
 tilemap/sprite use and selective linking with a shared font table and no arena dependency.
+
+Run `sh tests/run-hud-sprite-z80.sh` with SDCC and Python `z80` installed to
+execute stack-local sprite text descriptors on the Z80. This checks long menu
+captions, capacity limits and centering against the linked archive, catching
+compiler pointer-drift regressions that native C tests cannot expose.
