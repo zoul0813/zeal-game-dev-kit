@@ -2,5 +2,5 @@
 #define ZGDK_PHYSICS_H
 #include <zgdk/physics/body.h>
 #include <zgdk/physics/tilemap.h>
-/* Optional input/controller helpers: include <zgdk/physics/platformer.h>. */
+/* Optional controllers: <zgdk/physics/platformer.h> or <zgdk/physics/inertial.h>. */
 #endif

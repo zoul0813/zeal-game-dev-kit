@@ -70,3 +70,7 @@ set_property(SOURCE src/entities/presets/physics_sync.asm
     src/entities/presets/physics_pool_sync.asm src/entities/presets/sprite_sync.asm
     APPEND PROPERTY OBJECT_DEPENDS
     "${CMAKE_SOURCE_DIR}/src/entities/presets/prepare.inc;${CMAKE_SOURCE_DIR}/src/entities/presets/draw.inc")
+
+# Numeric helpers remain independently extractable and compact.
+file(GLOB ZGDK_CLAMP_SRCS CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/utils/clamp_*.c")
+set_source_files_properties(${ZGDK_CLAMP_SRCS} PROPERTIES COMPILE_OPTIONS "--opt-code-size")

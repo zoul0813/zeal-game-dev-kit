@@ -2,8 +2,9 @@
 
 Use `<zgdk/physics/body.h>` for free bodies, `<zgdk/physics/tilemap.h>` for
 optional tile collision, and `<zgdk/physics/platformer.h>` for the optional
-platformer controller. `<zgdk/physics.h>` includes the generic body/tile APIs;
-it does not include the platformer controller.
+platformer controller, or `<zgdk/physics/inertial.h>` for eight-way inertial
+movement. `<zgdk/physics.h>` includes the generic body/tile APIs;
+it does not include either optional controller.
 
 Each capability has its own archive member. Free bodies link no tile flags,
 row cache or controller code. No heap allocation or sprite is required.
@@ -145,3 +146,37 @@ variables available): `sh tests/run-physics-target.sh`. Run
 against a Python reference, fixed-point edges, and collision/platformer scenarios.
 `PYTHON`, `SDCC`, `AS`, `MAKEBIN` and `ZGDK_LIB` can select installed tools
 or the library directory for those checks.
+
+## Inertial controller
+
+Include `<zgdk/physics/inertial.h>` for optional eight-way acceleration, drag,
+speed limits and glide after impulses. It changes velocity only, has no mutable
+controller state, and depends only on `body_t`. It can drive swimming, top-down
+characters or ships. It does not link the platformer controller or tile collision.
+
+```c
+static const inertial_config_t movement = {
+    .accel = 3, .drag = 2, .max_speed = 40, .drift_y = 0, .glide = 2
+};
+inertial_update(&ship, &movement, dir_x, dir_y); /* each direction is -1, 0, 1 */
+body_integrate(&ship); /* or body_step(&ship) for tile collision */
+```
+
+All tuning uses 12.4 per tick. `accel`, `drag`, `max_speed` and `glide` must
+be nonnegative. No-input horizontal velocity approaches zero; vertical velocity
+approaches `drift_y` clamped to `[-max_speed, max_speed]` (negative for buoyancy,
+zero for no drift). This also keeps drift at zero when `max_speed` is zero. Diagonal input
+reduces each axis cap to three quarters, approximating equal overall speed.
+An axis above its cap approaches the cap by `glide` before accepting input again.
+Zero drag or glide preserves the corresponding momentum. Keep arithmetic sums
+within `int16_t`, as with the generic body APIs.
+
+`body_push(body, dvx, dvy, limit)` is a separate generic physics function declared
+in `<zgdk/physics/body.h>`. It adds an instantaneous velocity change and clamps
+both axes to `[-limit, limit]`. The limit must be nonnegative and each velocity
+plus delta must fit `int16_t`. It neither moves the body nor changes collision
+state. It also works with the platformer controller or free bodies. Unlike
+`body_accelerate()`, it imposes a speed limit.
+
+Run `sh tests/run-inertial.sh` for native controller/impulse checks, including
+proof that they link without collision, tile flags, sprites or platformer code.

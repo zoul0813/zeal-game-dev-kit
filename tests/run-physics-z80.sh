@@ -6,7 +6,7 @@ trap 'rm -rf "$out"' EXIT HUP INT TERM
 : "${ZOS_PATH:?set ZOS_PATH}"
 : "${ZVB_SDK_PATH:?set ZVB_SDK_PATH}"
 # Compile production sources separately, as the library build does.
-for source in "$root/src/physics/"*/*.c "$root/src/tilemap/flags/"*.c; do
+for source in "$root/src/physics/"*/*.c "$root/src/tilemap/flags/"*.c "$root/src/utils/clamp_i16.c"; do
     object=$(printf '%s' "${source#"$root/src/"}" | tr / _)
     "${SDCC:-sdcc}" -mz80 --opt-code-size -I"$root/include" \
         -I"$ZVB_SDK_PATH/include" -I"$ZOS_PATH/sdk/sdcc/include" \

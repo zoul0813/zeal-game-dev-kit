@@ -1,7 +1,7 @@
 # Utilities
 
 ZGDK utilities cover tile-based text, random numbers, formatted strings, logging,
-emulator timing markers, directory creation and byte-grid row addressing.
+emulator timing markers, directory creation, byte-grid row addressing and numeric clamping.
 Prefer the individual header when only one facility is needed.
 
 `<zgdk/utils.h>` includes the following headers; `<zgdk.h>` includes that umbrella
@@ -16,6 +16,7 @@ in turn. String aliases and directory creation require explicit includes.
 | [`utils/log.h`](../include/zgdk/utils/log.h) | Console error and string messages | Yes |
 | [`utils/debug.h`](../include/zgdk/utils/debug.h) | Emulator T-state markers | Yes |
 | [`utils/ensure_parent_dirs.h`](../include/zgdk/utils/ensure_parent_dirs.h) | Create a path's parent directories | No |
+| [`utils/math.h`](../include/zgdk/utils/math.h) | Signed/unsigned integer clamps | Yes |
 | [`utils/grid_rows.h`](../include/zgdk/utils/grid_rows.h) | Initialize byte-grid row pointers | Yes |
 
 ## Inline helpers
@@ -263,3 +264,26 @@ address on SDCC: no out-of-line definition is provided.
 Run `sh tests/run-grid-rows.sh` for the standalone ASan/UBSan tests. The suite
 covers padded rows, strides above 255 bytes, 255 rows, high-byte values, zero
 count/stride, table rebinding and backing-data edits.
+
+## Numeric clamping
+
+Include `<zgdk/utils/math.h>` (also included by `<zgdk/utils.h>`).
+
+| Function | Values/bounds | Range |
+|---|---|---|
+| `clamp_i16(value, min, max)` | `int16_t` | Inclusive `[min, max]` |
+| `clamp_u16(value, min, max)` | `uint16_t` | Inclusive `[min, max]` |
+| `clamp_i8(value, min, max)` | `int8_t` | Inclusive `[min, max]` |
+| `clamp_u8(value, min, max)` | `uint8_t` | Inclusive `[min, max]` |
+
+`min` must be at most `max`. To clamp symmetrically, pass `-limit` and `limit`
+as the bounds.
+Arguments are evaluated once, as ordinary function arguments. A clamp cannot repair
+overflow that already happened while computing the argument; perform sums in a
+suitable type. Each function has its own `.c` file/archive member, so linking one
+variant pulls in none of the others. The physics impulse and inertial controller
+both use `clamp_i16()`; neither defines a private clamp implementation.
+
+Run `sh tests/run-clamp.sh` for signed/unsigned boundary checks. After rebuilding
+`zgdk.lib`, run `sh tests/run-clamp-target.sh` with SDCC to verify each variant
+links without any of the other clamp variants.

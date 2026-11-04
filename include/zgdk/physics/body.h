@@ -39,6 +39,9 @@ INLINE void body_integrate(body_t *body) { body->x += body->vx; body->y += body-
 /* Apply once for an impulse, or each tick for acceleration, in fixed-point units.
  * The caller owns limits; keep arithmetic within int16_t range. */
 INLINE void body_accelerate(body_t *body, int16_t ax, int16_t ay) { body->vx += ax; body->vy += ay; }
+/* Add an impulse, clamping each velocity to [-limit, limit]. limit must be
+ * nonnegative; velocity + delta must fit int16_t. No movement or collision. */
+void body_push(body_t *body, int16_t dvx, int16_t dvy, int16_t limit);
 /* Downward acceleration with a positive terminal speed, both fixed-point. */
 INLINE void body_apply_gravity(body_t *body, int16_t gravity, int16_t max_fall) {
     body->vy += gravity;

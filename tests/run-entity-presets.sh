@@ -8,5 +8,5 @@ ${CC:-cc} -std=gnu11 -O1 -g -w -fsanitize=address,undefined \
  '-D__sfr=static volatile unsigned char' '-D__at(x)=' -D__SDCC_VERSION_MAJOR=4 -D__SDCC_VERSION_MINOR=4 '-D__sdcccall(x)=' \
  -I"$root/include" -I"$ZOS_PATH/sdk/sdcc/include" -I"$ZVB_SDK_PATH/include" -I"$COREUTILS_PATH/libsrc/libcore" \
  "$root/tests/entity_presets.c" "$root"/src/entities/presets/*.c \
- "$root"/src/entities/*.c "$root"/src/anims/*.c "$root"/src/physics/body/*.c -o "$out/presets"
+ "$root"/src/entities/*.c "$root"/src/anims/*.c "$root"/src/physics/body/*.c "$root/src/utils/clamp_i16.c" -o "$out/presets"
 "$out/presets"
