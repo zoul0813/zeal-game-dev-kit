@@ -27,6 +27,16 @@ typedef struct {
 
 void hiscore_init(const hiscore_config_t *config);
 
+/* Read-only ranked row, or NULL when rank >= HISCORES_COUNT. Rank 0 is the
+ * game high score; defaults must be ordered highest first. Returned storage is
+ * library-owned: init/load/add can change its contents and shift ranked rows. */
+const highscore_t *hiscore_get(uint8_t rank);
+
+/* Highest retained score matching exactly three initials bytes (not necessarily
+ * NUL-terminated). NULL for no match or NULL initials. Shares get's lifetime.
+ * Initials are the only player identifier; scores outside the top ten aren't kept. */
+const highscore_t *hiscore_find(const char initials[3]);
+
 /**
  * @brief Show the hiscore table
  */
