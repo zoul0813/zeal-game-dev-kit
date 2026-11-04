@@ -5,7 +5,7 @@
     pop iy
     ld a, 2 (ix)
     inc a
-    jp Z, 00980$
+    jp Z, entity_park
     ld a, 5 (ix)
     or a, a
-    jp NZ, 00980$
+    jp NZ, entity_park

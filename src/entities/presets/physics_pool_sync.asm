@@ -17,39 +17,39 @@ _physics_entities_sync::
     pop iy
     ld a, 5 (iy)
     cp #21
-    jp C, 00490$
+    jp C, pool_sync_return
     ld (_sync_stride), a
     ld a, 6 (iy)
     cp #2
-    jp NZ, 00490$
+    jp NZ, pool_sync_return
     ld l, 0 (iy)
     ld h, 1 (iy)
     ld a, h
     or a, l
-    jp Z, 00490$
+    jp Z, pool_sync_return
     push hl
     pop ix
     ld l, 2 (iy)
     ld h, 3 (iy)
     ld (_sync_end), hl
-00401$:
+pool_sync_loop:
     push ix
     pop hl
     ld de, (_sync_end)
     or a, a
     sbc hl, de
-    jp NC, 00490$
+    jp NC, pool_sync_return
 .include "prepare.inc"
     ld l, 9 (ix)
     ld h, 10 (ix)
 .include "draw.inc"
-00990$:
+entity_sync_done:
     ld a, (_sync_stride)
     ld c, a
     ld b, #0
     add ix, bc
-    jp 00401$
-00490$:
+    jp pool_sync_loop
+pool_sync_return:
     pop iy
     pop ix
     ret

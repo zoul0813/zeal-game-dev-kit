@@ -27,7 +27,7 @@
     ld      bc, (__entity_view_limit_x)
     or      a, a
     sbc     hl, bc
-    jp      NC, 00970$
+    jp      NC, entity_cull_x
     ; sy = ((int16)(y + off_y) >> 4) + oy   (screen y + 32)
     .ifne ENTITY_BODY
     ld      l, 11 (ix)
@@ -59,21 +59,21 @@
     ld      bc, (__entity_view_limit_y)
     ld      a, 4 (ix)
     or      a, a
-    jr      Z, 00010$
+    jr      Z, entity_check_y
     inc     hl
     inc     bc
-00010$:
+entity_check_y:
     ld      a, l
     sub     a, c
     ld      a, h
     sbc     a, b
-    jp      NC, 00980$
+    jp      NC, entity_park
     ; Restore hardware Y after the height-dependent visibility check.
     ld      a, 4 (ix)
     or      a, a
-    jr      NZ, 00011$
+    jr      NZ, entity_write_position
     inc     hl
-00011$:
+entity_write_position:
     ld      0 (iy), l
     ld      1 (iy), h
     ld      2 (iy), e
@@ -91,21 +91,21 @@
     ; options = tall ? SPRITE_OPTION_32PX : 0
     ld      a, 4 (ix)
     or      a, a
-    jr      Z, 00020$
+    jr      Z, entity_write_options
     ld      a, #2
-00020$:
+entity_write_options:
     ld      6 (iy), a
     ld      7 (iy), #0
-    jp      00990$
-00970$:
+    jp      entity_sync_done
+entity_cull_x:
     .ifeq ENTITY_BODY
     pop     hl
     .endif
-00980$:
+entity_park:
     ; park once: y = 0 and options = 0 (a 16x32 sprite at y = 0 would show its bottom half)
     ld      a, 8 (ix)
     or      a, a
-    jr      NZ, 00990$
+    jr      NZ, entity_sync_done
     ld      8 (ix), #1
     xor     a, a
     ld      0 (iy), a

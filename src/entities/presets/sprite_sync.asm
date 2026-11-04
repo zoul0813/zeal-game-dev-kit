@@ -20,7 +20,7 @@ _sprite_entity_sync_fp::
     ld d, (hl)
     pop hl
 .include "draw.inc"
-00990$:
+entity_sync_done:
     pop iy
     pop ix
     pop hl

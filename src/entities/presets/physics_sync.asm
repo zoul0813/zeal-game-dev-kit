@@ -13,7 +13,7 @@ _physics_entity_sync::
     ld l, 9 (ix)
     ld h, 10 (ix)
 .include "draw.inc"
-00990$:
+entity_sync_done:
     pop iy
     pop ix
     ret
