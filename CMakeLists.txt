@@ -78,3 +78,10 @@ set_source_files_properties(${ZGDK_CLAMP_SRCS} PROPERTIES COMPILE_OPTIONS "--opt
 # Sprite HUD text capabilities remain independently extractable and compact.
 file(GLOB ZGDK_HUD_SPRITE_SRCS CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/hud/sprite/*.c")
 set_source_files_properties(${ZGDK_HUD_SPRITE_SRCS} PROPERTIES COMPILE_OPTIONS "--opt-code-size")
+
+# Room management, optional slide transitions and independent minimaps.
+# Separate archive members keep unused transitions/renderers out of games.
+file(GLOB ZGDK_ROOMS_SRCS CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/rooms/*.c")
+file(GLOB ZGDK_MINIMAP_SRCS CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/minimap/*.c")
+set_source_files_properties(${ZGDK_ROOMS_SRCS} ${ZGDK_MINIMAP_SRCS}
+    PROPERTIES COMPILE_OPTIONS "--opt-code-size")

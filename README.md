@@ -19,6 +19,8 @@ This is a "simple" framework/library for building games for the [Zeal 8-bit Comp
 - [Sprites](docs/Sprites.md)
 - [High scores](docs/Hiscores.md)
 - [Tilemaps](docs/Tilemaps.md)
+- [Room grids](docs/Rooms.md)
+- [Independent minimaps](docs/Minimap.md)
 - [Camera and tilemap streaming](docs/camera-stream.md)
 - [Compression](docs/Compression.md)
 - [File](docs/File.md)
