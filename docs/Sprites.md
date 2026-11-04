@@ -64,3 +64,10 @@ void draw(void) {
 Call `sprites_deregister()` to release all registrations before loading a new scene. Previously returned sprite pointers are no longer valid. Register the new scene's sprites, then call `sprites_render(ctx)` to update the display and remove old sprites. Render even if the new scene has no sprites.
 
 Keep the arena alive until that render succeeds, retrying if needed, before releasing it or replacing it with `sprites_register_arena()`.
+
+`sprites_clear(ctx)` immediately hides all 128 hardware sprites, including tall
+sprites, without requiring an arena. It preserves arena contents and registrations;
+the next `sprites_render(ctx)` restores the registered sprites. It returns
+`GFX_SUCCESS` after clearing every slot, or the first SDK error and stops. On
+failure, earlier slots may already be hidden; retry the clear after resolving
+the error.

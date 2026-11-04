@@ -6,4 +6,5 @@ typedef struct {
     uint8_t tile, flags;
     uint16_t options;
 } gfx_sprite;
+gfx_error gfx_sprite_render(gfx_context*, uint8_t, const gfx_sprite*);
 gfx_error gfx_sprite_render_array(gfx_context*, uint8_t, const gfx_sprite*, uint8_t);

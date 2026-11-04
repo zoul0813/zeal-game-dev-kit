@@ -12,8 +12,12 @@ gfx_sprite* sprites_register(gfx_sprite sprite);
 /* Invalidates registered pointers. Render once to hide old hardware slots. */
 void sprites_deregister(void);
 gfx_error sprites_render(gfx_context* ctx);
+/* Immediately hide all hardware sprites, without changing the arena or its
+ * registrations. No arena is required. Stops on the first SDK error; earlier
+ * slots may already be hidden. sprites_render restores registered sprites. */
+gfx_error sprites_clear(gfx_context* ctx);
 
-void sprite_get_point(gfx_sprite *sprite, Point *point);
-void sprite_set_point(gfx_sprite *sprite, Point *point);
-void sprite_set_xy(gfx_sprite *sprite, uint16_t x, uint16_t y);
+void sprite_get_point(gfx_sprite* sprite, Point* point);
+void sprite_set_point(gfx_sprite* sprite, Point* point);
+void sprite_set_xy(gfx_sprite* sprite, uint16_t x, uint16_t y);
 #endif
