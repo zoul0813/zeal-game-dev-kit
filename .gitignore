@@ -7,3 +7,5 @@ extras/
 /tmp
 assets/*.zt[spm]
 *.tiled-session
+
+__pycache__
