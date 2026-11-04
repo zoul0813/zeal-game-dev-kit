@@ -74,3 +74,7 @@ set_property(SOURCE src/entities/presets/physics_sync.asm
 # Numeric helpers remain independently extractable and compact.
 file(GLOB ZGDK_CLAMP_SRCS CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/utils/clamp_*.c")
 set_source_files_properties(${ZGDK_CLAMP_SRCS} PROPERTIES COMPILE_OPTIONS "--opt-code-size")
+
+# Sprite HUD text capabilities remain independently extractable and compact.
+file(GLOB ZGDK_HUD_SPRITE_SRCS CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/hud/sprite/*.c")
+set_source_files_properties(${ZGDK_HUD_SPRITE_SRCS} PROPERTIES COMPILE_OPTIONS "--opt-code-size")

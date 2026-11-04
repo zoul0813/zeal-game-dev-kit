@@ -1,4 +1,5 @@
 #ifndef ZGDK_HUD_H
 #define ZGDK_HUD_H
 #include "zgdk/hud/tilemap.h"
+#include "zgdk/hud/sprite.h"
 #endif

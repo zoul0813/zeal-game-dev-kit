@@ -31,3 +31,16 @@ for obj in objects:
 counted = next(obj for obj in objects if '_hud_tilemap_nput_s_layer' in obj['defs'])
 assert counted['refs'] == {'_ascii_to', '_gfx_tilemap_load'}, counted['refs']
 print('HUD: four canonical entry points isolated; legacy names add no symbols or wrapper code')
+
+# Sprite text shares ASCII mapping, with no arena or VRAM dependencies.
+sprite = {'_hud_sprite_' + name for name in ('put_s', 'nput_s', 'put_s_centered', 'hide')}
+for symbol in sprite:
+    members = [obj for obj in objects if symbol in obj['defs']]
+    assert len(members) == 1, symbol
+    assert members[0]['defs'] & (sprite | modern) == {symbol}, symbol
+    assert not any(ref.startswith(('_gfx_', '_sprites_', '_sprite_')) for ref in members[0]['refs']), symbol
+counted_sprite = next(obj for obj in objects if '_hud_sprite_nput_s' in obj['defs'])
+assert '_ascii_to' in counted_sprite['refs'], counted_sprite
+hide = next(obj for obj in objects if '_hud_sprite_hide' in obj['defs'])
+assert not hide['refs'], hide
+print('sprite HUD: isolated capabilities; shared ASCII mapping without arena or VRAM dependencies')
