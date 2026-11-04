@@ -10,6 +10,7 @@ This is a "simple" framework/library for building games for the [Zeal 8-bit Comp
 - [Utilities](docs/Utils.md)
 - [Animations](docs/Anims.md)
 - [Entity pools](docs/Entities.md)
+- [Entity presets](docs/EntityPresets.md)
 - [Physics](docs/Physics.md)
 - [Input](docs/Input.md)
 - [Controller API migration](docs/controller-migration.md)

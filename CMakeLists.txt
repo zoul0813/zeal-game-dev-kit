@@ -57,9 +57,16 @@ set_source_files_properties(${ZGDK_PHYSICS_SRCS} ${ZGDK_TILEFLAGS_SRCS}
     PROPERTIES COMPILE_OPTIONS "--opt-code-size")
 
 # Independent pool capabilities are extracted only when used.
-file(GLOB ZGDK_ENTITY_SRCS CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/entities/*.c")
+file(GLOB_RECURSE ZGDK_ENTITY_SRCS CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/entities/*.c")
 set_source_files_properties(${ZGDK_ENTITY_SRCS} PROPERTIES COMPILE_OPTIONS "--opt-code-size")
 
 # Preserve the compact game animation sequencer, one capability per member.
 set_source_files_properties(src/anims/play.c src/anims/restart.c src/anims/tick.c
     PROPERTIES COMPILE_OPTIONS "--opt-code-size")
+
+# Shared ASM source body, compiled only into requested preset capabilities.
+target_include_directories(zgdk PRIVATE ${CMAKE_SOURCE_DIR}/src/entities/presets)
+set_property(SOURCE src/entities/presets/physics_sync.asm
+    src/entities/presets/physics_pool_sync.asm src/entities/presets/sprite_sync.asm
+    APPEND PROPERTY OBJECT_DEPENDS
+    "${CMAKE_SOURCE_DIR}/src/entities/presets/prepare.inc;${CMAKE_SOURCE_DIR}/src/entities/presets/draw.inc")

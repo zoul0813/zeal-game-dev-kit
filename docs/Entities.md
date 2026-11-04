@@ -4,6 +4,9 @@ Include `<zgdk/entities.h>`. A pool allocates caller-defined fixed-size records.
 It has no physics, animation, sprite, tilemap or heap dependency. Independent
 pools can contain unrelated record types, including invisible objects or tasks.
 
+For optional sprite, animated, physical and animated-physical record types, see
+[Entity presets](EntityPresets.md). These do not change the generic pool contract.
+
 ```c
 #include <zgdk/entities.h>
 
