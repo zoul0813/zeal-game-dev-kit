@@ -48,7 +48,7 @@ gfx_error tilemap_fill(gfx_context *ctx, uint8_t layer, uint8_t tile,
     ++ui_calls;
     return GFX_SUCCESS;
 }
-void nprint_string_layer(gfx_context *ctx, const char *text, uint8_t len,
+void hud_tilemap_nput_s_layer(gfx_context *ctx, const char *text, uint8_t len,
                          uint8_t layer, uint8_t x, uint8_t y) {
     assert(ctx && text && layer == 1 && x == 15 && y >= 3 && y < 13);
     assert(len == 10 || len == 1);

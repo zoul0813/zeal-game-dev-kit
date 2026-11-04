@@ -1,6 +1,6 @@
 #include <core.h>
 #include "zgdk/tilemap.h"
-#include "zgdk/utils/print.h"
+#include "zgdk/hud/tilemap.h"
 #include "ui.h"
 
 static void format_hiscore(const highscore_t *score, char *buffer) {
@@ -18,6 +18,6 @@ void hiscore_show(void) {
     for(i = 0; i < HISCORES_COUNT; i++) {
         highscore_t *score = &hiscore_table[i];
         format_hiscore(score, buffer);
-        nprint_string_layer(hiscore_config->context, buffer, 10, hiscore_config->layer, offset_x, OFFSET_Y + i);
+        hud_tilemap_nput_s_layer(hiscore_config->context, buffer, 10, hiscore_config->layer, offset_x, OFFSET_Y + i);
     }
 }

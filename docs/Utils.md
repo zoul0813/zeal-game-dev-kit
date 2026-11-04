@@ -9,7 +9,7 @@ in turn. String aliases and directory creation require explicit includes.
 
 | Header | Purpose | Included by utils.h |
 |---|---|---|
-| [`utils/print.h`](../include/zgdk/utils/print.h) | Render ASCII strings as tiles | Yes |
+| [`utils/print.h`](../include/zgdk/utils/print.h) | Compatibility include for [HUD text](Hud.md) | Yes |
 | [`utils/rand.h`](../include/zgdk/utils/rand.h) | Z80 refresh-register/LFSR random bytes | Yes |
 | [`utils/string.h`](../include/zgdk/utils/string.h) | Integer conversion and simplified formatted output | No |
 | [`utils/_strlen.h`](../include/zgdk/utils/_strlen.h) | SDK string-length helper and strlen alias | No |
@@ -46,44 +46,13 @@ needed for this header-only macro.
 Run `sh tests/run-inline.sh` to check shared-header linkage across two
 unoptimized host translation units under ASan/UBSan.
 
-## Tile-based text
+## Tile-based text compatibility
 
-Include `<zgdk/utils/print.h>`. These functions render to a graphics tilemap;
-they do not write to the console.
-
-```c
-void print_string(gfx_context *ctx, const char *str, uint8_t x, uint8_t y);
-void print_string_layer(gfx_context *ctx, const char *str,
-                        uint8_t layer, uint8_t x, uint8_t y);
-void nprint_string(gfx_context *ctx, const char *str,
-                   uint8_t len, uint8_t x, uint8_t y);
-void nprint_string_layer(gfx_context *ctx, const char *str, uint8_t len,
-                         uint8_t layer, uint8_t x, uint8_t y);
-```
-
-Coordinates are in tiles. The forms without a layer argument use `LAYER1`.
-`print_string*` reads a NUL-terminated string; `nprint_string*` reads exactly
-`len` bytes, which need not end in NUL.
-
-Each byte is translated through the ASCII-to-tile mapping from
-`<zgdk/ascii.h>`. Load the font tiles first, then use `ascii_map(start, length,
-from)` to associate characters with consecutive tile IDs. For example, after
-loading A–Z at tile 160:
-
-```c
-#include <zgdk/ascii.h>
-#include <zgdk/utils/print.h>
-
-ascii_map('A', 26, 160);
-print_string(&ctx, "READY", 2, 3);
-```
-
-The mapping covers printable ASCII 32–126; `ascii_to(c)` returns the mapped
-tile ID. Mapping ranges and text characters must remain within that range.
-The current print implementation uses a 40-byte temporary array and performs
-no length validation: keep each call to **at most 40 characters**, and ensure
-the text fits the destination tilemap. It does not interpret newlines or wrap
-text. The functions return void and do not expose tilemap-write errors.
+Tile-based text is owned by the [HUD namespace](Hud.md). Prefer `<zgdk/hud.h>`
+or `<zgdk/hud/tilemap.h>` and the `hud_tilemap_put_s*` / `hud_tilemap_nput_s*` names.
+`<zgdk/utils/print.h>` and the utilities umbrella continue to expose the old
+`print_string*` / `nprint_string*` names. They warn when used and call the matching
+HUD function directly, without additional linkable functions.
 
 ## Random bytes
 

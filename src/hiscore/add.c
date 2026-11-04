@@ -1,7 +1,7 @@
 #include <core.h>
 #include "zgdk/input.h"
 #include "zgdk/tilemap.h"
-#include "zgdk/utils/print.h"
+#include "zgdk/hud/tilemap.h"
 #include "ui.h"
 
 #define LEFT1     (input1 & BUTTON_LEFT)
@@ -44,7 +44,7 @@ int8_t hiscore_add(uint16_t score) {
         } else {
             blink = c;
         }
-        nprint_string_layer(hiscore_config->context, &blink, 1, hiscore_config->layer, offset_x + charindex, OFFSET_Y + i);
+        hud_tilemap_nput_s_layer(hiscore_config->context, &blink, 1, hiscore_config->layer, offset_x + charindex, OFFSET_Y + i);
 
         _frames++;
         gfx_wait_end_vblank(hiscore_config->context);
@@ -53,7 +53,7 @@ int8_t hiscore_add(uint16_t score) {
 
         if(input1 != last_input) {
             if(LEFT1 || RIGHT1) {
-                nprint_string_layer(hiscore_config->context, &c, 1, hiscore_config->layer, offset_x + charindex, OFFSET_Y + i);
+                hud_tilemap_nput_s_layer(hiscore_config->context, &c, 1, hiscore_config->layer, offset_x + charindex, OFFSET_Y + i);
                 if (LEFT1)  charindex--;
                 if (RIGHT1) charindex++;
                 if(charindex == 255) charindex = 2;

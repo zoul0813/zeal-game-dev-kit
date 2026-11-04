@@ -5,6 +5,7 @@
 #include "zgdk/sound.h"
 #include "zgdk/tiles.h"
 #include "zgdk/ascii.h"
+#include "zgdk/hud.h"
 #include "zgdk/utils.h"
 #include "zgdk/sprites.h"
 #include "zgdk/rect.h"
