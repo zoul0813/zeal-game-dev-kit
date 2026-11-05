@@ -137,3 +137,11 @@ Run `sh tests/run-hud-sprite-z80.sh` with SDCC and Python `z80` installed to
 execute stack-local sprite text descriptors on the Z80. This checks long menu
 captions, capacity limits and centering against the linked archive, catching
 compiler pointer-drift regressions that native C tests cannot expose.
+
+## Reusable SNES pad artwork
+
+[`assets/snes-pad.gif`](../assets/snes-pad.gif) provides thirteen 16 × 16
+controller glyphs with a magenta palette index 0 marked transparent. Copy and recolor
+these optional source tiles into the game's tileset, choosing transparency or
+an opaque background to match its font. See the [artwork guide](../assets/README.md)
+for tile order and import details. The artwork adds no code or data to `zgdk.lib`.
