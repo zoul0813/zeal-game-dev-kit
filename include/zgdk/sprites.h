@@ -11,6 +11,8 @@ gfx_error sprites_register_arena(gfx_sprite* arena, uint8_t size);
 gfx_sprite* sprites_register(gfx_sprite sprite);
 /* Invalidates registered pointers. Render once to hide old hardware slots. */
 void sprites_deregister(void);
+/* Uses short physical DMA transfers when available, otherwise the SDK CPU
+ * upload. Does not change CPU page mappings on the DMA path. */
 gfx_error sprites_render(gfx_context* ctx);
 /* Immediately hide all hardware sprites, without changing the arena or its
  * registrations. No arena is required. Stops on the first SDK error; earlier

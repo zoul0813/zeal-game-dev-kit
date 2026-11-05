@@ -8,6 +8,7 @@ gfx_error sprites_register_arena(gfx_sprite* arena, uint8_t size) {
     sprites_arena_size = size;
     sprites_registered = 0;
     sprites_rendered = 0;
+    sprites_dma_prepare();
 
     return GFX_SUCCESS;
 }

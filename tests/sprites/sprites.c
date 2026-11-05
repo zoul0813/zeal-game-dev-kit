@@ -5,6 +5,17 @@
 
 static gfx_sprite hardware[GFX_SPRITES_COUNT];
 static uint8_t last_count;
+static uint8_t dma_available;
+extern gfx_sprite *sprites_arena;
+extern uint8_t sprites_registered, sprites_rendered;
+void sprites_dma_prepare(void) {}
+uint8_t sprites_dma_upload(void) {
+    if (!dma_available) return 0;
+    unsigned count = sprites_registered > sprites_rendered ? sprites_registered : sprites_rendered;
+    memcpy(hardware, sprites_arena, count * sizeof(gfx_sprite));
+    last_count = count;
+    return 1;
+}
 static gfx_error render_error;
 static unsigned clear_calls;
 static uint8_t fail_slot = GFX_SPRITES_COUNT;
@@ -125,6 +136,27 @@ int main(void) {
         assert(sprites_render(&ctx) == GFX_SUCCESS && last_count == 1);
         expect_hidden(0, 1);
     }
+    /* DMA preserves ordering, full capacity, and cleanup after shrinking. */
+    dma_available = 1;
+    assert(sprites_register_arena(arena, GFX_SPRITES_COUNT) == GFX_SUCCESS);
+    for (unsigned i = 0; i < GFX_SPRITES_COUNT; ++i) {
+        sprite.x = 40 + i;
+        sprite.tile = i;
+        assert(sprites_register(sprite) == arena + i);
+    }
+    render_error = GFX_INVALID_ARG; /* CPU backend must not be used. */
+    assert(sprites_render(&ctx) == GFX_SUCCESS);
+    assert(!memcmp(hardware, arena, sizeof(arena)));
+    sprites_deregister();
+    assert(sprites_register(sprite) == arena);
+    assert(sprites_render(&ctx) == GFX_SUCCESS);
+    expect_hidden(1, 127);
+    assert(sprites_render(NULL) == GFX_INVALID_ARG);
+    sprites_deregister();
+    assert(sprites_render(&ctx) == GFX_SUCCESS);
+    expect_hidden(0, 128);
+    render_error = GFX_SUCCESS;
+    assert(sprites_render(&ctx) == GFX_SUCCESS);
     puts("sprite regression checks passed");
     return 0;
 }
