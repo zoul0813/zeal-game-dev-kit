@@ -20,7 +20,7 @@ add_library(zgdk STATIC ${ZGDK_SRCS})
 target_link_libraries(zgdk PUBLIC core)
 
 target_compile_options(zgdk PRIVATE
-    $<$<COMPILE_LANGUAGE:C>:--opt-code-speed>
+    $<$<COMPILE_LANGUAGE:C>:--opt-code-size>
 )
 
 target_include_directories(zgdk
@@ -34,54 +34,9 @@ set_target_properties(zgdk PROPERTIES
     ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib
 )
 
-# Cameras and tilemap loading/streaming are used by RAM-constrained games. Keep their objects small;
-# each public camera function has its own archive member.
-set_source_files_properties(
-    src/camera/init_view.c src/camera/set.c src/camera/follow_target.c
-    src/camera/scroll_layer.c src/camera/rebase.c
-    src/tilemap/load.c
-    src/tilemap/stream.c src/tilemap/stream_ring.c
-    src/tilemap/stream_ram.c src/tilemap/stream_reader.c
-    src/tilemap/stream_edit.c src/tilemap/stream_buffer.c src/tilemap/stream_rebase.c
-    PROPERTIES COMPILE_OPTIONS "--opt-code-size"
-)
-
-# Preserve the compact sequencer implementation used by RAM-constrained games.
-set_source_files_properties(src/sound/sfx.c src/sound/hardware.c
-    PROPERTIES COMPILE_OPTIONS "--opt-code-size")
-
-# Keep physics and general tile-flag lookups compact, with separate archive members.
-file(GLOB_RECURSE ZGDK_PHYSICS_SRCS CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/physics/*.c")
-file(GLOB ZGDK_TILEFLAGS_SRCS CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/tilemap/flags/*.c")
-set_source_files_properties(${ZGDK_PHYSICS_SRCS} ${ZGDK_TILEFLAGS_SRCS}
-    PROPERTIES COMPILE_OPTIONS "--opt-code-size")
-
-# Independent pool capabilities are extracted only when used.
-file(GLOB_RECURSE ZGDK_ENTITY_SRCS CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/entities/*.c")
-set_source_files_properties(${ZGDK_ENTITY_SRCS} PROPERTIES COMPILE_OPTIONS "--opt-code-size")
-
-# Preserve the compact game animation sequencer, one capability per member.
-set_source_files_properties(src/anims/play.c src/anims/restart.c src/anims/tick.c
-    PROPERTIES COMPILE_OPTIONS "--opt-code-size")
-
 # Shared ASM source body, compiled only into requested preset capabilities.
 target_include_directories(zgdk PRIVATE ${CMAKE_SOURCE_DIR}/src/entities/presets)
 set_property(SOURCE src/entities/presets/physics_sync.asm
     src/entities/presets/physics_pool_sync.asm src/entities/presets/sprite_sync.asm
     APPEND PROPERTY OBJECT_DEPENDS
     "${CMAKE_SOURCE_DIR}/src/entities/presets/prepare.inc;${CMAKE_SOURCE_DIR}/src/entities/presets/draw.inc")
-
-# Numeric helpers remain independently extractable and compact.
-file(GLOB ZGDK_CLAMP_SRCS CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/utils/clamp_*.c")
-set_source_files_properties(${ZGDK_CLAMP_SRCS} PROPERTIES COMPILE_OPTIONS "--opt-code-size")
-
-# Sprite HUD text capabilities remain independently extractable and compact.
-file(GLOB ZGDK_HUD_SPRITE_SRCS CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/hud/sprite/*.c")
-set_source_files_properties(${ZGDK_HUD_SPRITE_SRCS} PROPERTIES COMPILE_OPTIONS "--opt-code-size")
-
-# Room management, optional slide transitions and independent minimaps.
-# Separate archive members keep unused transitions/renderers out of games.
-file(GLOB ZGDK_ROOMS_SRCS CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/rooms/*.c")
-file(GLOB ZGDK_MINIMAP_SRCS CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/minimap/*.c")
-set_source_files_properties(${ZGDK_ROOMS_SRCS} ${ZGDK_MINIMAP_SRCS}
-    PROPERTIES COMPILE_OPTIONS "--opt-code-size")
