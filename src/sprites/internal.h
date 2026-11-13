@@ -13,4 +13,4 @@ extern uint8_t sprites_rendered;
 
 /* Private transfer plan, rebuilt when an arena or its physical mapping changes. */
 void sprites_dma_prepare(void);
-uint8_t sprites_dma_upload(void);
+uint8_t sprites_dma_upload(uint8_t start, uint8_t count);

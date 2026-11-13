@@ -9,7 +9,7 @@
 gfx_sprite *sprites_arena;
 uint8_t sprites_arena_size, sprites_registered, sprites_rendered, zvb_config_dev_idx;
 void sprites_dma_prepare(void);
-uint8_t sprites_dma_upload(void);
+uint8_t sprites_dma_upload(uint8_t start, uint8_t count);
 static uint8_t hardware[1024], *memory;
 static uint8_t available;
 static unsigned transfers, read_setups, write_setups;
@@ -35,6 +35,10 @@ uint32_t zvb_dma_virt_to_phys(void *ptr) {
 }
 uint8_t zvb_dma_set_read_virt(zvb_dma_descriptor_t *desc, void *ptr) {
     records[record(desc)].source = ptr;
+    /* Record the base address so uploads can temporarily offset a template. */
+    uintptr_t address = (uintptr_t)ptr;
+    desc->rd_addr_lo = address & 0xffff;
+    desc->rd_addr_hi = (address >> 16) & 0xff;
     ++read_setups;
     return 0;
 }
@@ -54,7 +58,9 @@ uint8_t zvb_dma_set_write(zvb_dma_descriptor_t *desc, uint32_t address) {
 }
 uint8_t zvb_dma_start_transfer(zvb_dma_descriptor_t *desc) {
     unsigned i = record(desc);
-    void *source = records[i].source;
+    uint16_t base = (uintptr_t)records[i].source & 0xffff;
+    uint16_t skip = desc->rd_addr_lo - base;
+    void *source = (uint8_t *)records[i].source + skip;
     zvb_config_dev_idx = 4;
     assert(((uintptr_t)desc & 0x3fff) + sizeof(*desc) <= 0x4000);
     assert(desc->flags.raw == DMA_DESC_LAST);
@@ -71,6 +77,23 @@ uint8_t zvb_dma_start_transfer(zvb_dma_descriptor_t *desc) {
     }
     return 0;
 }
+static void check_ranges(void) {
+    unsigned prepared = read_setups + write_setups;
+    for (unsigned start = 0; start < GFX_SPRITES_COUNT; ++start) {
+        for (unsigned count = 1; count <= GFX_SPRITES_COUNT - start; ++count) {
+            memset(hardware, 0xa5, sizeof(hardware));
+            assert(sprites_dma_upload(start, count));
+            assert(zvb_config_dev_idx == 7);
+            unsigned first = start * sizeof(gfx_sprite);
+            unsigned end = first + count * sizeof(gfx_sprite);
+            assert(!memcmp(hardware + first, (uint8_t *)sprites_arena + first, end - first));
+            for (unsigned i = 0; i < first; ++i) assert(hardware[i] == 0xa5);
+            for (unsigned i = end; i < sizeof(hardware); ++i) assert(hardware[i] == 0xa5);
+        }
+    }
+    assert(read_setups + write_setups == prepared); /* Templates remain reusable. */
+}
+
 int main(int argc, char **argv) {
     (void)argv;
     available = argc == 1;
@@ -84,7 +107,7 @@ int main(int argc, char **argv) {
     zvb_config_dev_idx = 7;
     sprites_dma_prepare();
     assert(zvb_config_dev_idx == 7 && transfers == 0);
-    assert(sprites_dma_upload() == available);
+    assert(sprites_dma_upload(0, 128) == available);
     assert(zvb_config_dev_idx == 7);
     if (available) {
         unsigned prepared = read_setups + write_setups;
@@ -92,42 +115,55 @@ int main(int argc, char **argv) {
         assert(!memcmp(hardware, sprites_arena, sizeof(hardware)));
         /* Sprite contents change without rebuilding descriptors. */
         ((uint8_t *)sprites_arena)[0] ^= 255;
-        assert(sprites_dma_upload());
+        assert(sprites_dma_upload(0, 128));
         assert(!memcmp(hardware, sprites_arena, sizeof(hardware)));
         /* Two sprites end partway through the second descriptor. */
         sprites_registered = 2;
         memset(hardware, 0xa5, sizeof(hardware));
-        assert(sprites_dma_upload());
+        assert(sprites_dma_upload(0, 2));
         assert(!memcmp(hardware, sprites_arena, 16) && hardware[16] == 0xa5);
         sprites_registered = 128;
-        assert(sprites_dma_upload());
+        assert(sprites_dma_upload(0, 128));
         assert(!memcmp(hardware, sprites_arena, sizeof(hardware)));
         assert(read_setups + write_setups == prepared);
+        check_ranges();
         /* Shrinking cleans old slots using the same templates. */
         sprites_registered = 1;
         sprites_rendered = 128;
         memset((uint8_t *)sprites_arena + 8, 0, 1016);
-        assert(sprites_dma_upload());
+        assert(sprites_dma_upload(0, 128));
         assert(!memcmp(hardware, sprites_arena, sizeof(hardware)));
         assert(read_setups + write_setups == prepared);
         /* Both source page mappings independently invalidate the cache. */
         mapping[0] = 0x40000;
-        assert(sprites_dma_upload());
+        assert(sprites_dma_upload(3, 6));
         assert(read_setups + write_setups > prepared);
         prepared = read_setups + write_setups;
         mapping[1] = 0x80000;
-        assert(sprites_dma_upload());
+        assert(sprites_dma_upload(1, 1));
         assert(read_setups + write_setups > prepared);
+        check_ranges();
+        /* An unaligned arena may split a sprite across physical pages. */
+        sprites_arena = (void *)(memory + 0x3ffd);
+        sprites_arena_size = sprites_registered = 128;
+        sprites_rendered = 0;
+        for (unsigned i = 0; i < sizeof(hardware); ++i)
+            ((uint8_t *)sprites_arena)[i] = (i * 19 + 7) & 255;
+        sprites_dma_prepare();
+        check_ranges();
         /* Replacing an arena prepares a new, smaller plan. */
         sprites_arena = (void *)(memory + 64);
         sprites_arena_size = sprites_registered = 1;
         sprites_rendered = 0;
         memset(sprites_arena, 0x39, sizeof(gfx_sprite));
         sprites_dma_prepare();
-        assert(sprites_dma_upload());
+        assert(sprites_dma_upload(0, 1));
         assert(!memcmp(hardware, sprites_arena, sizeof(gfx_sprite)));
         assert(zvb_config_dev_idx == 7);
-    } else assert(transfers == 0);
+    } else {
+        assert(!sprites_dma_upload(3, 6));
+        assert(transfers == 0);
+    }
     free(memory);
     puts("sprite DMA: reusable descriptors, partial chunks, source page changes, arena replacement, cleanup and absent controller passed");
 }

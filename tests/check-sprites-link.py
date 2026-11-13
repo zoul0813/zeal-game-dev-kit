@@ -23,7 +23,7 @@ while offset + 60 <= len(data):
 public = {
     '_sprites_register_arena', '_sprites_register', '_sprites_deregister',
     '_sprites_render', '_sprite_get_point', '_sprite_set_point', '_sprite_set_xy',
-    '_sprites_clear',
+    '_sprites_clear', '_sprites_render_range',
 }
 state = {'_sprites_arena', '_sprites_arena_size', '_sprites_registered', '_sprites_rendered'}
 for symbol in public | state:
@@ -48,6 +48,7 @@ for symbol in public:
     assert bool(defined & state) == (symbol.startswith('_sprites_') and symbol != '_sprites_clear'), symbol
     graphics = {name for name in wanted if name.startswith('_gfx_')}
     expected_graphics = {'_sprites_render': {'_gfx_sprite_render_array'},
+                         '_sprites_render_range': {'_gfx_sprite_render_array'},
                          '_sprites_clear': {'_gfx_sprite_render'}}
     assert graphics == expected_graphics.get(symbol, set()), symbol
-print('sprites: eight entry points isolated; clear needs no arena; one shared arena; point helpers need no state or graphics')
+print('sprites: nine entry points isolated; clear needs no arena; one shared arena; point helpers need no state or graphics')

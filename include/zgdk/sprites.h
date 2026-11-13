@@ -14,6 +14,12 @@ void sprites_deregister(void);
 /* Uses short physical DMA transfers when available, otherwise the SDK CPU
  * upload. Does not change CPU page mappings on the DMA path. */
 gfx_error sprites_render(gfx_context* ctx);
+/* Upload exactly count registered sprites starting at the zero-based arena
+ * index start, to the same hardware slots. Other slots are unchanged.
+ * Requires ctx and an arena; start + count must not exceed registrations.
+ * Zero count is a no-op when start <= registrations. Does not flush pending
+ * deregistration cleanup: use sprites_render for that. */
+gfx_error sprites_render_range(gfx_context* ctx, uint8_t start, uint8_t count);
 /* Immediately hide all hardware sprites, without changing the arena or its
  * registrations. No arena is required. Stops on the first SDK error; earlier
  * slots may already be hidden. sprites_render restores registered sprites. */

@@ -64,7 +64,7 @@ void sprites_dma_prepare(void)
     zvb_config_dev_idx = bank;
 }
 
-uint8_t sprites_dma_upload(void)
+uint8_t sprites_dma_upload(uint8_t start, uint8_t count)
 {
     if (dma_state != 2) return 0;
     /* An arena may occupy two discontiguous physical pages. Rebuild only if
@@ -72,13 +72,34 @@ uint8_t sprites_dma_upload(void)
     if (zvb_dma_virt_to_phys(sprites_arena) != arena_physical ||
         (next_page && zvb_dma_virt_to_phys(next_page) != next_page_physical))
         sprites_dma_prepare();
-    uint8_t count = sprites_registered > sprites_rendered ? sprites_registered : sprites_rendered;
     uint16_t remaining = (uint16_t)count * sizeof(gfx_sprite);
     uint8_t bank = zvb_config_dev_idx;
     uint8_t index = 0;
+    uint16_t skip = (uint16_t)start * sizeof(gfx_sprite);
     while (remaining) {
         zvb_dma_descriptor_t *desc = descriptors[index++];
         uint16_t length = desc->length;
+        if (skip >= length) {
+            skip -= length;
+            continue;
+        }
+        if (skip) {
+            uint16_t read = desc->rd_addr_lo, write = desc->wr_addr_lo;
+            uint16_t used = length - skip;
+            if (used > remaining) used = remaining;
+            /* Templates never cross a source page; sprite VRAM is within one
+             * page too. Offsetting inside a template cannot carry into hi. */
+            desc->rd_addr_lo += skip;
+            desc->wr_addr_lo += skip;
+            desc->length = used;
+            zvb_dma_start_transfer(desc);
+            desc->rd_addr_lo = read;
+            desc->wr_addr_lo = write;
+            desc->length = length;
+            remaining -= used;
+            skip = 0;
+            continue;
+        }
         if (remaining < length) {
             /* A partial final chunk must not change the reusable template. */
             desc->length = remaining;

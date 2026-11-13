@@ -77,6 +77,34 @@ void draw(void) {
 }
 ```
 
+## Uploading a range
+
+Register frequently changing sprites first, then upload only the range that
+changed. Arena indices are zero-based and map to the same hardware sprite slots:
+
+```C
+// After initialization or a scene change, upload all registered sprites.
+sprites_render(&vctx);
+
+// Each frame: upload entries 0 through 11, leaving other slots untouched.
+sprites_render_range(&vctx, 0, 12);
+
+// When entries 12 through 17 change, upload that range separately.
+sprites_render_range(&vctx, 12, 6);
+```
+
+Both render APIs use the same DMA backend and CPU fallback. The range API requires
+a valid context and registered arena, with `start + count` no greater than the
+number of registered sprites; invalid requests return `GFX_INVALID_ARG` without
+an upload. A zero count performs no upload and succeeds when `start` is at or
+before the end of the registrations.
+
+Range calls do not change arena contents, registration order, or registered
+pointers. They also do not hide sprites outside the requested range. If an active
+prefix shrinks, set the removed sprites to their hidden state and upload those
+slots too. After deregistration, use a successful full `sprites_render()` to
+flush old-slot cleanup; range calls preserve that pending cleanup.
+
 Call `sprites_deregister()` to release all registrations before loading a new scene. Previously returned sprite pointers are no longer valid. Register the new scene's sprites, then call `sprites_render(ctx)` to update the display and remove old sprites. Render even if the new scene has no sprites.
 
 Keep the arena alive until that render succeeds, retrying if needed, before releasing it or replacing it with `sprites_register_arena()`.

@@ -8,7 +8,7 @@ trap 'rm -f "$binary"' EXIT HUP INT TERM
     "$root/tests/sprites/sprites.c" \
     "$root/src/sprites/state.c" "$root/src/sprites/register_arena.c" \
     "$root/src/sprites/register.c" "$root/src/sprites/deregister.c" \
-    "$root/src/sprites/render.c" "$root/src/sprites/clear.c" \
+    "$root/src/sprites/render.c" "$root/src/sprites/render_range.c" "$root/src/sprites/clear.c" \
     "$root/src/sprites/get_point.c" "$root/src/sprites/set_point.c" \
     "$root/src/sprites/set_xy.c" -o "$binary"
 "$binary"
