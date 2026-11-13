@@ -3,6 +3,8 @@
 #include <zvb_dma.h>
 #include "internal.h"
 
+_Static_assert(sizeof(gfx_sprite) == 8, "DMA sprite layout");
+
 /* A page split can add one descriptor to the maximum-sized arena. */
 #define DMA_DESCRIPTORS (GFX_SPRITES_COUNT * sizeof(gfx_sprite) / SPRITES_DMA_CHUNK_BYTES + 1)
 /* At most one page boundary crosses this small allocation; allow skipped bytes. */
@@ -13,6 +15,8 @@ static uint8_t dma_state; /* 0 untested, 1 unavailable, 2 available */
 static volatile uint8_t probe_result;
 static uint32_t arena_physical, next_page_physical;
 static uint8_t *next_page;
+static gfx_sprite *prepared_arena;
+static uint8_t prepared_size;
 
 static zvb_dma_descriptor_t *page_safe(uint8_t *storage)
 {
@@ -21,7 +25,7 @@ static zvb_dma_descriptor_t *page_safe(uint8_t *storage)
     return (void *)storage;
 }
 
-void sprites_dma_prepare(void)
+static void sprites_dma_prepare(void)
 {
     zvb_dma_descriptor_t *desc = page_safe(descriptor_storage);
     uint8_t bank = zvb_config_dev_idx;
@@ -37,6 +41,8 @@ void sprites_dma_prepare(void)
         dma_state = probe_result == source ? 2 : 1;
     }
     if (dma_state == 2) {
+        prepared_arena = sprites_arena;
+        prepared_size = sprites_arena_size;
         uint16_t remaining = (uint16_t)sprites_arena_size * sizeof(gfx_sprite);
         uint16_t offset = 0;
         uint8_t index = 0;
@@ -66,6 +72,9 @@ void sprites_dma_prepare(void)
 
 uint8_t sprites_dma_upload(uint8_t start, uint8_t count)
 {
+    if (!dma_state || (dma_state == 2 &&
+        (prepared_arena != sprites_arena || prepared_size != sprites_arena_size)))
+        sprites_dma_prepare();
     if (dma_state != 2) return 0;
     /* An arena may occupy two discontiguous physical pages. Rebuild only if
      * their mappings change; the descriptor API translates each descriptor. */

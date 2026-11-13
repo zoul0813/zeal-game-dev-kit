@@ -52,22 +52,11 @@ zos_err_t player_init(void) {
 ```
 
 To render all the sprites in your Arena, you can call `sprites_render(ctx);` in your draw function.
-Arena initialization probes DMA once using private RAM and prepares reusable
-transfer descriptors for the arena capacity. Sprite registration/count changes
-reuse that plan; source MMU mapping changes rebuild it automatically. The cache
-uses 485 bytes of static RAM on the SDCC target, sized for the maximum
-supported arena. When available, the renderer uploads straight to physical
-sprite VRAM in transfers of at most 32 bytes, without
-remapping CPU memory or disabling interrupts. Transfers split at source MMU
-page boundaries, and the DMA descriptor fits within one mapped page. The current
-peripheral bank and DMA clock divider are preserved. Separate transfers release
-the bus so the CPU can service interrupts between holds. At the default DMA
-clock divider (`0x56`), 32-byte chunks passed 335 keyboard-release timing cases
-in the Enigma emulator workload; 64- and 128-byte chunks each lost a release.
-Other DMA clock settings or hardware timings need renewed validation.
-If DMA is absent or disconnected, the renderer falls back to the SDK CPU upload.
-That compatibility path retains the SDK's interrupt-masking limitation.
-Pending old-slot cleanup is committed only after the upload succeeds.
+`sprites_render()` and `sprites_render_range()` always use the ZVB SDK CPU
+copies. Arena registration does not probe or prepare DMA, and CPU-only callers
+do not link the DMA backend or reserve its descriptor cache. The SDK CPU path
+retains the SDK's interrupt-masking behavior. Pending old-slot cleanup is
+committed only after the upload succeeds.
 
 ```C
 void draw(void) {
@@ -93,7 +82,7 @@ sprites_render_range(&vctx, 0, 12);
 sprites_render_range(&vctx, 12, 6);
 ```
 
-Both render APIs use the same DMA backend and CPU fallback. The range API requires
+The CPU range API requires
 a valid context and registered arena, with `start + count` no greater than the
 number of registered sprites; invalid requests return `GFX_INVALID_ARG` without
 an upload. A zero count performs no upload and succeeds when `start` is at or
@@ -104,6 +93,43 @@ pointers. They also do not hide sprites outside the requested range. If an activ
 prefix shrinks, set the removed sprites to their hidden state and upload those
 slots too. After deregistration, use a successful full `sprites_render()` to
 flush old-slot cleanup; range calls preserve that pending cleanup.
+
+## Explicit DMA uploads
+
+Use the DMA entry points only when your game opts into DMA sprite transfers:
+
+```C
+// Full upload, including pending cleanup after deregistration.
+sprites_render_dma(&vctx);
+
+// Upload only slots 0 through 11 using DMA.
+sprites_render_range_dma(&vctx, 0, 12);
+```
+
+These calls share validation, arena indices, and cleanup tracking with the CPU
+APIs, so they may be mixed. A successful full upload through either API flushes
+pending old-slot cleanup; neither range API clears slots outside its range.
+An empty or invalid DMA request does not probe or prepare DMA.
+
+The first nonempty explicit DMA call probes DMA once using private RAM and
+prepares reusable transfer descriptors. Arena replacement, capacity changes,
+and source MMU mapping changes rebuild the plan on demand; changes to sprite
+contents or registration counts reuse it. Only callers that link an explicit DMA
+entry point reserve the descriptor cache.
+
+DMA uploads go directly to physical sprite VRAM in transfers of at most 32 bytes,
+without remapping CPU memory or disabling interrupts. Transfers split at source
+MMU page boundaries, and descriptors fit within one mapped page. The peripheral
+bank and DMA clock divider are preserved. Separate transfers release the bus
+between chunks. At the default DMA clock divider (`0x56`), 32-byte chunks passed
+335 keyboard-release timing cases in the previous Enigma emulator workload;
+64- and 128-byte chunks each lost a release. Other timings require renewed
+validation. Nonempty DMA uploads return `GFX_FAILURE` if DMA is unavailable;
+they never fall back to CPU copies. Failed uploads preserve pending cleanup and
+the rendered-slot high-water mark. Valid empty uploads succeed without probing
+DMA. Games may choose to call the corresponding CPU API themselves after a DMA
+failure. Existing games keep using CPU copies until they change their calls to
+the explicit DMA APIs.
 
 Call `sprites_deregister()` to release all registrations before loading a new scene. Previously returned sprite pointers are no longer valid. Register the new scene's sprites, then call `sprites_render(ctx)` to update the display and remove old sprites. Render even if the new scene has no sprites.
 

@@ -8,7 +8,6 @@
 
 gfx_sprite *sprites_arena;
 uint8_t sprites_arena_size, sprites_registered, sprites_rendered, zvb_config_dev_idx;
-void sprites_dma_prepare(void);
 uint8_t sprites_dma_upload(uint8_t start, uint8_t count);
 static uint8_t hardware[1024], *memory;
 static uint8_t available;
@@ -105,8 +104,7 @@ int main(int argc, char **argv) {
         ((uint8_t *)sprites_arena)[i] = (i * 17 + 3) & 255;
     sprites_arena_size = sprites_registered = 128;
     zvb_config_dev_idx = 7;
-    sprites_dma_prepare();
-    assert(zvb_config_dev_idx == 7 && transfers == 0);
+    assert(zvb_config_dev_idx == 7 && transfers == 0 && read_setups == 0);
     assert(sprites_dma_upload(0, 128) == available);
     assert(zvb_config_dev_idx == 7);
     if (available) {
@@ -149,20 +147,26 @@ int main(int argc, char **argv) {
         sprites_rendered = 0;
         for (unsigned i = 0; i < sizeof(hardware); ++i)
             ((uint8_t *)sprites_arena)[i] = (i * 19 + 7) & 255;
-        sprites_dma_prepare();
+        assert(sprites_dma_upload(0, 1)); /* Changed arena prepares lazily. */
         check_ranges();
         /* Replacing an arena prepares a new, smaller plan. */
         sprites_arena = (void *)(memory + 64);
         sprites_arena_size = sprites_registered = 1;
         sprites_rendered = 0;
         memset(sprites_arena, 0x39, sizeof(gfx_sprite));
-        sprites_dma_prepare();
         assert(sprites_dma_upload(0, 1));
         assert(!memcmp(hardware, sprites_arena, sizeof(gfx_sprite)));
         assert(zvb_config_dev_idx == 7);
+        /* Resizing the same arena must rebuild its plan before a larger upload. */
+        sprites_arena_size = sprites_registered = 128;
+        prepared = read_setups + write_setups;
+        assert(sprites_dma_upload(0, 128));
+        assert(read_setups + write_setups > prepared);
+        assert(!memcmp(hardware, sprites_arena, sizeof(hardware)));
     } else {
+        unsigned probes = read_setups;
         assert(!sprites_dma_upload(3, 6));
-        assert(transfers == 0);
+        assert(transfers == 0 && read_setups == probes);
     }
     free(memory);
     puts("sprite DMA: reusable descriptors, partial chunks, source page changes, arena replacement, cleanup and absent controller passed");

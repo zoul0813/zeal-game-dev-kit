@@ -11,6 +11,6 @@ extern uint8_t sprites_rendered;
  * 64/128-byte chunks lose releases. Slower clocks need renewed validation. */
 #define SPRITES_DMA_CHUNK_BYTES 32
 
-/* Private transfer plan, rebuilt when an arena or its physical mapping changes. */
-void sprites_dma_prepare(void);
+/* Lazily probe DMA and prepare a plan on the first explicit DMA upload.
+ * Rebuild when the arena, its capacity, or its physical mapping changes. */
 uint8_t sprites_dma_upload(uint8_t start, uint8_t count);

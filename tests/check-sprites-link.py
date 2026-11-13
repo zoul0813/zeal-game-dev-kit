@@ -24,6 +24,7 @@ public = {
     '_sprites_register_arena', '_sprites_register', '_sprites_deregister',
     '_sprites_render', '_sprite_get_point', '_sprite_set_point', '_sprite_set_xy',
     '_sprites_clear', '_sprites_render_range',
+    '_sprites_render_dma', '_sprites_render_range_dma',
 }
 state = {'_sprites_arena', '_sprites_arena_size', '_sprites_registered', '_sprites_rendered'}
 for symbol in public | state:
@@ -51,4 +52,6 @@ for symbol in public:
                          '_sprites_render_range': {'_gfx_sprite_render_array'},
                          '_sprites_clear': {'_gfx_sprite_render'}}
     assert graphics == expected_graphics.get(symbol, set()), symbol
-print('sprites: nine entry points isolated; clear needs no arena; one shared arena; point helpers need no state or graphics')
+    dma_refs = {name for name in wanted if name.startswith('_zvb_dma_')}
+    assert bool(dma_refs) == (symbol in {'_sprites_render_dma', '_sprites_render_range_dma'}), symbol
+print('sprites: eleven entry points isolated; only explicit DMA APIs link DMA; clear needs no arena; one shared arena; point helpers need no state or graphics')
